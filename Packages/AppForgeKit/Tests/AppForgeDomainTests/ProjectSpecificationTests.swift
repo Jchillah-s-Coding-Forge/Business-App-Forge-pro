@@ -25,4 +25,32 @@ final class ProjectSpecificationTests: XCTestCase {
 
         XCTAssertEqual(decoded, original)
     }
+
+    func testOnlyAvailableRendererWithSupportedPlatformsIsValid() {
+        let flutter = ProjectSpecification(
+            identity: ProjectIdentity(name: "Field Service", organizationIdentifier: "de.example"),
+            framework: .flutter,
+            targetPlatforms: [.iOS, .android],
+            backend: .supabase,
+            flutterStateManagement: .riverpod
+        )
+        let plannedSwiftUI = ProjectSpecification(
+            identity: ProjectIdentity(name: "Field Service", organizationIdentifier: "de.example"),
+            framework: .swiftUI,
+            targetPlatforms: [.iOS],
+            backend: .supabase,
+            flutterStateManagement: nil
+        )
+        let invalidFlutter = ProjectSpecification(
+            identity: ProjectIdentity(name: "Field Service", organizationIdentifier: "de.example"),
+            framework: .flutter,
+            targetPlatforms: [.macOS],
+            backend: .supabase,
+            flutterStateManagement: .riverpod
+        )
+
+        XCTAssertTrue(flutter.hasSupportedTargetConfiguration)
+        XCTAssertFalse(plannedSwiftUI.hasSupportedTargetConfiguration)
+        XCTAssertFalse(invalidFlutter.hasSupportedTargetConfiguration)
+    }
 }

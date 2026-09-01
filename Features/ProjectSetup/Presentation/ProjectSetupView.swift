@@ -17,27 +17,30 @@ struct ProjectSetupView: View {
                     Text("Der Name kann vor der Veröffentlichung später geändert werden.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    TextField("Organisationskennung", text: $viewModel.organizationIdentifier, prompt: Text("de.meinefirma"))
+                    Text("Wird als Basis für eindeutige Bundle- und Paketkennungen verwendet.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Framework") {
                     Picker("Framework", selection: $viewModel.framework) {
-                        ForEach(OutputFramework.allCases) { framework in
+                        ForEach(viewModel.availableFrameworks) { framework in
                             Text(framework.rawValue).tag(framework)
                         }
                     }
                     .pickerStyle(.segmented)
 
-                    if viewModel.framework != .flutter {
-                        Label(
-                            "Dieser Renderer ist geplant. Der erste produktive Output ist Flutter.",
-                            systemImage: "clock"
-                        )
-                        .foregroundStyle(.secondary)
-                    }
+                    Label(
+                        "SwiftUI und Jetpack Compose sind geplant und werden erst auswählbar, wenn ihre Renderer produktionsbereit sind.",
+                        systemImage: "clock"
+                    )
+                    .foregroundStyle(.secondary)
                 }
 
                 Section("Zielplattformen") {
-                    ForEach([TargetPlatform.iOS, .android]) { platform in
+                    ForEach(viewModel.availablePlatforms) { platform in
                         Toggle(
                             platform.rawValue,
                             isOn: Binding(
@@ -97,7 +100,7 @@ struct ProjectSetupView: View {
             Divider()
             footer
         }
-        .frame(width: 760, height: 720)
+        .frame(width: 760, height: 760)
     }
 
     private var header: some View {

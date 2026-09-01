@@ -6,10 +6,13 @@
 - Xcode 26 oder kompatible aktuelle Version
 - Swift 6
 - Homebrew
-- XcodeGen, SwiftFormat und SwiftLint
+- Mint
+
+Die Projektwerkzeuge selbst sind im `Mintfile` auf feste Versionen gepinnt. Dadurch verwenden lokale Quality Gates und CI dieselben Versionen von XcodeGen, SwiftFormat und SwiftLint.
 
 ```bash
-brew install xcodegen swiftformat swiftlint
+brew install mint
+mint bootstrap
 ```
 
 ## Projekt vorbereiten

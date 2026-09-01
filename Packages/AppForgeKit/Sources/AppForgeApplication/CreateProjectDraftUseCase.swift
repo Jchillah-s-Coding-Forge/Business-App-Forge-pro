@@ -7,7 +7,7 @@ public struct CreateProjectDraftUseCase: Sendable {
         ProjectSpecification(
             identity: ProjectIdentity(
                 name: projectName,
-                organizationIdentifier: "com.example"
+                organizationIdentifier: ""
             ),
             framework: .flutter,
             targetPlatforms: [.iOS, .android],

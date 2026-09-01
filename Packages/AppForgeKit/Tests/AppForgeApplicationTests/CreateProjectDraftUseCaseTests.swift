@@ -7,6 +7,7 @@ final class CreateProjectDraftUseCaseTests: XCTestCase {
         let specification = CreateProjectDraftUseCase()(projectName: "Operations")
 
         XCTAssertEqual(specification.identity.name, "Operations")
+        XCTAssertEqual(specification.identity.organizationIdentifier, "")
         XCTAssertEqual(specification.framework, .flutter)
         XCTAssertEqual(specification.targetPlatforms, [.iOS, .android])
         XCTAssertEqual(specification.backend, .supabase)

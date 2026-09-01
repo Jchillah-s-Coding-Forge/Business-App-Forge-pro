@@ -32,8 +32,6 @@ targets:
     sources:
       - path: App
       - path: Features
-    resources:
-      - path: Resources
     dependencies:
       - package: AppForgeKit
         product: AppForgeCore

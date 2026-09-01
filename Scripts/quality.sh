@@ -4,18 +4,16 @@ set -euo pipefail
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
 
-required_tools=(xcodegen swiftformat swiftlint)
-for tool in "${required_tools[@]}"; do
-  if ! command -v "$tool" >/dev/null 2>&1; then
-    echo "$tool fehlt. Installation: brew install $tool"
-    exit 1
-  fi
-done
+if ! command -v mint >/dev/null 2>&1; then
+  echo "Mint fehlt. Installation: brew install mint"
+  exit 1
+fi
 
-swiftformat App Features Packages Tests --lint
-swiftlint lint --strict
+mint bootstrap
+mint run swiftformat App Features Packages Tests --lint
+mint run swiftlint lint --strict
 swift test --package-path Packages/AppForgeKit -Xswiftc -warnings-as-errors
-xcodegen generate
+mint run xcodegen generate
 git diff --exit-code -- AppForgePro.xcodeproj
 xcodebuild \
   -project AppForgePro.xcodeproj \

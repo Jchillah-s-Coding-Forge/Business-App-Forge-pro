@@ -20,20 +20,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install deterministic project tools
-        run: brew install xcodegen swiftformat swiftlint
+      - name: Install Mint
+        run: brew install mint
+
+      - name: Install pinned project tools
+        run: mint bootstrap
 
       - name: Verify formatting
-        run: swiftformat App Features Packages Tests --lint
+        run: mint run swiftformat App Features Packages Tests --lint
 
       - name: Verify lint
-        run: swiftlint lint --strict
+        run: mint run swiftlint lint --strict
 
       - name: Test reusable packages
         run: swift test --package-path Packages/AppForgeKit -Xswiftc -warnings-as-errors
 
       - name: Regenerate Xcode project
-        run: xcodegen generate
+        run: mint run xcodegen generate
 
       - name: Verify generated project is committed
         run: git diff --exit-code -- AppForgePro.xcodeproj

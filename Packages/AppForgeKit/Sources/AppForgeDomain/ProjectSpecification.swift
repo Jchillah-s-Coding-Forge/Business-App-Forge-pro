@@ -8,6 +8,21 @@ public enum OutputFramework: String, CaseIterable, Codable, Identifiable, Sendab
     public var id: String {
         rawValue
     }
+
+    public var isAvailable: Bool {
+        self == .flutter
+    }
+
+    public var supportedPlatforms: Set<TargetPlatform> {
+        switch self {
+        case .flutter:
+            [.iOS, .android]
+        case .swiftUI:
+            [.iOS, .macOS]
+        case .compose:
+            [.android]
+        }
+    }
 }
 
 public enum TargetPlatform: String, CaseIterable, Codable, Identifiable, Sendable {
@@ -83,8 +98,8 @@ public struct ArchitectureContract: Codable, Equatable, Sendable {
 }
 
 public struct ProjectIdentity: Codable, Equatable, Sendable {
-    public var name: String
-    public var organizationIdentifier: String
+    public let name: String
+    public let organizationIdentifier: String
 
     public init(name: String, organizationIdentifier: String) {
         self.name = name
@@ -93,12 +108,18 @@ public struct ProjectIdentity: Codable, Equatable, Sendable {
 }
 
 public struct ProjectSpecification: Codable, Equatable, Sendable {
-    public var identity: ProjectIdentity
-    public var framework: OutputFramework
-    public var targetPlatforms: Set<TargetPlatform>
-    public var backend: BackendProvider
-    public var flutterStateManagement: FlutterStateManagement?
+    public let identity: ProjectIdentity
+    public let framework: OutputFramework
+    public let targetPlatforms: Set<TargetPlatform>
+    public let backend: BackendProvider
+    public let flutterStateManagement: FlutterStateManagement?
     public let architecture: ArchitectureContract
+
+    public var hasSupportedTargetConfiguration: Bool {
+        framework.isAvailable
+            && !targetPlatforms.isEmpty
+            && targetPlatforms.isSubset(of: framework.supportedPlatforms)
+    }
 
     public init(
         identity: ProjectIdentity,
