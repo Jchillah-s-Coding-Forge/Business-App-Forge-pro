@@ -31,6 +31,7 @@ targets:
     platform: macOS
     sources:
       - path: App
+      - path: Features/Workspace
     resources:
       - path: Resources
     dependencies:
@@ -52,11 +53,29 @@ targets:
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: YES
 
+  AppForgeProTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/AppForgeProTests/WorkspaceHomeViewModelTests.swift
+    dependencies:
+      - target: AppForgePro
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: pro.appforge.studio.tests
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   AppForgePro:
     build:
       targets:
         AppForgePro: all
+        AppForgeProTests:
+          - test
+    test:
+      gatherCoverageData: true
+      targets:
+        - AppForgeProTests
     run:
       config: Debug
     archive:

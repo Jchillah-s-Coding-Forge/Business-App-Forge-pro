@@ -1,20 +1,15 @@
-import AppForgeDesignSystem
 import SwiftUI
 
 @main
 struct AppForgeProApp: App {
+    @State private var viewModel = WorkspaceHomeViewModel()
+
     var body: some Scene {
         WindowGroup {
-            VStack(alignment: .leading, spacing: AppForgeSpacing.medium) {
-                Text("AppForge Pro")
-                    .font(.largeTitle.bold())
-                Text("Business-Anwendungen ohne Programmierkenntnisse entwickeln.")
-                    .foregroundStyle(.secondary)
-            }
-            .padding(AppForgeSpacing.extraLarge)
-            .frame(minWidth: 900, minHeight: 600, alignment: .topLeading)
+            WorkspaceHomeView(viewModel: viewModel)
+                .frame(minWidth: 1080, minHeight: 720)
         }
         .windowStyle(.titleBar)
-        .defaultSize(width: 1180, height: 760)
+        .defaultSize(width: 1280, height: 820)
     }
 }
