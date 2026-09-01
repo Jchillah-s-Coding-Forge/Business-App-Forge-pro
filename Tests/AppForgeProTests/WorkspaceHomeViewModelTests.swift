@@ -3,20 +3,22 @@ import XCTest
 
 @MainActor
 final class WorkspaceHomeViewModelTests: XCTestCase {
-    func testStartProjectSetupPresentsWizardEntry() {
-        let viewModel = WorkspaceHomeViewModel()
+    func testStartProjectSetupCreatesOneDraftAndPresentsWizard() {
+        let viewModel = WorkspaceHomeViewModel(environment: .test)
 
         viewModel.startProjectSetup()
 
         XCTAssertTrue(viewModel.isPresentingProjectSetup)
+        XCTAssertNotNil(viewModel.projectSetupViewModel)
     }
 
-    func testDismissProjectSetupClosesWizardEntry() {
-        let viewModel = WorkspaceHomeViewModel()
+    func testDismissProjectSetupClearsTransientDraft() {
+        let viewModel = WorkspaceHomeViewModel(environment: .test)
         viewModel.startProjectSetup()
 
         viewModel.dismissProjectSetup()
 
         XCTAssertFalse(viewModel.isPresentingProjectSetup)
+        XCTAssertNil(viewModel.projectSetupViewModel)
     }
 }

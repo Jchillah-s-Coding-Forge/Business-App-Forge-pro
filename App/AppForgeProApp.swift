@@ -2,7 +2,7 @@ import SwiftUI
 
 @main
 struct AppForgeProApp: App {
-    @State private var viewModel = WorkspaceHomeViewModel()
+    @State private var viewModel = WorkspaceHomeViewModel(environment: .live)
 
     var body: some Scene {
         WindowGroup {

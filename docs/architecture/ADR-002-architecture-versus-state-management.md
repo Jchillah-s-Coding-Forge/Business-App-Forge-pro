@@ -5,7 +5,7 @@
 
 ## Entscheidung
 
-MVVM, Feature-First, Repository Pattern, Use Cases, DI und SSOT sind nicht einzeln auswählbar. Sie bilden den verbindlichen Qualitätsvertrag.
+MVVM, Feature-First, Repository Pattern, SOLID, Use Cases, DI und SSOT sind nicht einzeln auswählbar. Sie bilden den verbindlichen Qualitätsvertrag.
 
 Für Flutter kann der Nutzer innerhalb dieses Vertrags Riverpod oder BLoC/Cubit wählen:
 

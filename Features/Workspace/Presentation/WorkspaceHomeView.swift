@@ -26,16 +26,12 @@ struct WorkspaceHomeView: View {
             .background(Color(nsColor: .windowBackgroundColor))
         }
         .sheet(isPresented: $viewModel.isPresentingProjectSetup) {
-            VStack(spacing: AppForgeSpacing.medium) {
-                Text("Projekt-Setup")
-                    .font(.title2.bold())
-                Text("Der geführte Wizard wird als nächstes Feature ergänzt.")
-                    .foregroundStyle(.secondary)
-                Button("Schließen", action: viewModel.dismissProjectSetup)
-                    .keyboardShortcut(.cancelAction)
+            if let projectSetupViewModel = viewModel.projectSetupViewModel {
+                ProjectSetupView(
+                    viewModel: projectSetupViewModel,
+                    onClose: viewModel.dismissProjectSetup
+                )
             }
-            .padding(AppForgeSpacing.extraLarge)
-            .frame(width: 520, height: 260)
         }
     }
 

@@ -11,7 +11,10 @@
 		2169237E5BBB11DDCF2946E8 /* WorkspaceHomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */; };
 		3858948FEC791AEC22589123 /* AppForgeCore in Frameworks */ = {isa = PBXBuildFile; productRef = D34DA3ECCB06C78E6DEE8454 /* AppForgeCore */; };
 		596BD00CC054EDCD76539F79 /* WorkspaceHomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D0E40A9FDE62F73F320375 /* WorkspaceHomeViewModel.swift */; };
+		6A0CB127FC4A25A1285BFECF /* ProjectSetupViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */; };
 		7C2FDF42A1DD4471BD388831 /* AppForgeDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 2270788993E9C3F3FA63F409 /* AppForgeDomain */; };
+		B34B7CF78B39E9C39A45B552 /* ProjectSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550C17458B1B176817565B39 /* ProjectSetupView.swift */; };
+		C4E78B6A5FD6DEC76ABC1221 /* ProjectSetupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */; };
 		CC32843ECE2CA002EDE36252 /* AppForgeDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 82C6A92B978155B2FB3B0BE2 /* AppForgeDesignSystem */; };
 		D289F72DC0BAA3C49A33EB61 /* AppForgeProApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8DE2371B97E0C2541808A4 /* AppForgeProApp.swift */; };
 		E7CA53A5E09B03131DDDB0B6 /* WorkspaceHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EA82C86E425638AF62D8C1 /* WorkspaceHomeView.swift */; };
@@ -31,6 +34,7 @@
 /* Begin PBXFileReference section */
 		1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = OVERVIEW.md; sourceTree = "<group>"; };
 		14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceHomeViewModelTests.swift; sourceTree = "<group>"; };
+		177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModelTests.swift; sourceTree = "<group>"; };
 		1AB8F0DBFA1F7FAEC8CAAA17 /* MONETIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MONETIZATION.md; sourceTree = "<group>"; };
 		320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		439F0AB5EBB8B7CF6B232067 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -38,6 +42,7 @@
 		4CFC68B345B3B408237076FF /* PRODUCT_VISION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRODUCT_VISION.md; sourceTree = "<group>"; };
 		4D55E9AEE487CE52EA349CC5 /* GIT_WORKFLOW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GIT_WORKFLOW.md; sourceTree = "<group>"; };
 		52A30BB954D6A2B6A69AE174 /* PRD.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRD.md; sourceTree = "<group>"; };
+		550C17458B1B176817565B39 /* ProjectSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupView.swift; sourceTree = "<group>"; };
 		5E6F91737C991DC763DE412C /* ADR-001-project-foundation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ADR-001-project-foundation.md"; sourceTree = "<group>"; };
 		5E7CB9DF868D27E6CC1F76F1 /* AppForgeKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppForgeKit; path = Packages/AppForgeKit; sourceTree = SOURCE_ROOT; };
 		7464E48BACC48BE572C2749B /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
@@ -45,6 +50,7 @@
 		7C8DE2371B97E0C2541808A4 /* AppForgeProApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppForgeProApp.swift; sourceTree = "<group>"; };
 		842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppForgeProTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20F2750C50A2573A0D1C120 /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
+		CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModel.swift; sourceTree = "<group>"; };
 		D4EA82C86E425638AF62D8C1 /* WorkspaceHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceHomeView.swift; sourceTree = "<group>"; };
 		DB68F58E8883DA6504CD5D08 /* DEFINITION_OF_DONE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEFINITION_OF_DONE.md; sourceTree = "<group>"; };
 		DD13EAF9A8A29554F06D68A1 /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
@@ -156,9 +162,19 @@
 			path = Presentation;
 			sourceTree = "<group>";
 		};
+		9C9FF4C4BDDC4992FF93859D /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				550C17458B1B176817565B39 /* ProjectSetupView.swift */,
+				CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
 		BE6BA86D1F005396721A82AD /* AppForgeProTests */ = {
 			isa = PBXGroup;
 			children = (
+				177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */,
 				14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */,
 			);
 			path = AppForgeProTests;
@@ -175,6 +191,7 @@
 		EDE7B01AF5986A559F9E4475 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				FDBABDC8FCB3231284BC2552 /* ProjectSetup */,
 				EF9E947DF510428D797DEEBF /* Workspace */,
 			);
 			path = Features;
@@ -186,6 +203,14 @@
 				8B714069CFFF2BFA60543C4B /* Presentation */,
 			);
 			path = Workspace;
+			sourceTree = "<group>";
+		};
+		FDBABDC8FCB3231284BC2552 /* ProjectSetup */ = {
+			isa = PBXGroup;
+			children = (
+				9C9FF4C4BDDC4992FF93859D /* Presentation */,
+			);
+			path = ProjectSetup;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -273,6 +298,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A0CB127FC4A25A1285BFECF /* ProjectSetupViewModelTests.swift in Sources */,
 				2169237E5BBB11DDCF2946E8 /* WorkspaceHomeViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -283,6 +309,8 @@
 			files = (
 				E81A2CBC55DCEFEAEEB36543 /* AppEnvironment.swift in Sources */,
 				D289F72DC0BAA3C49A33EB61 /* AppForgeProApp.swift in Sources */,
+				B34B7CF78B39E9C39A45B552 /* ProjectSetupView.swift in Sources */,
+				C4E78B6A5FD6DEC76ABC1221 /* ProjectSetupViewModel.swift in Sources */,
 				E7CA53A5E09B03131DDDB0B6 /* WorkspaceHomeView.swift in Sources */,
 				596BD00CC054EDCD76539F79 /* WorkspaceHomeViewModel.swift in Sources */,
 			);

@@ -31,7 +31,7 @@ targets:
     platform: macOS
     sources:
       - path: App
-      - path: Features/Workspace
+      - path: Features
     resources:
       - path: Resources
     dependencies:
@@ -57,7 +57,7 @@ targets:
     type: bundle.unit-test
     platform: macOS
     sources:
-      - path: Tests/AppForgeProTests/WorkspaceHomeViewModelTests.swift
+      - path: Tests/AppForgeProTests
     dependencies:
       - target: AppForgePro
     settings:
