@@ -1,0 +1,68 @@
+name: AppForgePro
+
+options:
+  bundleIdPrefix: pro.appforge
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: "14.0"
+  groupSortPosition: top
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    MACOSX_DEPLOYMENT_TARGET: 14.0
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 0.1.0
+    CLANG_ENABLE_MODULES: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_STRICT_CONCURRENCY: complete
+
+packages:
+  AppForgeKit:
+    path: Packages/AppForgeKit
+
+targets:
+  AppForgePro:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+    resources:
+      - path: Resources
+    dependencies:
+      - package: AppForgeKit
+        product: AppForgeCore
+      - package: AppForgeKit
+        product: AppForgeDomain
+      - package: AppForgeKit
+        product: AppForgeApplication
+      - package: AppForgeKit
+        product: AppForgeDesignSystem
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: pro.appforge.studio
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: AppForge Pro
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        INFOPLIST_KEY_NSHumanReadableCopyright: Copyright © Jchillah's Coding Forge
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+
+schemes:
+  AppForgePro:
+    build:
+      targets:
+        AppForgePro: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+
+fileGroups:
+  - README.md
+  - docs
+  - project.yml
