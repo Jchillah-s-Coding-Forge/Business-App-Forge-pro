@@ -8,7 +8,9 @@
 - Homebrew
 - Mint
 
-Die Projektwerkzeuge selbst sind im `Mintfile` auf feste Versionen gepinnt. Dadurch verwenden lokale Quality Gates und CI dieselben Versionen von XcodeGen, SwiftFormat und SwiftLint.
+Die lokalen Projektwerkzeuge sind im `Mintfile` auf feste Versionen gepinnt. Dadurch verwenden lokale Quality Gates dieselben XcodeGen-, SwiftFormat- und SwiftLint-Versionen wie CI.
+
+GitHub Actions kompiliert diese Werkzeuge nicht bei jedem Lauf neu. CI lädt die offiziellen Release-Artefakte derselben Versionen und verifiziert vor der Nutzung deren fest hinterlegte SHA-256-Digests.
 
 ```bash
 brew install mint
