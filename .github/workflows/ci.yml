@@ -1,0 +1,50 @@
+name: AppForge Pro CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: appforge-pro-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: SwiftPM, lint and Xcode
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install deterministic project tools
+        run: brew install xcodegen swiftformat swiftlint
+
+      - name: Verify formatting
+        run: swiftformat App Features Packages Tests --lint
+
+      - name: Verify lint
+        run: swiftlint lint --strict
+
+      - name: Test reusable packages
+        run: swift test --package-path Packages/AppForgeKit -Xswiftc -warnings-as-errors
+
+      - name: Regenerate Xcode project
+        run: xcodegen generate
+
+      - name: Verify generated project is committed
+        run: git diff --exit-code -- AppForgePro.xcodeproj
+
+      - name: Test macOS application
+        run: >-
+          xcodebuild
+          -project AppForgePro.xcodeproj
+          -scheme AppForgePro
+          -destination 'platform=macOS'
+          -derivedDataPath /tmp/appforge-pro-derived
+          CODE_SIGNING_ALLOWED=NO
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+          test
