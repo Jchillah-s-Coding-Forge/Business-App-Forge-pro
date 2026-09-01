@@ -18,10 +18,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install deterministic project tools
+      - name: Install project tools
         run: brew install xcodegen swiftformat swiftlint
+
+      - name: Verify pinned tool versions
+        run: ./Scripts/verify_tool_versions.sh
 
       - name: Verify formatting
         run: swiftformat App Features Packages Tests --lint

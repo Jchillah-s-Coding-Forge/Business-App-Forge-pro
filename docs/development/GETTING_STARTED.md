@@ -8,9 +8,22 @@
 - Homebrew
 - XcodeGen, SwiftFormat und SwiftLint
 
+Die verbindlichen Versionen stehen in `Config/tool-versions.env`. Lokale Prüfung und CI brechen bei abweichenden Versionen bewusst ab, damit derselbe Commit nicht mit wechselnden Formatter-, Linter- oder Projektgeneratorregeln bewertet wird.
+
 ```bash
 brew install xcodegen swiftformat swiftlint
+./Scripts/verify_tool_versions.sh
 ```
+
+Nach einer angekündigten Toolchain-Aktualisierung:
+
+```bash
+brew update
+brew upgrade xcodegen swiftformat swiftlint
+./Scripts/verify_tool_versions.sh
+```
+
+Eine Versionsänderung erfolgt ausschließlich in einem eigenen PR, zusammen mit neu erzeugtem Xcode-Projekt und grünen Quality Gates.
 
 ## Projekt vorbereiten
 
