@@ -16,6 +16,7 @@ swiftformat App Features Packages Tests --lint
 swiftlint lint --strict
 swift test --package-path Packages/AppForgeKit -Xswiftc -warnings-as-errors
 xcodegen generate
+git diff --exit-code -- AppForgePro.xcodeproj
 xcodebuild \
   -project AppForgePro.xcodeproj \
   -scheme AppForgePro \
