@@ -50,10 +50,13 @@ final class ProjectSetupViewModelTests: XCTestCase {
         viewModel.organizationIdentifier = "de.meine-firma"
         XCTAssertFalse(viewModel.canPrepareProject)
 
+        viewModel.organizationIdentifier = "de.meine_firma"
+        XCTAssertFalse(viewModel.canPrepareProject)
+
         viewModel.organizationIdentifier = "123.meinefirma"
         XCTAssertFalse(viewModel.canPrepareProject)
 
-        viewModel.organizationIdentifier = "de.meine_firma2"
+        viewModel.organizationIdentifier = "de.meinefirma2"
         XCTAssertTrue(viewModel.canPrepareProject)
     }
 }

@@ -117,7 +117,7 @@ final class ProjectSetupViewModel {
             }
 
             return component.allSatisfy { character in
-                character.isLowercase || character.isNumber || character == "_"
+                character.isLowercase || character.isNumber
             }
         }
     }
