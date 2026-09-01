@@ -5,7 +5,9 @@ public enum OutputFramework: String, CaseIterable, Codable, Identifiable, Sendab
     case swiftUI = "SwiftUI"
     case compose = "Jetpack Compose"
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 }
 
 public enum TargetPlatform: String, CaseIterable, Codable, Identifiable, Sendable {
@@ -16,14 +18,18 @@ public enum TargetPlatform: String, CaseIterable, Codable, Identifiable, Sendabl
     case windows = "Windows"
     case linux = "Linux"
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 }
 
 public enum FlutterStateManagement: String, CaseIterable, Codable, Identifiable, Sendable {
     case riverpod = "Riverpod"
     case blocCubit = "BLoC / Cubit"
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 
     public var recommendation: String {
         switch self {
@@ -40,7 +46,9 @@ public enum BackendProvider: String, CaseIterable, Codable, Identifiable, Sendab
     case supabase = "Supabase"
     case firebase = "Firebase"
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 
     public var guidance: String {
         switch self {

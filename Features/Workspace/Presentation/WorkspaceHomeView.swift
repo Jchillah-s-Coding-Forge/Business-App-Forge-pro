@@ -131,7 +131,9 @@ private enum WorkspaceSection: String, CaseIterable, Identifiable {
     case quality
     case releases
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var title: String {
         switch self {
