@@ -78,7 +78,7 @@ final class ProjectSetupViewModel {
         }
 
         guard isOrganizationIdentifierValid else {
-            summaryMessage = "Bitte geben Sie eine gültige Organisationskennung wie de.meinefirma ein."
+            summaryMessage = "Bitte verwenden Sie eine portable Organisationskennung wie de.meinefirma."
             return
         }
 
@@ -102,7 +102,7 @@ final class ProjectSetupViewModel {
     }
 
     private var normalizedOrganizationIdentifier: String {
-        organizationIdentifier.trimmingCharacters(in: .whitespacesAndNewlines)
+        organizationIdentifier.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
     private var isOrganizationIdentifierValid: Bool {
@@ -111,9 +111,14 @@ final class ProjectSetupViewModel {
             return false
         }
 
-        let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-"))
         return components.allSatisfy { component in
-            !component.isEmpty && component.unicodeScalars.allSatisfy { allowedCharacters.contains($0) }
+            guard let first = component.first, first.isLowercase else {
+                return false
+            }
+
+            return component.allSatisfy { character in
+                character.isLowercase || character.isNumber || character == "_"
+            }
         }
     }
 }

@@ -35,11 +35,25 @@ final class ProjectSetupViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.canPrepareProject)
     }
 
-    func testSpecificationUsesUserProvidedOrganizationIdentifier() {
+    func testSpecificationUsesNormalizedUserProvidedOrganizationIdentifier() {
         let viewModel = ProjectSetupViewModel(createProjectDraft: CreateProjectDraftUseCase())
         viewModel.projectName = "Werkstatt Operations"
-        viewModel.organizationIdentifier = "de.werkstatt"
+        viewModel.organizationIdentifier = "DE.Werkstatt"
 
         XCTAssertEqual(viewModel.specification.identity.organizationIdentifier, "de.werkstatt")
+    }
+
+    func testOrganizationIdentifierMustBePortableAcrossAppleAndAndroidTargets() {
+        let viewModel = ProjectSetupViewModel(createProjectDraft: CreateProjectDraftUseCase())
+        viewModel.projectName = "Werkstatt Operations"
+
+        viewModel.organizationIdentifier = "de.meine-firma"
+        XCTAssertFalse(viewModel.canPrepareProject)
+
+        viewModel.organizationIdentifier = "123.meinefirma"
+        XCTAssertFalse(viewModel.canPrepareProject)
+
+        viewModel.organizationIdentifier = "de.meine_firma2"
+        XCTAssertTrue(viewModel.canPrepareProject)
     }
 }
