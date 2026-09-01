@@ -3,11 +3,14 @@ import AppForgeDomain
 public struct CreateProjectDraftUseCase: Sendable {
     public init() {}
 
-    public func callAsFunction(projectName: String = "") -> ProjectSpecification {
+    public func callAsFunction(
+        projectName: String = "",
+        organizationIdentifier: String = ""
+    ) -> ProjectSpecification {
         ProjectSpecification(
             identity: ProjectIdentity(
                 name: projectName,
-                organizationIdentifier: "com.example"
+                organizationIdentifier: organizationIdentifier
             ),
             framework: .flutter,
             targetPlatforms: [.iOS, .android],

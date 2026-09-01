@@ -17,12 +17,19 @@ struct ProjectSetupView: View {
                     Text("Der Name kann vor der Veröffentlichung später geändert werden.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    TextField("Organisations-ID", text: $viewModel.organizationIdentifier)
+                        .textContentType(.organizationName)
+                    Text("Klein geschriebene Reverse-Domain-ID, zum Beispiel de.meinefirma.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Framework") {
                     Picker("Framework", selection: $viewModel.framework) {
                         ForEach(OutputFramework.allCases) { framework in
-                            Text(framework.rawValue).tag(framework)
+                            Text(framework == .flutter ? framework.rawValue : "\(framework.rawValue) · geplant")
+                                .tag(framework)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -45,6 +52,7 @@ struct ProjectSetupView: View {
                                 set: { viewModel.setTarget(platform, enabled: $0) }
                             )
                         )
+                        .disabled(!viewModel.compatibleTargetPlatforms.contains(platform))
                     }
                 }
 
@@ -119,9 +127,17 @@ struct ProjectSetupView: View {
 
     private var footer: some View {
         HStack {
-            Text("Schritt 1 von 8 · Projektbasis")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: AppForgeSpacing.extraSmall) {
+                Text("Schritt 1 von 8 · Projektbasis")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if let guidance = viewModel.preparationGuidance {
+                    Text(guidance)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             Spacer()
 

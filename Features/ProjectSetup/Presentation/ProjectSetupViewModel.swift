@@ -7,9 +7,17 @@ import Observation
 @Observable
 final class ProjectSetupViewModel {
     private let createProjectDraft: CreateProjectDraftUseCase
+    private static let organizationIdentifierPattern = #"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$"#
 
     var projectName: String
-    var framework: OutputFramework
+    var organizationIdentifier: String
+    var framework: OutputFramework {
+        didSet {
+            targetPlatforms.formIntersection(compatibleTargetPlatforms)
+            summaryMessage = nil
+        }
+    }
+
     var targetPlatforms: Set<TargetPlatform>
     var backend: BackendProvider
     var flutterStateManagement: FlutterStateManagement
@@ -21,6 +29,7 @@ final class ProjectSetupViewModel {
         self.createProjectDraft = createProjectDraft
         let draft = createProjectDraft()
         projectName = draft.identity.name
+        organizationIdentifier = draft.identity.organizationIdentifier
         framework = draft.framework
         targetPlatforms = draft.targetPlatforms
         backend = draft.backend
@@ -28,15 +37,60 @@ final class ProjectSetupViewModel {
     }
 
     var canPrepareProject: Bool {
-        !projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !targetPlatforms.isEmpty
+        preparationGuidance == nil
+    }
+
+    var compatibleTargetPlatforms: Set<TargetPlatform> {
+        switch framework {
+        case .flutter:
+            [.iOS, .android]
+        case .swiftUI:
+            [.iOS]
+        case .compose:
+            [.android]
+        }
+    }
+
+    var isRendererAvailable: Bool {
+        framework == .flutter
+    }
+
+    var isOrganizationIdentifierValid: Bool {
+        organizationIdentifier.range(
+            of: Self.organizationIdentifierPattern,
+            options: .regularExpression
+        ) != nil
+    }
+
+    var preparationGuidance: String? {
+        if projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "Geben Sie einen App-Namen ein."
+        }
+
+        if !isOrganizationIdentifierValid {
+            return "Geben Sie eine gültige Organisations-ID ein, zum Beispiel de.meinefirma."
+        }
+
+        if !isRendererAvailable {
+            return "Der ausgewählte Renderer ist geplant, aber noch nicht für Generierungen freigegeben."
+        }
+
+        if targetPlatforms.isEmpty {
+            return "Wählen Sie mindestens eine kompatible Zielplattform."
+        }
+
+        if !targetPlatforms.isSubset(of: compatibleTargetPlatforms) {
+            return "Die gewählten Zielplattformen sind mit dem Framework nicht kompatibel."
+        }
+
+        return nil
     }
 
     var specification: ProjectSpecification {
         ProjectSpecification(
             identity: ProjectIdentity(
                 name: projectName.trimmingCharacters(in: .whitespacesAndNewlines),
-                organizationIdentifier: "com.example"
+                organizationIdentifier: organizationIdentifier.trimmingCharacters(in: .whitespacesAndNewlines)
             ),
             framework: framework,
             targetPlatforms: targetPlatforms,
@@ -46,6 +100,11 @@ final class ProjectSetupViewModel {
     }
 
     func setTarget(_ platform: TargetPlatform, enabled: Bool) {
+        guard compatibleTargetPlatforms.contains(platform) else {
+            targetPlatforms.remove(platform)
+            return
+        }
+
         if enabled {
             targetPlatforms.insert(platform)
         } else {
@@ -54,8 +113,8 @@ final class ProjectSetupViewModel {
     }
 
     func prepareProject() {
-        guard canPrepareProject else {
-            summaryMessage = "Bitte geben Sie einen Projektnamen ein und wählen Sie mindestens eine Zielplattform."
+        if let preparationGuidance {
+            summaryMessage = preparationGuidance
             return
         }
 
