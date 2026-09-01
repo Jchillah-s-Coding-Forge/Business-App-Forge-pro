@@ -37,7 +37,7 @@ struct ProjectSetupView: View {
                     .pickerStyle(.segmented)
 
                     Label(
-                        "SwiftUI und Jetpack Compose sind geplant und werden erst auswählbar, wenn ihre Renderer produktionsbereit sind.",
+                        "SwiftUI und Jetpack Compose folgen, sobald ihre Renderer produktionsbereit sind.",
                         systemImage: "clock"
                     )
                     .foregroundStyle(.secondary)
