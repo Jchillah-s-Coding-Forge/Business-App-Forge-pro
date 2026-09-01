@@ -18,7 +18,11 @@ struct ProjectSetupView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    TextField("Organisationskennung", text: $viewModel.organizationIdentifier, prompt: Text("de.meinefirma"))
+                    TextField(
+                        "Organisationskennung",
+                        text: $viewModel.organizationIdentifier,
+                        prompt: Text("de.meinefirma")
+                    )
                     Text("Wird als Basis für eindeutige Bundle- und Paketkennungen verwendet.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
