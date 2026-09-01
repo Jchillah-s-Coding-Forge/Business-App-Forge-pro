@@ -83,8 +83,8 @@ public struct ArchitectureContract: Codable, Equatable, Sendable {
 }
 
 public struct ProjectIdentity: Codable, Equatable, Sendable {
-    public var name: String
-    public var organizationIdentifier: String
+    public let name: String
+    public let organizationIdentifier: String
 
     public init(name: String, organizationIdentifier: String) {
         self.name = name
@@ -93,11 +93,11 @@ public struct ProjectIdentity: Codable, Equatable, Sendable {
 }
 
 public struct ProjectSpecification: Codable, Equatable, Sendable {
-    public var identity: ProjectIdentity
-    public var framework: OutputFramework
-    public var targetPlatforms: Set<TargetPlatform>
-    public var backend: BackendProvider
-    public var flutterStateManagement: FlutterStateManagement?
+    public let identity: ProjectIdentity
+    public let framework: OutputFramework
+    public let targetPlatforms: Set<TargetPlatform>
+    public let backend: BackendProvider
+    public let flutterStateManagement: FlutterStateManagement?
     public let architecture: ArchitectureContract
 
     public init(
