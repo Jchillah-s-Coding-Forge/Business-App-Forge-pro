@@ -65,29 +65,50 @@ public struct VerifiedFlutterSDKInstaller: FlutterSDKInstalling {
 
         await progress(.downloading)
         let archiveURL = try await downloader.download(artifact)
-        defer { try? FileManager.default.removeItem(at: archiveURL) }
+        var stagingURL: URL?
 
-        await progress(.verifying)
-        guard try checksumVerifier.verify(fileURL: archiveURL, expectedSHA256: artifact.sha256) else {
-            throw AppForgeError.configuration(
-                message: "Die Prüfsumme des Flutter-SDK-Downloads stimmt nicht mit dem offiziellen Release überein."
+        do {
+            await progress(.verifying)
+            guard try checksumVerifier.verify(fileURL: archiveURL, expectedSHA256: artifact.sha256) else {
+                throw AppForgeError.configuration(
+                    message: "Die Prüfsumme des Flutter-SDK-Downloads stimmt nicht mit dem offiziellen Release überein."
+                )
+            }
+
+            let createdStagingURL = try makeStagingDirectory(in: parentURL)
+            stagingURL = createdStagingURL
+            let stagedSDKURL = createdStagingURL.appendingPathComponent("flutter", isDirectory: true)
+
+            await progress(.extracting)
+            try extractor.extract(archiveURL: archiveURL, into: createdStagingURL)
+
+            await progress(.validating)
+            try validator.validate(sdkURL: stagedSDKURL)
+            try ensureInstallTargetIsAvailable(sdkURL)
+            try FileManager.default.moveItem(at: stagedSDKURL, to: sdkURL)
+
+            let cleanupWarnings = cleanupTemporaryArtifacts([createdStagingURL, archiveURL])
+            await progress(.completed)
+            return FlutterInstallationResult(
+                sdkPath: sdkURL.path,
+                version: artifact.version,
+                warnings: cleanupWarnings
             )
+        } catch let installError {
+            let cleanupURLs = [stagingURL, archiveURL].compactMap(\.self)
+            let cleanupWarnings = cleanupTemporaryArtifacts(cleanupURLs)
+            guard cleanupWarnings.isEmpty else {
+                throw AppForgeError.fileSystem(
+                    message: [
+                        "Die Flutter-Installation ist fehlgeschlagen und temporäre Artefakte konnten nicht vollständig bereinigt werden.",
+                        cleanupWarnings.joined(separator: " "),
+                        "Ursprünglicher Fehler: \(installError.localizedDescription)"
+                    ].joined(separator: " ")
+                )
+            }
+
+            throw installError
         }
-
-        let stagingURL = try makeStagingDirectory(in: parentURL)
-        defer { try? FileManager.default.removeItem(at: stagingURL) }
-        let stagedSDKURL = stagingURL.appendingPathComponent("flutter", isDirectory: true)
-
-        await progress(.extracting)
-        try extractor.extract(archiveURL: archiveURL, into: stagingURL)
-
-        await progress(.validating)
-        try validator.validate(sdkURL: stagedSDKURL)
-        try ensureInstallTargetIsAvailable(sdkURL)
-        try FileManager.default.moveItem(at: stagedSDKURL, to: sdkURL)
-
-        await progress(.completed)
-        return FlutterInstallationResult(sdkPath: sdkURL.path, version: artifact.version)
     }
 
     private func validatedParentDirectory(path: String) throws -> URL {
@@ -138,6 +159,22 @@ public struct VerifiedFlutterSDKInstaller: FlutterSDKInstalling {
             withIntermediateDirectories: false
         )
         return stagingURL
+    }
+
+    private func cleanupTemporaryArtifacts(_ urls: [URL]) -> [String] {
+        var warnings: [String] = []
+
+        for url in urls where FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.removeItem(at: url)
+            } catch {
+                warnings.append(
+                    "Temporäres Artefakt \(url.lastPathComponent) konnte nicht entfernt werden: \(error.localizedDescription)"
+                )
+            }
+        }
+
+        return warnings
     }
 }
 
@@ -343,20 +380,67 @@ private struct FlutterReleaseManifestEntry: Decodable {
 
 private enum SystemCommand {
     static func run(executablePath: String, arguments: [String]) throws -> CommandExecution {
+        let outputURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("appforge-command-output-\(UUID().uuidString).log")
+        guard FileManager.default.createFile(atPath: outputURL.path, contents: nil) else {
+            throw AppForgeError.fileSystem(message: "Temporäre Prozessausgabe konnte nicht angelegt werden.")
+        }
+
         let process = Process()
-        let pipe = Pipe()
+        var outputHandle: FileHandle? = try FileHandle(forWritingTo: outputURL)
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
-        process.standardOutput = pipe
-        process.standardError = pipe
+        process.standardOutput = outputHandle
+        process.standardError = outputHandle
 
-        try process.run()
-        process.waitUntilExit()
+        do {
+            try process.run()
+            process.waitUntilExit()
+            try outputHandle?.close()
+            outputHandle = nil
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = (String(data: data, encoding: .utf8) ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return CommandExecution(exitCode: process.terminationStatus, output: output)
+            let data = try Data(contentsOf: outputURL)
+            let output = (String(data: data, encoding: .utf8) ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            do {
+                try FileManager.default.removeItem(at: outputURL)
+            } catch {
+                throw AppForgeError.fileSystem(
+                    message: "Temporäre Prozessausgabe konnte nicht entfernt werden: \(error.localizedDescription)"
+                )
+            }
+
+            return CommandExecution(exitCode: process.terminationStatus, output: output)
+        } catch let commandError {
+            var cleanupFailures: [String] = []
+
+            if let outputHandle {
+                do {
+                    try outputHandle.close()
+                } catch {
+                    cleanupFailures.append("Datei-Handle konnte nicht geschlossen werden: \(error.localizedDescription)")
+                }
+            }
+
+            if FileManager.default.fileExists(atPath: outputURL.path) {
+                do {
+                    try FileManager.default.removeItem(at: outputURL)
+                } catch {
+                    cleanupFailures.append("Temporäre Prozessausgabe konnte nicht entfernt werden: \(error.localizedDescription)")
+                }
+            }
+
+            guard cleanupFailures.isEmpty else {
+                throw AppForgeError.fileSystem(
+                    message: [
+                        cleanupFailures.joined(separator: " "),
+                        "Ursprünglicher Prozessfehler: \(commandError.localizedDescription)"
+                    ].joined(separator: " ")
+                )
+            }
+
+            throw commandError
+        }
     }
 }
 
