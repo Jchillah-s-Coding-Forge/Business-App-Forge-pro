@@ -9,7 +9,9 @@ public enum ToolIdentifier: String, CaseIterable, Codable, Identifiable, Sendabl
     case vsCode
     case androidStudio
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 }
 
 public enum ToolAvailability: String, Codable, Sendable {
@@ -44,7 +46,7 @@ public struct SemanticVersion: Codable, Equatable, Comparable, Sendable, CustomS
         }
 
         guard let token else { return nil }
-        let numbers = token.split(separator: ".").compactMap { Int($0) }
+        let numbers = token.split(separator: ".").compactMap(Int.init)
         guard numbers.count >= 2 else { return nil }
 
         major = numbers[0]
@@ -103,7 +105,9 @@ public struct ToolRequirement: Codable, Equatable, Identifiable, Sendable {
 }
 
 public struct ToolDetectionResult: Codable, Equatable, Identifiable, Sendable {
-    public var id: ToolIdentifier { requirement.id }
+    public var id: ToolIdentifier {
+        requirement.id
+    }
 
     public let requirement: ToolRequirement
     public let availability: ToolAvailability
@@ -136,9 +140,9 @@ public struct ToolchainReport: Codable, Equatable, Sendable {
     }
 
     public var isReady: Bool {
-        results
-            .filter { $0.requirement.isRequired }
-            .allSatisfy { $0.availability == .ready }
+        results.allSatisfy { result in
+            !result.requirement.isRequired || result.availability == .ready
+        }
     }
 
     public var requiredFailures: [ToolDetectionResult] {
@@ -153,7 +157,9 @@ public enum PreferredIDE: String, CaseIterable, Codable, Identifiable, Sendable 
     case finder = "Finder"
     case terminal = "Terminal"
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 }
 
 public struct ToolchainPreferences: Codable, Equatable, Sendable {
