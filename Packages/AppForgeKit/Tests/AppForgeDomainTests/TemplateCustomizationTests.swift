@@ -11,15 +11,15 @@ final class TemplateCustomizationTests: XCTestCase {
             reference: TemplateReference(templateID: "inventory", version: "1.0.0"),
             entities: [baselineCustomer, baselineOrder]
         )
-        var project = makeProject(baseline: baseline)
-        project.entities = [
+        var draft = makeDraft(baseline: baseline)
+        draft.entities = [
             EntityDefinition(
                 identity: baselineCustomer.identity.renamed(label: "Kunde")
             ),
             makeEntity(id: "entity.asset", code: "asset", label: "Asset")
         ]
 
-        let diff = service.diff(project)
+        let diff = service.diff(draft)
 
         XCTAssertTrue(
             diff.contains(
@@ -56,19 +56,19 @@ final class TemplateCustomizationTests: XCTestCase {
             reference: TemplateReference(templateID: "crm", version: "1.0.0"),
             entities: [baselineCustomer]
         )
-        var project = makeProject(baseline: baseline)
-        project.entities = [
+        var draft = makeDraft(baseline: baseline)
+        draft.entities = [
             EntityDefinition(identity: baselineCustomer.identity.renamed(label: "Kunde")),
             makeEntity(id: "entity.custom", code: "custom", label: "Eigene Entität")
         ]
 
-        service.resetEntity(id: baselineCustomer.id, in: &project)
+        service.resetEntity(id: baselineCustomer.id, in: &draft)
 
         XCTAssertEqual(
-            project.entities.first(where: { $0.id == baselineCustomer.id }),
+            draft.entities.first(where: { $0.id == baselineCustomer.id }),
             baselineCustomer
         )
-        XCTAssertNotNil(project.entities.first(where: { $0.id == "entity.custom" }))
+        XCTAssertNotNil(draft.entities.first(where: { $0.id == "entity.custom" }))
     }
 
     func testResetFieldRestoresOnlySelectedField() {
@@ -89,18 +89,18 @@ final class TemplateCustomizationTests: XCTestCase {
             reference: TemplateReference(templateID: "crm", version: "1.0.0"),
             entities: [customer]
         )
-        var project = makeProject(baseline: baseline)
+        var draft = makeDraft(baseline: baseline)
         var changedName = name
         changedName.isRequired = false
         var changedEmail = email
         changedEmail.identity = changedEmail.identity.renamed(label: "Kontakt")
-        project.entities = [
+        draft.entities = [
             EntityDefinition(identity: customer.identity, fields: [changedName, changedEmail])
         ]
 
-        service.resetField(entityID: customer.id, fieldID: name.id, in: &project)
+        service.resetField(entityID: customer.id, fieldID: name.id, in: &draft)
 
-        let restored = project.entities[0]
+        let restored = draft.entities[0]
         XCTAssertEqual(restored.fields.first(where: { $0.id == name.id }), name)
         XCTAssertEqual(restored.fields.first(where: { $0.id == email.id }), changedEmail)
     }
@@ -120,19 +120,33 @@ final class TemplateCustomizationTests: XCTestCase {
                 ]
             )
         )
-        var project = makeProject(baseline: baseline)
-        project.entities = []
-        project.navigation = NavigationDefinition()
+        var draft = makeDraft(baseline: baseline)
+        draft.entities = []
+        draft.navigation = NavigationDefinition()
 
-        service.resetBusinessModel(&project)
+        service.resetBusinessModel(&draft)
 
-        XCTAssertEqual(project.entities, baseline.entities)
-        XCTAssertEqual(project.navigation, baseline.navigation)
-        XCTAssertTrue(service.diff(project).isEmpty)
+        XCTAssertEqual(draft.entities, baseline.entities)
+        XCTAssertEqual(draft.navigation, baseline.navigation)
+        XCTAssertTrue(service.diff(draft).isEmpty)
     }
 
-    private func makeProject(baseline: TemplateBaselineDefinition) -> ProjectSpecification {
-        ProjectSpecification(
+    func testDraftSnapshotIsIndependentAfterCreation() {
+        let baseline = TemplateBaselineDefinition(
+            reference: TemplateReference(templateID: "crm", version: "1.0.0")
+        )
+        var draft = makeDraft(baseline: baseline)
+        let snapshot = draft.snapshot()
+
+        draft.identity.name = "Geändert"
+        draft.entities.append(makeEntity(id: "entity.customer", code: "customer", label: "Kunde"))
+
+        XCTAssertEqual(snapshot.identity.name, "Template Test")
+        XCTAssertTrue(snapshot.entities.isEmpty)
+    }
+
+    private func makeDraft(baseline: TemplateBaselineDefinition) -> ProjectSpecificationDraft {
+        ProjectSpecificationDraft(
             identity: ProjectIdentity(name: "Template Test", organizationIdentifier: "de.example"),
             framework: .flutter,
             targetPlatforms: [.iOS, .android],
