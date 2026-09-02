@@ -4,18 +4,35 @@ public struct DefinitionIdentity: Codable, Equatable, Hashable, Identifiable, Se
     public let id: String
     public var code: String
     public var label: String
+    public var singularLabel: String
+    public var pluralLabel: String
 
-    public init(id: String, code: String, label: String) {
+    public init(
+        id: String,
+        code: String,
+        label: String,
+        singularLabel: String? = nil,
+        pluralLabel: String? = nil
+    ) {
         self.id = id
         self.code = code
         self.label = label
+        self.singularLabel = singularLabel ?? label
+        self.pluralLabel = pluralLabel ?? label
     }
 
-    public func renamed(code: String? = nil, label: String? = nil) -> DefinitionIdentity {
+    public func renamed(
+        code: String? = nil,
+        label: String? = nil,
+        singularLabel: String? = nil,
+        pluralLabel: String? = nil
+    ) -> DefinitionIdentity {
         DefinitionIdentity(
             id: id,
             code: code ?? self.code,
-            label: label ?? self.label
+            label: label ?? self.label,
+            singularLabel: singularLabel ?? self.singularLabel,
+            pluralLabel: pluralLabel ?? self.pluralLabel
         )
     }
 }
@@ -33,9 +50,11 @@ public enum FieldDataType: String, CaseIterable, Codable, Sendable {
     case url
     case currency
     case percentage
+    case enumeration
     case file
     case image
     case color
+    case location
 }
 
 public enum FieldDefaultValue: Codable, Equatable, Sendable {
@@ -43,6 +62,10 @@ public enum FieldDefaultValue: Codable, Equatable, Sendable {
     case integer(Int)
     case decimal(Double)
     case boolean(Bool)
+    case date(String)
+    case dateTime(String)
+    case time(String)
+    case option(String)
 }
 
 public enum FieldValidationRule: Codable, Equatable, Sendable {
@@ -53,13 +76,42 @@ public enum FieldValidationRule: Codable, Equatable, Sendable {
     case pattern(String)
 }
 
+public enum DataSensitivity: String, CaseIterable, Codable, Sendable {
+    case standard
+    case personal
+    case confidential
+    case restricted
+}
+
+public enum FieldSyncBehavior: String, CaseIterable, Codable, Sendable {
+    case synchronized
+    case localOnly
+    case remoteOnly
+}
+
+public struct FieldOptionDefinition: Codable, Equatable, Identifiable, Sendable {
+    public let id: String
+    public var value: String
+    public var label: String
+
+    public init(id: String, value: String, label: String) {
+        self.id = id
+        self.value = value
+        self.label = label
+    }
+}
+
 public struct FieldDefinition: Codable, Equatable, Identifiable, Sendable {
     public var identity: DefinitionIdentity
     public var dataType: FieldDataType
     public var isRequired: Bool
     public var isUnique: Bool
+    public var isIndexed: Bool
     public var defaultValue: FieldDefaultValue?
     public var validationRules: [FieldValidationRule]
+    public var options: [FieldOptionDefinition]
+    public var sensitivity: DataSensitivity
+    public var syncBehavior: FieldSyncBehavior
     public var isSearchable: Bool
     public var isFilterable: Bool
     public var isSortable: Bool
@@ -73,8 +125,12 @@ public struct FieldDefinition: Codable, Equatable, Identifiable, Sendable {
         dataType: FieldDataType,
         isRequired: Bool = false,
         isUnique: Bool = false,
+        isIndexed: Bool = false,
         defaultValue: FieldDefaultValue? = nil,
         validationRules: [FieldValidationRule] = [],
+        options: [FieldOptionDefinition] = [],
+        sensitivity: DataSensitivity = .standard,
+        syncBehavior: FieldSyncBehavior = .synchronized,
         isSearchable: Bool = false,
         isFilterable: Bool = false,
         isSortable: Bool = false
@@ -83,8 +139,12 @@ public struct FieldDefinition: Codable, Equatable, Identifiable, Sendable {
         self.dataType = dataType
         self.isRequired = isRequired
         self.isUnique = isUnique
+        self.isIndexed = isIndexed
         self.defaultValue = defaultValue
         self.validationRules = validationRules
+        self.options = options
+        self.sensitivity = sensitivity
+        self.syncBehavior = syncBehavior
         self.isSearchable = isSearchable
         self.isFilterable = isFilterable
         self.isSortable = isSortable
@@ -184,6 +244,7 @@ public enum FieldControl: String, CaseIterable, Codable, Hashable, Sendable {
     case filePicker
     case imagePicker
     case colorPicker
+    case locationPicker
 }
 
 public enum PresentationTarget: Codable, Equatable, Sendable {
@@ -227,6 +288,7 @@ public struct FieldPresentationDefinition: Codable, Equatable, Identifiable, Sen
 public enum ControlCompatibilityIssue: Equatable, Sendable {
     case unsupportedControl(control: FieldControl)
     case sliderRequiresValidRange
+    case selectionOptionsRequired
 }
 
 public struct ControlCompatibilityValidator: Sendable {
@@ -248,12 +310,16 @@ public struct ControlCompatibilityValidator: Sendable {
             [.timePicker]
         case .email, .phone, .url:
             [.textField]
+        case .enumeration:
+            [.radioGroup, .segmented, .select, .comboBox, .autocomplete]
         case .file:
             [.filePicker]
         case .image:
             [.imagePicker]
         case .color:
             [.colorPicker]
+        case .location:
+            [.textField, .autocomplete, .locationPicker]
         }
     }
 
@@ -270,11 +336,20 @@ public struct ControlCompatibilityValidator: Sendable {
         _ presentation: FieldPresentationDefinition,
         field: FieldDefinition
     ) -> [ControlCompatibilityIssue] {
-        validate(
+        var issues = validate(
             control: presentation.control,
             allowedControls: compatibleControls(for: field.dataType),
             numericRange: presentation.numericRange
         )
+
+        if requiresSelectionOptions(presentation.control),
+           field.dataType != .boolean,
+           field.options.isEmpty
+        {
+            issues.append(.selectionOptionsRequired)
+        }
+
+        return issues
     }
 
     public func validate(
@@ -304,5 +379,14 @@ public struct ControlCompatibilityValidator: Sendable {
         }
 
         return issues
+    }
+
+    private func requiresSelectionOptions(_ control: FieldControl) -> Bool {
+        switch control {
+        case .radioGroup, .segmented, .select, .comboBox, .autocomplete:
+            true
+        default:
+            false
+        }
     }
 }
