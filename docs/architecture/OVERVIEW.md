@@ -12,7 +12,7 @@ SwiftUI Feature
   ← Infrastructure Adapter
 ```
 
-Die UI baut den Generator nicht direkt zusammen. Während der Konfiguration arbeitet sie auf einer editierbaren `ProjectSpecification`. Vor Resolver und Generator wird daraus ein validierter Snapshot. Resolver und Renderer verändern diesen fachlichen Vertrag nicht stillschweigend.
+Die UI baut den Generator nicht direkt zusammen. Während der Konfiguration arbeitet sie auf einem mutablen `ProjectSpecificationDraft`. Der technische Handoff erzeugt mit `snapshot()` eine unveränderliche `ProjectSpecification`, die anschließend ganzheitlich validiert wird. Resolver und Renderer erhalten ausschließlich diesen Snapshot und verändern ihn nicht stillschweigend.
 
 Der normative Vertrag ist in [`PROJECT_SPECIFICATION.md`](PROJECT_SPECIFICATION.md) beschrieben.
 
@@ -24,7 +24,7 @@ AppForgePro
 ├── Features             Feature-First SwiftUI/MVVM
 └── Packages/AppForgeKit
     ├── AppForgeCore             Fehler und gemeinsame Verträge
-    ├── AppForgeDomain           ProjectSpecification und Invarianten
+    ├── AppForgeDomain           Draft, ProjectSpecification und Invarianten
     ├── AppForgeApplication      Use Cases
     └── AppForgeDesignSystem     Host-App-Tokens und Komponenten
 ```
@@ -39,7 +39,8 @@ Weitere Generator-, Registry-, Resolver- und Renderer-Module werden in ihren jew
 - Presentation spricht nur mit ViewModels und Application Use Cases.
 - Generierte Anwendungen enthalten keine AppForge-Pro-Laufzeitabhängigkeit.
 - Templates liefern Defaults, aber keine versteckten Generator-Sonderpfade.
-- Renderer konsumieren ausschließlich validierte Specification beziehungsweise Resolved Product Graph.
+- Mutationen finden ausschließlich am `ProjectSpecificationDraft` statt.
+- Resolver und Renderer konsumieren ausschließlich validierte `ProjectSpecification`-Snapshots beziehungsweise den Resolved Product Graph.
 
 ## Fester Architekturvertrag erzeugter Apps
 
@@ -62,6 +63,8 @@ Fachliche Zustände wie `draft → approved → completed` werden als `BusinessS
 ```text
 Template / leeres Projekt
         ↓
+ProjectSpecificationDraft
+        ↓ snapshot()
 ProjectSpecification
         ↓
 ProjectSpecificationValidator
@@ -79,7 +82,7 @@ Quality Gates
 Standalone Source Code
 ```
 
-Der Renderer darf ungültige fachliche Konfiguration nicht durch Heuristiken, Regex-Rewrites oder hardcodierte Template-Zweige korrigieren.
+Der Renderer darf ungültige fachliche Konfiguration nicht durch Heuristiken, Regex-Rewrites oder hardcodierte Template-Zweige korrigieren. Ebenso darf er keinen mutablen Draft konsumieren.
 
 ## Packagestrategie
 
