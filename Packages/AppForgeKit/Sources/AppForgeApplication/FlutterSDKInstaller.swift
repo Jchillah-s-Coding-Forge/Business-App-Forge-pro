@@ -98,9 +98,11 @@ public struct VerifiedFlutterSDKInstaller: FlutterSDKInstalling {
             let cleanupURLs = [stagingURL, archiveURL].compactMap(\.self)
             let cleanupWarnings = cleanupTemporaryArtifacts(cleanupURLs)
             guard cleanupWarnings.isEmpty else {
+                let cleanupHeadline = "Die Flutter-Installation ist fehlgeschlagen und temporäre Artefakte "
+                    + "konnten nicht vollständig bereinigt werden."
                 throw AppForgeError.fileSystem(
                     message: [
-                        "Die Flutter-Installation ist fehlgeschlagen und temporäre Artefakte konnten nicht vollständig bereinigt werden.",
+                        cleanupHeadline,
                         cleanupWarnings.joined(separator: " "),
                         "Ursprünglicher Fehler: \(installError.localizedDescription)"
                     ].joined(separator: " ")
@@ -168,9 +170,9 @@ public struct VerifiedFlutterSDKInstaller: FlutterSDKInstalling {
             do {
                 try FileManager.default.removeItem(at: url)
             } catch {
-                warnings.append(
-                    "Temporäres Artefakt \(url.lastPathComponent) konnte nicht entfernt werden: \(error.localizedDescription)"
-                )
+                let warning = "Temporäres Artefakt \(url.lastPathComponent) konnte nicht entfernt werden: "
+                    + error.localizedDescription
+                warnings.append(warning)
             }
         }
 
@@ -380,71 +382,98 @@ private struct FlutterReleaseManifestEntry: Decodable {
 
 private enum SystemCommand {
     static func run(executablePath: String, arguments: [String]) throws -> CommandExecution {
-        let outputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("appforge-command-output-\(UUID().uuidString).log")
-        guard FileManager.default.createFile(atPath: outputURL.path, contents: nil) else {
-            throw AppForgeError.fileSystem(message: "Temporäre Prozessausgabe konnte nicht angelegt werden.")
-        }
-
+        let capture = try CommandOutputCapture()
         let process = Process()
-        var outputHandle: FileHandle? = try FileHandle(forWritingTo: outputURL)
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
-        process.standardOutput = outputHandle
-        process.standardError = outputHandle
+        capture.attach(to: process)
 
         do {
             try process.run()
             process.waitUntilExit()
-            try outputHandle?.close()
-            outputHandle = nil
-
-            let data = try Data(contentsOf: outputURL)
-            let output = (String(data: data, encoding: .utf8) ?? "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            do {
-                try FileManager.default.removeItem(at: outputURL)
-            } catch {
-                throw AppForgeError.fileSystem(
-                    message: "Temporäre Prozessausgabe konnte nicht entfernt werden: \(error.localizedDescription)"
-                )
-            }
-
+            let output = try capture.finish()
             return CommandExecution(exitCode: process.terminationStatus, output: output)
         } catch let commandError {
-            var cleanupFailures: [String] = []
-
-            if let outputHandle {
-                do {
-                    try outputHandle.close()
-                } catch {
-                    cleanupFailures.append(
-                        "Datei-Handle konnte nicht geschlossen werden: \(error.localizedDescription)"
-                    )
-                }
-            }
-
-            if FileManager.default.fileExists(atPath: outputURL.path) {
-                do {
-                    try FileManager.default.removeItem(at: outputURL)
-                } catch {
-                    cleanupFailures.append(
-                        "Temporäre Prozessausgabe konnte nicht entfernt werden: \(error.localizedDescription)"
-                    )
-                }
-            }
-
+            let cleanupFailures = capture.cleanupFailures()
             guard cleanupFailures.isEmpty else {
                 throw AppForgeError.fileSystem(
-                    message: [
-                        cleanupFailures.joined(separator: " "),
-                        "Ursprünglicher Prozessfehler: \(commandError.localizedDescription)"
-                    ].joined(separator: " ")
+                    message: cleanupFailureMessage(
+                        cleanupFailures: cleanupFailures,
+                        commandError: commandError
+                    )
                 )
             }
-
             throw commandError
         }
+    }
+
+    private static func cleanupFailureMessage(
+        cleanupFailures: [String],
+        commandError: Error
+    ) -> String {
+        [
+            cleanupFailures.joined(separator: " "),
+            "Ursprünglicher Prozessfehler: \(commandError.localizedDescription)"
+        ].joined(separator: " ")
+    }
+}
+
+private final class CommandOutputCapture {
+    private let outputURL: URL
+    private var outputHandle: FileHandle?
+
+    init() throws {
+        outputURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("appforge-command-output-\(UUID().uuidString).log")
+        guard FileManager.default.createFile(atPath: outputURL.path, contents: nil) else {
+            throw AppForgeError.fileSystem(message: "Temporäre Prozessausgabe konnte nicht angelegt werden.")
+        }
+        outputHandle = try FileHandle(forWritingTo: outputURL)
+    }
+
+    func attach(to process: Process) {
+        process.standardOutput = outputHandle
+        process.standardError = outputHandle
+    }
+
+    func finish() throws -> String {
+        try closeHandle()
+        let data = try Data(contentsOf: outputURL)
+        let output = (String(data: data, encoding: .utf8) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        try removeOutputFile()
+        return output
+    }
+
+    func cleanupFailures() -> [String] {
+        var failures: [String] = []
+
+        do {
+            try closeHandle()
+        } catch {
+            failures.append("Datei-Handle konnte nicht geschlossen werden: \(error.localizedDescription)")
+        }
+
+        do {
+            try removeOutputFile()
+        } catch {
+            let message = "Temporäre Prozessausgabe konnte nicht entfernt werden: "
+                + error.localizedDescription
+            failures.append(message)
+        }
+
+        return failures
+    }
+
+    private func closeHandle() throws {
+        guard let outputHandle else { return }
+        try outputHandle.close()
+        self.outputHandle = nil
+    }
+
+    private func removeOutputFile() throws {
+        guard FileManager.default.fileExists(atPath: outputURL.path) else { return }
+        try FileManager.default.removeItem(at: outputURL)
     }
 }
 
