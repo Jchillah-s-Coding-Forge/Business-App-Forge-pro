@@ -104,13 +104,11 @@ public struct ProjectSpecificationValidator: Sendable {
             issues.append(.unsupportedSchemaVersion(specification.schemaVersion))
         }
 
-        issues += IdentityValidator().validate(specification)
-        issues += FieldValidator().validate(specification)
-        issues += RelationValidator().validate(specification)
-        issues += PresentationValidator(controlValidator: controlValidator).validate(specification)
-        issues += WorkflowValidator().validate(specification)
-        issues += ScreenNavigationValidator().validate(specification)
-        issues += ConfigurationValidator().validate(specification)
+        issues += ProjectIdentityValidator().validate(specification)
+        issues += ProjectModelValidator(controlValidator: controlValidator).validate(specification)
+        issues += ProjectWorkflowValidator().validate(specification)
+        issues += ProjectScreenNavigationValidator().validate(specification)
+        issues += ProjectConfigurationValidator().validate(specification)
 
         return ProjectSpecificationValidationReport(issues: issues)
     }
