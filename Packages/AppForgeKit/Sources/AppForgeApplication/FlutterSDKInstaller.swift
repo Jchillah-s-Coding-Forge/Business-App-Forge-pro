@@ -418,7 +418,9 @@ private enum SystemCommand {
                 do {
                     try outputHandle.close()
                 } catch {
-                    cleanupFailures.append("Datei-Handle konnte nicht geschlossen werden: \(error.localizedDescription)")
+                    cleanupFailures.append(
+                        "Datei-Handle konnte nicht geschlossen werden: \(error.localizedDescription)"
+                    )
                 }
             }
 
@@ -426,7 +428,9 @@ private enum SystemCommand {
                 do {
                     try FileManager.default.removeItem(at: outputURL)
                 } catch {
-                    cleanupFailures.append("Temporäre Prozessausgabe konnte nicht entfernt werden: \(error.localizedDescription)")
+                    cleanupFailures.append(
+                        "Temporäre Prozessausgabe konnte nicht entfernt werden: \(error.localizedDescription)"
+                    )
                 }
             }
 
