@@ -15,7 +15,26 @@ public struct ToolchainRequirements: Sendable {
         for framework: OutputFramework,
         targetPlatforms: Set<TargetPlatform>
     ) -> [ToolRequirement] {
-        var requirements = [
+        var requirements = coreRequirements
+
+        if framework == .flutter {
+            requirements += flutterRequirements
+        }
+
+        if targetPlatforms.contains(.iOS) || targetPlatforms.contains(.macOS) {
+            requirements += appleRequirements
+        }
+
+        if targetPlatforms.contains(.android) {
+            requirements += androidRequirements
+        }
+
+        requirements += optionalIDERequirements
+        return requirements
+    }
+
+    private var coreRequirements: [ToolRequirement] {
+        [
             ToolRequirement(
                 id: .git,
                 displayName: "Git",
@@ -24,51 +43,53 @@ public struct ToolchainRequirements: Sendable {
                 installStrategy: .systemManaged
             )
         ]
+    }
 
-        if framework == .flutter {
-            requirements.append(
-                ToolRequirement(
-                    id: .flutter,
-                    displayName: "Flutter SDK",
-                    purpose: "Generierung, Analyse, Tests und Builds von Flutter-Projekten",
-                    isRequired: true,
-                    installStrategy: .userSelectedLocation
-                )
+    private var flutterRequirements: [ToolRequirement] {
+        [
+            ToolRequirement(
+                id: .flutter,
+                displayName: "Flutter SDK",
+                purpose: "Generierung, Analyse, Tests und Builds von Flutter-Projekten",
+                isRequired: true,
+                installStrategy: .userSelectedLocation
             )
-        }
+        ]
+    }
 
-        if targetPlatforms.contains(.iOS) || targetPlatforms.contains(.macOS) {
-            requirements.append(
-                ToolRequirement(
-                    id: .xcode,
-                    displayName: "Xcode",
-                    purpose: "Apple SDKs, Simulatoren, Signierung und Builds",
-                    isRequired: true,
-                    installStrategy: .externalApplication
-                )
+    private var appleRequirements: [ToolRequirement] {
+        [
+            ToolRequirement(
+                id: .xcode,
+                displayName: "Xcode",
+                purpose: "Apple SDKs, Simulatoren, Signierung und Builds",
+                isRequired: true,
+                installStrategy: .externalApplication
             )
-        }
+        ]
+    }
 
-        if targetPlatforms.contains(.android) {
-            requirements.append(contentsOf: [
-                ToolRequirement(
-                    id: .androidSDK,
-                    displayName: "Android SDK",
-                    purpose: "Android Platform Tools und Builds",
-                    isRequired: true,
-                    installStrategy: .externalApplication
-                ),
-                ToolRequirement(
-                    id: .java,
-                    displayName: "JDK",
-                    purpose: "Android Gradle Toolchain",
-                    isRequired: true,
-                    installStrategy: .externalApplication
-                )
-            ])
-        }
+    private var androidRequirements: [ToolRequirement] {
+        [
+            ToolRequirement(
+                id: .androidSDK,
+                displayName: "Android SDK",
+                purpose: "Android Platform Tools und Builds",
+                isRequired: true,
+                installStrategy: .externalApplication
+            ),
+            ToolRequirement(
+                id: .java,
+                displayName: "JDK",
+                purpose: "Android Gradle Toolchain",
+                isRequired: true,
+                installStrategy: .externalApplication
+            )
+        ]
+    }
 
-        requirements.append(contentsOf: [
+    private var optionalIDERequirements: [ToolRequirement] {
+        [
             ToolRequirement(
                 id: .vsCode,
                 displayName: "VS Code",
@@ -83,9 +104,7 @@ public struct ToolchainRequirements: Sendable {
                 isRequired: false,
                 installStrategy: .externalApplication
             )
-        ])
-
-        return requirements
+        ]
     }
 }
 
@@ -283,7 +302,7 @@ public struct SystemToolDetector: ToolDetector {
             try process.run()
             process.waitUntilExit()
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(decoding: data, as: UTF8.self)
+            let output = (String(data: data, encoding: .utf8) ?? "")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             return CommandExecution(exitCode: process.terminationStatus, output: output)
         } catch {
