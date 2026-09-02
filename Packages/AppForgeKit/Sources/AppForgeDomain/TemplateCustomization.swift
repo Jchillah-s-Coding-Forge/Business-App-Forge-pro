@@ -38,41 +38,151 @@ public struct TemplateCustomizationService: Sendable {
     public init() {}
 
     public func diff(_ specification: ProjectSpecification) -> [TemplateDiffEntry] {
-        guard let baseline = specification.templateBaseline else { return [] }
+        diff(
+            entities: specification.entities,
+            relations: specification.relations,
+            presentations: specification.fieldPresentations,
+            roles: specification.roles,
+            stateMachines: specification.stateMachines,
+            screens: specification.screens,
+            navigation: specification.navigation,
+            baseline: specification.templateBaseline
+        )
+    }
+
+    public func diff(_ draft: ProjectSpecificationDraft) -> [TemplateDiffEntry] {
+        diff(
+            entities: draft.entities,
+            relations: draft.relations,
+            presentations: draft.fieldPresentations,
+            roles: draft.roles,
+            stateMachines: draft.stateMachines,
+            screens: draft.screens,
+            navigation: draft.navigation,
+            baseline: draft.templateBaseline
+        )
+    }
+
+    public func resetBusinessModel(_ draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline else { return }
+        draft.entities = baseline.entities
+        draft.relations = baseline.relations
+        draft.fieldPresentations = baseline.fieldPresentations
+        draft.roles = baseline.roles
+        draft.stateMachines = baseline.stateMachines
+        draft.screens = baseline.screens
+        draft.navigation = baseline.navigation
+    }
+
+    public func resetEntity(id: String, in draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline,
+              let baselineEntity = baseline.entities.first(where: { $0.id == id })
+        else {
+            return
+        }
+
+        replaceOrAppend(baselineEntity, in: &draft.entities)
+    }
+
+    public func resetField(
+        entityID: String,
+        fieldID: String,
+        in draft: inout ProjectSpecificationDraft
+    ) {
+        guard let baseline = draft.templateBaseline,
+              let baselineEntity = baseline.entities.first(where: { $0.id == entityID }),
+              let baselineField = baselineEntity.fields.first(where: { $0.id == fieldID })
+        else {
+            return
+        }
+
+        guard let entityIndex = draft.entities.firstIndex(where: { $0.id == entityID }) else {
+            draft.entities.append(baselineEntity)
+            return
+        }
+
+        replaceOrAppend(baselineField, in: &draft.entities[entityIndex].fields)
+    }
+
+    public func resetRelation(id: String, in draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline,
+              let value = baseline.relations.first(where: { $0.id == id })
+        else {
+            return
+        }
+        replaceOrAppend(value, in: &draft.relations)
+    }
+
+    public func resetPresentation(id: String, in draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline,
+              let value = baseline.fieldPresentations.first(where: { $0.id == id })
+        else {
+            return
+        }
+        replaceOrAppend(value, in: &draft.fieldPresentations)
+    }
+
+    public func resetRole(id: String, in draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline,
+              let value = baseline.roles.first(where: { $0.id == id })
+        else {
+            return
+        }
+        replaceOrAppend(value, in: &draft.roles)
+    }
+
+    public func resetStateMachine(id: String, in draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline,
+              let value = baseline.stateMachines.first(where: { $0.id == id })
+        else {
+            return
+        }
+        replaceOrAppend(value, in: &draft.stateMachines)
+    }
+
+    public func resetScreen(id: String, in draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline,
+              let value = baseline.screens.first(where: { $0.id == id })
+        else {
+            return
+        }
+        replaceOrAppend(value, in: &draft.screens)
+    }
+
+    public func resetNavigation(in draft: inout ProjectSpecificationDraft) {
+        guard let baseline = draft.templateBaseline else { return }
+        draft.navigation = baseline.navigation
+    }
+
+    private func diff(
+        entities: [EntityDefinition],
+        relations: [RelationDefinition],
+        presentations: [FieldPresentationDefinition],
+        roles: [RoleDefinition],
+        stateMachines: [BusinessStateMachineDefinition],
+        screens: [ScreenDefinition],
+        navigation: NavigationDefinition,
+        baseline: TemplateBaselineDefinition?
+    ) -> [TemplateDiffEntry] {
+        guard let baseline else { return [] }
         var result: [TemplateDiffEntry] = []
 
+        result += diffIdentified(current: entities, baseline: baseline.entities, kind: .entity)
+        result += diffIdentified(current: relations, baseline: baseline.relations, kind: .relation)
         result += diffIdentified(
-            current: specification.entities,
-            baseline: baseline.entities,
-            kind: .entity
-        )
-        result += diffIdentified(
-            current: specification.relations,
-            baseline: baseline.relations,
-            kind: .relation
-        )
-        result += diffIdentified(
-            current: specification.fieldPresentations,
+            current: presentations,
             baseline: baseline.fieldPresentations,
             kind: .presentation
         )
+        result += diffIdentified(current: roles, baseline: baseline.roles, kind: .role)
         result += diffIdentified(
-            current: specification.roles,
-            baseline: baseline.roles,
-            kind: .role
-        )
-        result += diffIdentified(
-            current: specification.stateMachines,
+            current: stateMachines,
             baseline: baseline.stateMachines,
             kind: .stateMachine
         )
-        result += diffIdentified(
-            current: specification.screens,
-            baseline: baseline.screens,
-            kind: .screen
-        )
+        result += diffIdentified(current: screens, baseline: baseline.screens, kind: .screen)
 
-        if specification.navigation != baseline.navigation {
+        if navigation != baseline.navigation {
             result.append(
                 TemplateDiffEntry(
                     objectKind: .navigation,
@@ -83,97 +193,6 @@ public struct TemplateCustomizationService: Sendable {
         }
 
         return result
-    }
-
-    public func resetBusinessModel(_ specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline else { return }
-        specification.entities = baseline.entities
-        specification.relations = baseline.relations
-        specification.fieldPresentations = baseline.fieldPresentations
-        specification.roles = baseline.roles
-        specification.stateMachines = baseline.stateMachines
-        specification.screens = baseline.screens
-        specification.navigation = baseline.navigation
-    }
-
-    public func resetEntity(id: String, in specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline,
-              let baselineEntity = baseline.entities.first(where: { $0.id == id })
-        else {
-            return
-        }
-
-        replaceOrAppend(baselineEntity, in: &specification.entities)
-    }
-
-    public func resetField(
-        entityID: String,
-        fieldID: String,
-        in specification: inout ProjectSpecification
-    ) {
-        guard let baseline = specification.templateBaseline,
-              let baselineEntity = baseline.entities.first(where: { $0.id == entityID }),
-              let baselineField = baselineEntity.fields.first(where: { $0.id == fieldID })
-        else {
-            return
-        }
-
-        guard let entityIndex = specification.entities.firstIndex(where: { $0.id == entityID }) else {
-            specification.entities.append(baselineEntity)
-            return
-        }
-
-        replaceOrAppend(baselineField, in: &specification.entities[entityIndex].fields)
-    }
-
-    public func resetRelation(id: String, in specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline,
-              let value = baseline.relations.first(where: { $0.id == id })
-        else {
-            return
-        }
-        replaceOrAppend(value, in: &specification.relations)
-    }
-
-    public func resetPresentation(id: String, in specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline,
-              let value = baseline.fieldPresentations.first(where: { $0.id == id })
-        else {
-            return
-        }
-        replaceOrAppend(value, in: &specification.fieldPresentations)
-    }
-
-    public func resetRole(id: String, in specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline,
-              let value = baseline.roles.first(where: { $0.id == id })
-        else {
-            return
-        }
-        replaceOrAppend(value, in: &specification.roles)
-    }
-
-    public func resetStateMachine(id: String, in specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline,
-              let value = baseline.stateMachines.first(where: { $0.id == id })
-        else {
-            return
-        }
-        replaceOrAppend(value, in: &specification.stateMachines)
-    }
-
-    public func resetScreen(id: String, in specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline,
-              let value = baseline.screens.first(where: { $0.id == id })
-        else {
-            return
-        }
-        replaceOrAppend(value, in: &specification.screens)
-    }
-
-    public func resetNavigation(in specification: inout ProjectSpecification) {
-        guard let baseline = specification.templateBaseline else { return }
-        specification.navigation = baseline.navigation
     }
 
     private func diffIdentified<Value>(
