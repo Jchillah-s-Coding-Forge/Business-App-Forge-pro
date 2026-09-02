@@ -54,6 +54,26 @@ final class FlutterSDKInstallerTests: XCTestCase {
             XCTAssertTrue(error.technicalMessage.contains("existiert bereits"))
         }
     }
+
+    func testValidationFailureLeavesNoPartialInstallation() async throws {
+        let fixture = try InstallationFixture()
+        defer { fixture.cleanup() }
+        let installer = fixture.makeInstaller(
+            checksumMatches: true,
+            validator: FailingValidator()
+        )
+
+        do {
+            _ = try await installer.install(into: fixture.parentURL.path) { _ in }
+            XCTFail("Expected validation to fail")
+        } catch {
+            let flutterURL = fixture.parentURL.appendingPathComponent("flutter")
+            XCTAssertFalse(FileManager.default.fileExists(atPath: flutterURL.path))
+            let contents = try FileManager.default.contentsOfDirectory(atPath: fixture.parentURL.path)
+            let stagingEntries = contents.filter { $0.hasPrefix(".appforge-flutter-install-") }
+            XCTAssertTrue(stagingEntries.isEmpty)
+        }
+    }
 }
 
 private struct InstallationFixture {
@@ -75,14 +95,15 @@ private struct InstallationFixture {
 
     func makeInstaller(
         checksumMatches: Bool,
-        extractor: any FlutterArchiveExtracting = NoopExtractor()
+        extractor: any FlutterArchiveExtracting = StagingExtractor(),
+        validator: any FlutterSDKValidating = NoopValidator()
     ) -> VerifiedFlutterSDKInstaller {
         VerifiedFlutterSDKInstaller(
             catalog: StubCatalog(),
             downloader: StubDownloader(sourceURL: archiveURL),
             checksumVerifier: StubChecksumVerifier(matches: checksumMatches),
             extractor: extractor,
-            validator: NoopValidator()
+            validator: validator
         )
     }
 
@@ -122,8 +143,11 @@ private struct StubChecksumVerifier: FlutterArchiveChecksumVerifying {
     }
 }
 
-private struct NoopExtractor: FlutterArchiveExtracting {
-    func extract(archiveURL: URL, into parentDirectoryURL: URL) throws {}
+private struct StagingExtractor: FlutterArchiveExtracting {
+    func extract(archiveURL: URL, into parentDirectoryURL: URL) throws {
+        let flutterURL = parentDirectoryURL.appendingPathComponent("flutter", isDirectory: true)
+        try FileManager.default.createDirectory(at: flutterURL, withIntermediateDirectories: false)
+    }
 }
 
 private struct FailingIfCalledExtractor: FlutterArchiveExtracting {
@@ -134,6 +158,12 @@ private struct FailingIfCalledExtractor: FlutterArchiveExtracting {
 
 private struct NoopValidator: FlutterSDKValidating {
     func validate(sdkURL: URL) throws {}
+}
+
+private struct FailingValidator: FlutterSDKValidating {
+    func validate(sdkURL: URL) throws {
+        throw AppForgeError.configuration(message: "Validation failed")
+    }
 }
 
 private actor PhaseRecorder {
