@@ -114,6 +114,9 @@ public struct ProjectSpecification: Codable, Equatable, Sendable {
     public let backend: BackendProvider
     public let flutterStateManagement: FlutterStateManagement?
     public let architecture: ArchitectureContract
+    public let entities: [EntityDefinition]
+    public let relations: [RelationDefinition]
+    public let fieldPresentations: [FieldPresentationDefinition]
 
     public var hasSupportedTargetConfiguration: Bool {
         framework.isAvailable
@@ -127,7 +130,10 @@ public struct ProjectSpecification: Codable, Equatable, Sendable {
         targetPlatforms: Set<TargetPlatform>,
         backend: BackendProvider,
         flutterStateManagement: FlutterStateManagement?,
-        architecture: ArchitectureContract = .standard
+        architecture: ArchitectureContract = .standard,
+        entities: [EntityDefinition] = [],
+        relations: [RelationDefinition] = [],
+        fieldPresentations: [FieldPresentationDefinition] = []
     ) {
         self.identity = identity
         self.framework = framework
@@ -135,5 +141,8 @@ public struct ProjectSpecification: Codable, Equatable, Sendable {
         self.backend = backend
         self.flutterStateManagement = flutterStateManagement
         self.architecture = architecture
+        self.entities = entities
+        self.relations = relations
+        self.fieldPresentations = fieldPresentations
     }
 }
