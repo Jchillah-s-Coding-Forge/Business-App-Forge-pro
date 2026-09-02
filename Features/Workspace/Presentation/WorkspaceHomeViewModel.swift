@@ -34,6 +34,7 @@ final class EnvironmentDoctorViewModel {
     private let doctor: EnvironmentDoctorUseCase
     private let preferencesStore: any ToolchainPreferenceStore
     private let projectOpener: any GeneratedProjectOpening
+    private var configurationRevision = 0
 
     var selectedPlatforms: Set<TargetPlatform> = [.iOS, .android]
     var preferredIDE: PreferredIDE {
@@ -62,7 +63,7 @@ final class EnvironmentDoctorViewModel {
     }
 
     var canScan: Bool {
-        !selectedPlatforms.isEmpty && !isScanning
+        !selectedPlatforms.isEmpty
     }
 
     func setTarget(_ platform: TargetPlatform, enabled: Bool) {
@@ -71,29 +72,43 @@ final class EnvironmentDoctorViewModel {
         } else {
             selectedPlatforms.remove(platform)
         }
+        configurationDidChange()
     }
 
     func setFlutterSDKPath(_ path: String) {
         flutterSDKPath = path.trimmingCharacters(in: .whitespacesAndNewlines)
         persistPreferences()
+        configurationDidChange()
     }
 
     func clearFlutterSDKPath() {
         flutterSDKPath = ""
         persistPreferences()
+        configurationDidChange()
     }
 
     func scan() async {
-        guard canScan else { return }
+        guard canScan else {
+            isScanning = false
+            report = nil
+            return
+        }
+
+        let revision = configurationRevision
+        let platforms = selectedPlatforms
+        let sdkPath = flutterSDKPath.isEmpty ? nil : flutterSDKPath
         isScanning = true
         errorMessage = nil
-        defer { isScanning = false }
 
-        report = await doctor.run(
+        let newReport = await doctor.run(
             framework: .flutter,
-            targetPlatforms: selectedPlatforms,
-            flutterSDKPath: flutterSDKPath.isEmpty ? nil : flutterSDKPath
+            targetPlatforms: platforms,
+            flutterSDKPath: sdkPath
         )
+
+        guard revision == configurationRevision else { return }
+        report = newReport
+        isScanning = false
     }
 
     func openGeneratedProject(at url: URL) {
@@ -103,6 +118,15 @@ final class EnvironmentDoctorViewModel {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func configurationDidChange() {
+        configurationRevision += 1
+        report = nil
+        isScanning = false
+
+        guard canScan else { return }
+        Task { await scan() }
     }
 
     private func persistPreferences() {
