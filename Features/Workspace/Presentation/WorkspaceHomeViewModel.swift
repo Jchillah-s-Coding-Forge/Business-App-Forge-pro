@@ -41,6 +41,7 @@ final class EnvironmentDoctorViewModel {
     var preferredIDE: PreferredIDE {
         didSet { persistPreferences() }
     }
+
     var isPresentingFlutterInstallConfirmation = false
 
     private(set) var flutterSDKPath: String
