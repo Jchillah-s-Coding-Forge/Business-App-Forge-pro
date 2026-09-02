@@ -46,7 +46,9 @@ public struct SemanticVersion: Codable, Equatable, Comparable, Sendable, CustomS
         }
 
         guard let token else { return nil }
-        let numbers = token.split(separator: ".").compactMap(Int.init)
+        let numbers = token.split(separator: ".").compactMap { component in
+            Int(String(component))
+        }
         guard numbers.count >= 2 else { return nil }
 
         major = numbers[0]
