@@ -110,23 +110,23 @@ public struct ProjectIdentity: Codable, Equatable, Sendable {
 public struct ProjectSpecification: Codable, Equatable, Sendable {
     public static let currentSchemaVersion = 1
 
-    public var schemaVersion: Int
-    public var identity: ProjectIdentity
-    public var framework: OutputFramework
-    public var targetPlatforms: Set<TargetPlatform>
-    public var backend: BackendProvider
-    public var flutterStateManagement: FlutterStateManagement?
+    public let schemaVersion: Int
+    public let identity: ProjectIdentity
+    public let framework: OutputFramework
+    public let targetPlatforms: Set<TargetPlatform>
+    public let backend: BackendProvider
+    public let flutterStateManagement: FlutterStateManagement?
     public let architecture: ArchitectureContract
-    public var entities: [EntityDefinition]
-    public var relations: [RelationDefinition]
-    public var fieldPresentations: [FieldPresentationDefinition]
-    public var roles: [RoleDefinition]
-    public var stateMachines: [BusinessStateMachineDefinition]
-    public var screens: [ScreenDefinition]
-    public var navigation: NavigationDefinition
-    public var offline: OfflineConfiguration
-    public var design: DesignConfiguration
-    public var templateBaseline: TemplateBaselineDefinition?
+    public let entities: [EntityDefinition]
+    public let relations: [RelationDefinition]
+    public let fieldPresentations: [FieldPresentationDefinition]
+    public let roles: [RoleDefinition]
+    public let stateMachines: [BusinessStateMachineDefinition]
+    public let screens: [ScreenDefinition]
+    public let navigation: NavigationDefinition
+    public let offline: OfflineConfiguration
+    public let design: DesignConfiguration
+    public let templateBaseline: TemplateBaselineDefinition?
 
     public var hasSupportedTargetConfiguration: Bool {
         framework.isAvailable
