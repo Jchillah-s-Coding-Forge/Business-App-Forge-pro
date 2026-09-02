@@ -37,7 +37,7 @@ public struct DefinitionIdentity: Codable, Equatable, Hashable, Identifiable, Se
     }
 }
 
-public enum FieldDataType: String, CaseIterable, Codable, Sendable {
+public enum FieldDataType: String, CaseIterable, Codable, Hashable, Sendable {
     case string
     case integer
     case decimal
@@ -291,36 +291,33 @@ public enum ControlCompatibilityIssue: Equatable, Sendable {
     case selectionOptionsRequired
 }
 
+private enum ControlCompatibilityCatalog {
+    static let fieldControls: [FieldDataType: Set<FieldControl>] = [
+        .string: [.textField, .textArea, .select, .comboBox, .autocomplete],
+        .integer: [.numericField, .stepper, .slider],
+        .decimal: [.numericField, .stepper, .slider],
+        .boolean: [.checkbox, .switchToggle, .radioGroup, .segmented],
+        .date: [.datePicker],
+        .dateTime: [.dateTimePicker],
+        .time: [.timePicker],
+        .email: [.textField],
+        .phone: [.textField],
+        .url: [.textField],
+        .currency: [.numericField, .stepper, .slider],
+        .percentage: [.numericField, .stepper, .slider],
+        .enumeration: [.radioGroup, .segmented, .select, .comboBox, .autocomplete],
+        .file: [.filePicker],
+        .image: [.imagePicker],
+        .color: [.colorPicker],
+        .location: [.textField, .autocomplete, .locationPicker]
+    ]
+}
+
 public struct ControlCompatibilityValidator: Sendable {
     public init() {}
 
     public func compatibleControls(for dataType: FieldDataType) -> Set<FieldControl> {
-        switch dataType {
-        case .string:
-            [.textField, .textArea, .select, .comboBox, .autocomplete]
-        case .integer, .decimal, .currency, .percentage:
-            [.numericField, .stepper, .slider]
-        case .boolean:
-            [.checkbox, .switchToggle, .radioGroup, .segmented]
-        case .date:
-            [.datePicker]
-        case .dateTime:
-            [.dateTimePicker]
-        case .time:
-            [.timePicker]
-        case .email, .phone, .url:
-            [.textField]
-        case .enumeration:
-            [.radioGroup, .segmented, .select, .comboBox, .autocomplete]
-        case .file:
-            [.filePicker]
-        case .image:
-            [.imagePicker]
-        case .color:
-            [.colorPicker]
-        case .location:
-            [.textField, .autocomplete, .locationPicker]
-        }
+        ControlCompatibilityCatalog.fieldControls[dataType] ?? []
     }
 
     public func compatibleControls(for cardinality: RelationCardinality) -> Set<FieldControl> {
@@ -344,8 +341,7 @@ public struct ControlCompatibilityValidator: Sendable {
 
         if requiresSelectionOptions(presentation.control),
            field.dataType != .boolean,
-           field.options.isEmpty
-        {
+           field.options.isEmpty {
             issues.append(.selectionOptionsRequired)
         }
 
