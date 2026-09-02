@@ -224,7 +224,7 @@ public struct SystemToolDetector: ToolDetector {
             environment["ANDROID_SDK_ROOT"],
             environment["ANDROID_HOME"],
             "\(home)/Library/Android/sdk"
-        ].compactMap { $0 }
+        ].compactMap(\.self)
 
         for root in roots {
             let adb = URL(fileURLWithPath: root)
@@ -348,19 +348,17 @@ public struct SystemGeneratedProjectOpener: GeneratedProjectOpening {
     public init() {}
 
     public func open(projectURL: URL, preferredIDE: PreferredIDE) throws {
-        let arguments: [String]
-
-        switch preferredIDE {
+        let arguments: [String] = switch preferredIDE {
         case .vsCode:
-            arguments = ["-a", "Visual Studio Code", projectURL.path]
+            ["-a", "Visual Studio Code", projectURL.path]
         case .androidStudio:
-            arguments = ["-a", "Android Studio", projectURL.path]
+            ["-a", "Android Studio", projectURL.path]
         case .xcode:
-            arguments = ["-a", "Xcode", projectURL.path]
+            ["-a", "Xcode", projectURL.path]
         case .finder:
-            arguments = ["-R", projectURL.path]
+            ["-R", projectURL.path]
         case .terminal:
-            arguments = ["-a", "Terminal", projectURL.path]
+            ["-a", "Terminal", projectURL.path]
         }
 
         let process = Process()
