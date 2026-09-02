@@ -2,12 +2,16 @@
 
 ## Zweck
 
-`ProjectSpecification` ist der deklarative, versionierte Vertrag zwischen der fachlichen Konfiguration in AppForge Pro und der technischen Generator-Pipeline.
+`ProjectSpecificationDraft` ist das mutierbare Arbeitsmodell der AppForge-Projektkonfiguration. `ProjectSpecification` ist der daraus erzeugte, unveränderliche und versionierte Vertrag für Validierung, Resolver und Generator.
 
 ```text
-Business-Vorlage
+Business-Vorlage / leeres Projekt
       ↓
-editierbare ProjectSpecification
+ProjectSpecificationDraft
+      ↓ bearbeiten / Diff / Reset
+snapshot()
+      ↓
+ProjectSpecification
       ↓
 ProjectSpecificationValidator
       ↓
@@ -20,21 +24,25 @@ Renderer
 standalone Flutter Source Code
 ```
 
-Die SwiftUI-Oberfläche, Templates und Renderer dürfen keine parallelen fachlichen Wahrheiten pflegen. Vorlagen liefern Defaults. Nach dem Anwenden arbeitet die Anwendung ausschließlich auf der `ProjectSpecification`.
+Die SwiftUI-Oberfläche, Templates und Renderer dürfen keine parallelen fachlichen Wahrheiten pflegen. Vorlagen liefern Defaults. Nach dem Anwenden arbeitet der Editor ausschließlich auf `ProjectSpecificationDraft`. Resolver und Renderer erhalten ausschließlich einen unveränderlichen `ProjectSpecification`-Snapshot.
 
 ## Lebenszyklus
 
-1. Eine Vorlage oder ein leeres Projekt erzeugt eine `ProjectSpecification`.
-2. Der Nutzer verändert Datenmodell, Beziehungen, Rollen, Workflows, Screens, Controls, Design und Infrastruktur.
-3. Jede relevante Änderung wird gegen `ProjectSpecificationValidator` geprüft.
-4. Nur eine valide Specification darf an Resolver und Generator übergeben werden.
-5. Für persistierte Manifeste wird `ProjectSpecificationJSONCodec` verwendet.
-6. Der Resolver erzeugt aus der fachlichen Specification einen aufgelösten Product Graph und später `forge.lock`.
-7. Renderer konsumieren ausschließlich Specification beziehungsweise Resolved Product Graph — niemals Template-Sonderpfade.
+1. Eine Vorlage oder ein leeres Projekt erzeugt einen `ProjectSpecificationDraft`.
+2. Der Nutzer verändert im Draft Datenmodell, Beziehungen, Rollen, Workflows, Screens, Controls, Design und Infrastruktur.
+3. Template-Diff und granulare Reset-Operationen arbeiten auf dem Draft und stabilen IDs.
+4. Vor dem technischen Handoff erzeugt `draft.snapshot()` einen unveränderlichen `ProjectSpecification`-Snapshot.
+5. `ProjectSpecificationValidator` validiert diesen Snapshot als Ganzes.
+6. Nur ein valider Snapshot darf an Registry, Resolver und Generator übergeben werden.
+7. Für persistierte Manifest-Snapshots wird `ProjectSpecificationJSONCodec` verwendet.
+8. Der Resolver erzeugt daraus einen aufgelösten Product Graph und später `forge.lock`.
+9. Renderer konsumieren ausschließlich `ProjectSpecification` beziehungsweise den Resolved Product Graph — niemals UI-Zustand oder Template-Sonderpfade.
+
+Diese Trennung verhindert, dass ein laufender Editorvorgang einen bereits gestarteten Resolver-/Generatorlauf nachträglich verändert.
 
 ## Schema-Version
 
-`ProjectSpecification.currentSchemaVersion` kennzeichnet das aktuelle persistierbare Schema. Ein unbekannter Wert wird durch den Validator als `unsupportedSchemaVersion` abgelehnt.
+`ProjectSpecification.currentSchemaVersion` kennzeichnet das aktuelle persistierbare Snapshot-Schema. Ein unbekannter Wert wird durch den Validator als `unsupportedSchemaVersion` abgelehnt.
 
 Schemaänderungen müssen zukünftig über explizite Migrationen erfolgen. Ein stilles Interpretieren unbekannter Versionen ist nicht zulässig.
 
@@ -139,8 +147,6 @@ Eine n:m-Beziehung benötigt im aktuellen Schema eine explizite `joinEntityID`. 
 
 `FieldPresentationDefinition` verändert niemals den Domain-Datentyp. Es beschreibt ausschließlich die Darstellung.
 
-Beispiele:
-
 | Domain | kompatible Controls |
 | --- | --- |
 | boolean | checkbox, switchToggle, radioGroup, segmented |
@@ -181,8 +187,6 @@ Eine Permission kann global oder auf eine konkrete `entityID` begrenzt werden. R
 ## Fachliche State Machines
 
 `BusinessStateMachineDefinition` ist strikt von Flutter-State-Management getrennt.
-
-Beispiel:
 
 ```text
 draft
@@ -269,7 +273,7 @@ Farben werden als 6- oder 8-stellige Hexwerte validiert. Design-Tokens und volls
 
 `TemplateBaselineDefinition` speichert die ursprüngliche fachliche Baseline zusammen mit `TemplateReference(templateID, version)`.
 
-Die aktuelle Specification bleibt frei editierbar. `TemplateCustomizationService` kann:
+Die Baseline bleibt unverändert; Anpassungen passieren im `ProjectSpecificationDraft`. `TemplateCustomizationService` kann:
 
 - Added/Removed/Modified-Änderungen ermitteln
 - komplettes Business-Modell zurücksetzen
@@ -284,14 +288,17 @@ Die aktuelle Specification bleibt frei editierbar. `TemplateCustomizationService
 
 Eigene, nicht zur Vorlage gehörende Definitionen bleiben bei granularen Resets erhalten.
 
+`TemplateCustomizationService.diff(...)` kann sowohl einen Draft als auch einen unveränderlichen Snapshot gegen die gespeicherte Baseline vergleichen. Reset-Operationen verändern ausschließlich den Draft.
+
 ## Ganzheitliche Validierung
 
-`ProjectSpecificationValidator` prüft vor Resolver/Generator unter anderem:
+`ProjectSpecificationValidator` validiert den unveränderlichen Snapshot vor Resolver/Generator unter anderem auf:
 
 - Schema-Version
-- doppelte Entity-/Field-IDs und Codes
+- stabile IDs, portable Codes und nichtleere Labels
+- doppelte Entity-/Field-/Relation-/Role-/Workflow-/Screen-IDs und Codes
 - Enum-Optionen und Defaultwerte
-- Typverträglichkeit von Validierungsregeln
+- Typverträglichkeit und Kohärenz von Validierungsregeln
 - Relation-Referenzen und n:m-Join-Entities
 - Display-Felder
 - Field-/Relation-Presentation-Referenzen
@@ -299,8 +306,8 @@ Eigene, nicht zur Vorlage gehörende Definitionen bleiben bei granularen Resets 
 - Rollen und Permission-Entities
 - State-Machine-Entity/Statusfeld
 - genau einen Initialzustand
-- Transition-State-/Role-Referenzen
-- Guard-/Side-Effect-Felder
+- State-/Transition-Referenzen und Statusoptionen
+- Guard-/Side-Effect-Felder und deren Entity-Grenzen
 - Screen-Entity/Feld/Rollen
 - Navigation-Screens/Rollen
 - Offline-SSOT/Outbox-Invarianten
@@ -308,18 +315,21 @@ Eigene, nicht zur Vorlage gehörende Definitionen bleiben bei granularen Resets 
 
 Ein Renderer darf diese Fehler nicht still korrigieren.
 
+`ProjectSpecificationValidationReport` stellt zusätzlich zu den Issues ein `isValid`-Signal bereit, sodass Application Use Cases und UI einen Generatorlauf eindeutig sperren können.
+
 ## Deterministische Serialisierung
 
-`ProjectSpecificationJSONCodec` verwendet sortierte JSON-Keys und eine feste Ausgabeformatierung. Gleiche Specifications erzeugen dadurch byte-identische Manifestdaten.
+`ProjectSpecificationJSONCodec` serialisiert ausschließlich `ProjectSpecification`-Snapshots und verwendet sortierte JSON-Keys sowie eine feste Ausgabeformatierung. Gleiche Snapshots erzeugen dadurch byte-identische Manifestdaten.
 
 Die Reihenfolge fachlich relevanter Arrays bleibt Teil der Specification und wird nicht automatisch umsortiert.
 
 ## Sicherheitsgrenzen
 
-- keine Secrets oder Service-Role-Keys in `ProjectSpecification`
+- keine Secrets oder Service-Role-Keys in Draft oder `ProjectSpecification`
 - keine frei ausführbaren Codefragmente in Guards oder Side Effects
 - keine Template-Regex-Manipulation nach der Generierung
 - keine UI-Direktzugriffe auf Backend-Adapter
+- kein Resolver-/Renderer-Zugriff auf mutablen Editorzustand
 - keine Renderer-Heuristik, die ungültige Specification still verändert
 
 Backend-Secrets gehören in die spätere Environment-/Deployment-Konfiguration, nicht in den fachlichen Generatorvertrag.
@@ -334,11 +344,14 @@ Nicht zulässig:
 if template == "inventory" { ... }
 regexReplace(generatedCode, ...)
 UI-Auswahl direkt im Renderer lesen
+ProjectSpecificationDraft direkt rendern
 ```
 
 Zulässig:
 
 ```text
+ProjectSpecificationDraft
+  → snapshot()
 ProjectSpecification
   → validate
   → resolve packages/capabilities
