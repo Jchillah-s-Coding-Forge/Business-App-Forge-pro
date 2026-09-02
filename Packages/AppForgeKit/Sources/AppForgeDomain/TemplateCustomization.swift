@@ -195,11 +195,11 @@ public struct TemplateCustomizationService: Sendable {
         return result
     }
 
-    private func diffIdentified<Value>(
+    private func diffIdentified<Value: Identifiable & Equatable>(
         current: [Value],
         baseline: [Value],
         kind: TemplateObjectKind
-    ) -> [TemplateDiffEntry] where Value: Identifiable & Equatable, Value.ID == String {
+    ) -> [TemplateDiffEntry] where Value.ID == String {
         let currentMap = Dictionary(uniqueKeysWithValues: current.map { ($0.id, $0) })
         let baselineMap = Dictionary(uniqueKeysWithValues: baseline.map { ($0.id, $0) })
         let allIDs = Set(currentMap.keys).union(baselineMap.keys).sorted()
@@ -218,10 +218,10 @@ public struct TemplateCustomizationService: Sendable {
         }
     }
 
-    private func replaceOrAppend<Value>(
+    private func replaceOrAppend<Value: Identifiable>(
         _ value: Value,
         in values: inout [Value]
-    ) where Value: Identifiable, Value.ID == String {
+    ) where Value.ID == String {
         if let index = values.firstIndex(where: { $0.id == value.id }) {
             values[index] = value
         } else {
