@@ -192,7 +192,7 @@ public struct FlutterReleaseCatalogClient: FlutterReleaseCatalogProviding {
         }
     }
 
-    private func validateRelease(_ release: FlutterReleaseManifest.Release) throws {
+    private func validateRelease(_ release: FlutterReleaseManifestEntry) throws {
         let isSafeArchive = release.archive.hasPrefix("stable/macos/")
             && release.archive.hasSuffix(".zip")
             && !release.archive.contains("..")
@@ -309,35 +309,35 @@ private enum HostFlutterArchitecture {
 
 private struct FlutterReleaseManifest: Decodable {
     let baseURL: String
-    let currentRelease: CurrentRelease
-    let releases: [Release]
+    let currentRelease: FlutterCurrentRelease
+    let releases: [FlutterReleaseManifestEntry]
 
     enum CodingKeys: String, CodingKey {
         case baseURL = "base_url"
         case currentRelease = "current_release"
         case releases
     }
+}
 
-    struct CurrentRelease: Decodable {
-        let stable: String
-    }
+private struct FlutterCurrentRelease: Decodable {
+    let stable: String
+}
 
-    struct Release: Decodable {
-        let hash: String
-        let channel: String
-        let version: String
-        let dartSDKArchitecture: String
-        let archive: String
-        let sha256: String
+private struct FlutterReleaseManifestEntry: Decodable {
+    let hash: String
+    let channel: String
+    let version: String
+    let dartSDKArchitecture: String
+    let archive: String
+    let sha256: String
 
-        enum CodingKeys: String, CodingKey {
-            case hash
-            case channel
-            case version
-            case dartSDKArchitecture = "dart_sdk_arch"
-            case archive
-            case sha256
-        }
+    enum CodingKeys: String, CodingKey {
+        case hash
+        case channel
+        case version
+        case dartSDKArchitecture = "dart_sdk_arch"
+        case archive
+        case sha256
     }
 }
 
