@@ -12,7 +12,9 @@ SwiftUI Feature
   ← Infrastructure Adapter
 ```
 
-Die UI baut den Generator nicht direkt zusammen. Sie erzeugt eine vollständige `ProjectSpecification`, die anschließend unveränderlich an Resolver und Generator übergeben wird.
+Die UI baut den Generator nicht direkt zusammen. Während der Konfiguration arbeitet sie auf einer editierbaren `ProjectSpecification`. Vor Resolver und Generator wird daraus ein validierter Snapshot. Resolver und Renderer verändern diesen fachlichen Vertrag nicht stillschweigend.
+
+Der normative Vertrag ist in [`PROJECT_SPECIFICATION.md`](PROJECT_SPECIFICATION.md) beschrieben.
 
 ## Module im Foundation-Meilenstein
 
@@ -27,7 +29,7 @@ AppForgePro
     └── AppForgeDesignSystem     Host-App-Tokens und Komponenten
 ```
 
-Weitere Generator-, Registry-, Resolver- und Renderer-Module werden erst in ihren Issues ergänzt.
+Weitere Generator-, Registry-, Resolver- und Renderer-Module werden in ihren jeweiligen Issues ergänzt.
 
 ## Abhängigkeitsregeln
 
@@ -36,6 +38,8 @@ Weitere Generator-, Registry-, Resolver- und Renderer-Module werden erst in ihre
 - Infrastructure implementiert Domain-Verträge und wird am Composition Root injiziert.
 - Presentation spricht nur mit ViewModels und Application Use Cases.
 - Generierte Anwendungen enthalten keine AppForge-Pro-Laufzeitabhängigkeit.
+- Templates liefern Defaults, aber keine versteckten Generator-Sonderpfade.
+- Renderer konsumieren ausschließlich validierte Specification beziehungsweise Resolved Product Graph.
 
 ## Fester Architekturvertrag erzeugter Apps
 
@@ -45,10 +49,37 @@ Weitere Generator-, Registry-, Resolver- und Renderer-Module werden erst in ihre
 - Use Cases
 - Dependency Injection
 - lokale SSOT bei Offline-Modus
+- Sync-Outbox bei Cloud + Offline
 - typisierte Fehler
 - keine Backend-Aufrufe aus Screens
 
 State Management implementiert MVVM; es ersetzt MVVM nicht. Deshalb gibt es keinen separaten MVVM-Schalter.
+
+Fachliche Zustände wie `draft → approved → completed` werden als `BusinessStateMachineDefinition` modelliert und sind strikt von Riverpod/BLoC-Zuständen getrennt.
+
+## Generatorgrenze
+
+```text
+Template / leeres Projekt
+        ↓
+ProjectSpecification
+        ↓
+ProjectSpecificationValidator
+        ↓
+Registry + Resolver
+        ↓
+Resolved Product Graph
+        ↓
+forge.lock
+        ↓
+Renderer
+        ↓
+Quality Gates
+        ↓
+Standalone Source Code
+```
+
+Der Renderer darf ungültige fachliche Konfiguration nicht durch Heuristiken, Regex-Rewrites oder hardcodierte Template-Zweige korrigieren.
 
 ## Packagestrategie
 
