@@ -14,10 +14,11 @@ final class EnvironmentDoctorViewModelTests: XCTestCase {
         )
 
         viewModel.requestFlutterInstallation(into: "/tmp/appforge-sdk")
+        let callCount = await recorder.callCount
 
         XCTAssertTrue(viewModel.isPresentingFlutterInstallConfirmation)
         XCTAssertEqual(viewModel.flutterInstallParentPath, "/tmp/appforge-sdk")
-        XCTAssertEqual(await recorder.callCount, 0)
+        XCTAssertEqual(callCount, 0)
     }
 
     func testSuccessfulFlutterInstallationPersistsSDKAndRefreshesDoctor() async {
@@ -37,8 +38,9 @@ final class EnvironmentDoctorViewModelTests: XCTestCase {
 
         viewModel.requestFlutterInstallation(into: "/tmp/appforge-sdk")
         await viewModel.installFlutter()
+        let callCount = await recorder.callCount
 
-        XCTAssertEqual(await recorder.callCount, 1)
+        XCTAssertEqual(callCount, 1)
         XCTAssertEqual(viewModel.flutterSDKPath, "/tmp/appforge-sdk/flutter")
         XCTAssertEqual(preferences.saved.flutterSDKPath, "/tmp/appforge-sdk/flutter")
         XCTAssertEqual(viewModel.installationPhase, .completed)
