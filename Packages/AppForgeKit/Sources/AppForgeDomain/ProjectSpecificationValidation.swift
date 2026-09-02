@@ -1,6 +1,7 @@
 import Foundation
 
 public enum ProjectSpecificationValidationIssue: Equatable, Sendable {
+    case unsupportedSchemaVersion(Int)
     case duplicateEntityID(String)
     case duplicateEntityCode(String)
     case duplicateFieldID(String)
@@ -20,6 +21,22 @@ public enum ProjectSpecificationValidationIssue: Equatable, Sendable {
         presentationID: String,
         issues: [ControlCompatibilityIssue]
     )
+    case duplicateRoleID(String)
+    case missingPermissionEntity(roleID: String, entityID: String)
+    case missingStateMachineEntity(machineID: String, entityID: String)
+    case invalidStateField(machineID: String, fieldID: String)
+    case invalidInitialStateCount(machineID: String, count: Int)
+    case missingTransitionState(transitionID: String, stateID: String)
+    case missingTransitionRole(transitionID: String, roleID: String)
+    case missingWorkflowField(machineID: String, fieldID: String)
+    case missingScreenEntity(screenID: String, entityID: String)
+    case missingScreenField(screenID: String, fieldID: String)
+    case missingScreenRole(screenID: String, roleID: String)
+    case missingNavigationScreen(itemID: String, screenID: String)
+    case missingNavigationRole(itemID: String, roleID: String)
+    case offlineSingleSourceOfTruthRequired
+    case offlineSyncOutboxRequired
+    case invalidPrimaryColorHex(String)
 }
 
 public struct ProjectSpecificationValidator: Sendable {
@@ -31,53 +48,54 @@ public struct ProjectSpecificationValidator: Sendable {
 
     public func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
         var issues: [ProjectSpecificationValidationIssue] = []
-        let entitiesByID = Dictionary(uniqueKeysWithValues: uniqueEntities(specification.entities))
-        let fieldsByID = allFieldsByID(specification.entities)
-        let relationsByID = Dictionary(uniqueKeysWithValues: uniqueRelations(specification.relations))
 
-        validateEntityIdentity(specification.entities, issues: &issues)
-        validateFields(specification.entities, issues: &issues)
-        validateRelations(
-            specification.relations,
-            entitiesByID: entitiesByID,
-            issues: &issues
-        )
-        validatePresentations(
-            specification.fieldPresentations,
-            fieldsByID: fieldsByID,
-            relationsByID: relationsByID,
-            issues: &issues
-        )
+        if specification.schemaVersion != ProjectSpecification.currentSchemaVersion {
+            issues.append(.unsupportedSchemaVersion(specification.schemaVersion))
+        }
+
+        issues += IdentityValidator().validate(specification)
+        issues += FieldValidator().validate(specification)
+        issues += RelationValidator().validate(specification)
+        issues += PresentationValidator(controlValidator: controlValidator).validate(specification)
+        issues += WorkflowValidator().validate(specification)
+        issues += ScreenNavigationValidator().validate(specification)
+        issues += ConfigurationValidator().validate(specification)
 
         return issues
     }
+}
 
-    private func validateEntityIdentity(
-        _ entities: [EntityDefinition],
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
-        var ids = Set<String>()
-        var codes = Set<String>()
+private struct IdentityValidator {
+    func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
+        var issues: [ProjectSpecificationValidationIssue] = []
+        var entityIDs = Set<String>()
+        var entityCodes = Set<String>()
+        var roleIDs = Set<String>()
 
-        for entity in entities {
-            if !ids.insert(entity.id).inserted {
+        for entity in specification.entities {
+            if !entityIDs.insert(entity.id).inserted {
                 issues.append(.duplicateEntityID(entity.id))
             }
-            if !codes.insert(entity.identity.code).inserted {
+            if !entityCodes.insert(entity.identity.code).inserted {
                 issues.append(.duplicateEntityCode(entity.identity.code))
             }
         }
-    }
 
-    private func validateFields(
-        _ entities: [EntityDefinition],
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
+        for role in specification.roles where !roleIDs.insert(role.id).inserted {
+            issues.append(.duplicateRoleID(role.id))
+        }
+
+        return issues
+    }
+}
+
+private struct FieldValidator {
+    func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
+        var issues: [ProjectSpecificationValidationIssue] = []
         var globalFieldIDs = Set<String>()
 
-        for entity in entities {
+        for entity in specification.entities {
             var fieldCodes = Set<String>()
-
             for field in entity.fields {
                 if !globalFieldIDs.insert(field.id).inserted {
                     issues.append(.duplicateFieldID(field.id))
@@ -87,16 +105,16 @@ public struct ProjectSpecificationValidator: Sendable {
                         .duplicateFieldCode(entityID: entity.id, code: field.identity.code)
                     )
                 }
-
-                validateFieldDefinition(field, issues: &issues)
+                issues += validateDefinition(field)
             }
         }
+
+        return issues
     }
 
-    private func validateFieldDefinition(
-        _ field: FieldDefinition,
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
+    private func validateDefinition(_ field: FieldDefinition) -> [ProjectSpecificationValidationIssue] {
+        var issues: [ProjectSpecificationValidationIssue] = []
+
         if field.dataType == .enumeration, field.options.isEmpty {
             issues.append(.enumerationOptionsRequired(fieldID: field.id))
         }
@@ -106,27 +124,25 @@ public struct ProjectSpecificationValidator: Sendable {
             issues.append(.duplicateFieldOptionValue(fieldID: field.id, value: option.value))
         }
 
-        if let defaultValue = field.defaultValue,
-           !defaultValue.isCompatible(with: field)
-        {
+        if let defaultValue = field.defaultValue, !defaultValue.isCompatible(with: field) {
             issues.append(.invalidDefaultValue(fieldID: field.id))
         }
-
         if field.validationRules.contains(where: { !$0.isCompatible(with: field.dataType) }) {
             issues.append(.invalidValidationRule(fieldID: field.id))
         }
+
+        return issues
     }
+}
 
-    private func validateRelations(
-        _ relations: [RelationDefinition],
-        entitiesByID: [String: EntityDefinition],
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
-        for relation in relations {
-            let source = entitiesByID[relation.sourceEntityID]
+private struct RelationValidator {
+    func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
+        let entitiesByID = entityMap(specification.entities)
+        var issues: [ProjectSpecificationValidationIssue] = []
+
+        for relation in specification.relations {
             let target = entitiesByID[relation.targetEntityID]
-
-            if source == nil {
+            if entitiesByID[relation.sourceEntityID] == nil {
                 issues.append(
                     .missingSourceEntity(relationID: relation.id, entityID: relation.sourceEntityID)
                 )
@@ -136,114 +152,273 @@ public struct ProjectSpecificationValidator: Sendable {
                     .missingTargetEntity(relationID: relation.id, entityID: relation.targetEntityID)
                 )
             }
-
-            validateJoinEntity(relation, entitiesByID: entitiesByID, issues: &issues)
-            validateDisplayField(relation, target: target, issues: &issues)
+            issues += validateJoinEntity(relation, entitiesByID: entitiesByID)
+            issues += validateDisplayField(relation, target: target)
         }
+
+        return issues
     }
 
     private func validateJoinEntity(
         _ relation: RelationDefinition,
-        entitiesByID: [String: EntityDefinition],
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
+        entitiesByID: [String: EntityDefinition]
+    ) -> [ProjectSpecificationValidationIssue] {
         if relation.cardinality == .manyToMany, relation.joinEntityID == nil {
-            issues.append(.manyToManyJoinEntityRequired(relationID: relation.id))
+            return [.manyToManyJoinEntityRequired(relationID: relation.id)]
         }
-
         if let joinEntityID = relation.joinEntityID, entitiesByID[joinEntityID] == nil {
-            issues.append(.missingJoinEntity(relationID: relation.id, entityID: joinEntityID))
+            return [.missingJoinEntity(relationID: relation.id, entityID: joinEntityID)]
         }
+        return []
     }
 
     private func validateDisplayField(
         _ relation: RelationDefinition,
-        target: EntityDefinition?,
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
-        guard let displayFieldID = relation.displayFieldID else { return }
+        target: EntityDefinition?
+    ) -> [ProjectSpecificationValidationIssue] {
+        guard let displayFieldID = relation.displayFieldID else { return [] }
         guard target?.fields.contains(where: { $0.id == displayFieldID }) == true else {
-            issues.append(.invalidDisplayField(relationID: relation.id, fieldID: displayFieldID))
-            return
+            return [.invalidDisplayField(relationID: relation.id, fieldID: displayFieldID)]
         }
+        return []
     }
+}
 
-    private func validatePresentations(
-        _ presentations: [FieldPresentationDefinition],
-        fieldsByID: [String: FieldDefinition],
-        relationsByID: [String: RelationDefinition],
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
-        for presentation in presentations {
+private struct PresentationValidator {
+    let controlValidator: ControlCompatibilityValidator
+
+    func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
+        let fieldsByID = fieldMap(specification.entities)
+        let relationsByID = relationMap(specification.relations)
+        var issues: [ProjectSpecificationValidationIssue] = []
+
+        for presentation in specification.fieldPresentations {
             switch presentation.target {
             case let .field(fieldID):
-                guard let field = fieldsByID[fieldID] else {
-                    issues.append(
-                        .missingPresentationField(presentationID: presentation.id, fieldID: fieldID)
-                    )
-                    continue
-                }
-                appendControlIssues(
-                    controlValidator.validate(presentation, field: field),
-                    presentationID: presentation.id,
-                    issues: &issues
+                issues += validateFieldPresentation(
+                    presentation,
+                    fieldID: fieldID,
+                    fieldsByID: fieldsByID
                 )
             case let .relation(relationID):
-                guard let relation = relationsByID[relationID] else {
-                    issues.append(
-                        .missingPresentationRelation(
-                            presentationID: presentation.id,
-                            relationID: relationID
-                        )
-                    )
-                    continue
-                }
-                appendControlIssues(
-                    controlValidator.validate(presentation, relation: relation),
-                    presentationID: presentation.id,
-                    issues: &issues
+                issues += validateRelationPresentation(
+                    presentation,
+                    relationID: relationID,
+                    relationsByID: relationsByID
                 )
             }
         }
+
+        return issues
     }
 
-    private func appendControlIssues(
+    private func validateFieldPresentation(
+        _ presentation: FieldPresentationDefinition,
+        fieldID: String,
+        fieldsByID: [String: FieldDefinition]
+    ) -> [ProjectSpecificationValidationIssue] {
+        guard let field = fieldsByID[fieldID] else {
+            return [.missingPresentationField(presentationID: presentation.id, fieldID: fieldID)]
+        }
+        return wrap(controlValidator.validate(presentation, field: field), id: presentation.id)
+    }
+
+    private func validateRelationPresentation(
+        _ presentation: FieldPresentationDefinition,
+        relationID: String,
+        relationsByID: [String: RelationDefinition]
+    ) -> [ProjectSpecificationValidationIssue] {
+        guard let relation = relationsByID[relationID] else {
+            return [
+                .missingPresentationRelation(
+                    presentationID: presentation.id,
+                    relationID: relationID
+                )
+            ]
+        }
+        return wrap(controlValidator.validate(presentation, relation: relation), id: presentation.id)
+    }
+
+    private func wrap(
         _ controlIssues: [ControlCompatibilityIssue],
-        presentationID: String,
-        issues: inout [ProjectSpecificationValidationIssue]
-    ) {
-        guard !controlIssues.isEmpty else { return }
-        issues.append(
-            .incompatiblePresentation(
-                presentationID: presentationID,
-                issues: controlIssues
+        id: String
+    ) -> [ProjectSpecificationValidationIssue] {
+        guard !controlIssues.isEmpty else { return [] }
+        return [.incompatiblePresentation(presentationID: id, issues: controlIssues)]
+    }
+}
+
+private struct WorkflowValidator {
+    func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
+        let entitiesByID = entityMap(specification.entities)
+        let fieldsByID = fieldMap(specification.entities)
+        let roleIDs = Set(specification.roles.map(\.id))
+        var issues = validateRolePermissions(specification.roles, entitiesByID: entitiesByID)
+
+        for machine in specification.stateMachines {
+            issues += validateMachine(
+                machine,
+                entitiesByID: entitiesByID,
+                fieldsByID: fieldsByID,
+                roleIDs: roleIDs
             )
-        )
+        }
+
+        return issues
     }
 
-    private func uniqueEntities(_ entities: [EntityDefinition]) -> [(String, EntityDefinition)] {
-        var seen = Set<String>()
-        return entities.compactMap { entity in
-            guard seen.insert(entity.id).inserted else { return nil }
-            return (entity.id, entity)
+    private func validateRolePermissions(
+        _ roles: [RoleDefinition],
+        entitiesByID: [String: EntityDefinition]
+    ) -> [ProjectSpecificationValidationIssue] {
+        var issues: [ProjectSpecificationValidationIssue] = []
+        for role in roles {
+            for permission in role.permissions {
+                guard let entityID = permission.entityID else { continue }
+                if entitiesByID[entityID] == nil {
+                    issues.append(.missingPermissionEntity(roleID: role.id, entityID: entityID))
+                }
+            }
         }
+        return issues
     }
 
-    private func uniqueRelations(_ relations: [RelationDefinition]) -> [(String, RelationDefinition)] {
-        var seen = Set<String>()
-        return relations.compactMap { relation in
-            guard seen.insert(relation.id).inserted else { return nil }
-            return (relation.id, relation)
+    private func validateMachine(
+        _ machine: BusinessStateMachineDefinition,
+        entitiesByID: [String: EntityDefinition],
+        fieldsByID: [String: FieldDefinition],
+        roleIDs: Set<String>
+    ) -> [ProjectSpecificationValidationIssue] {
+        var issues: [ProjectSpecificationValidationIssue] = []
+        let entity = entitiesByID[machine.entityID]
+        let stateIDs = Set(machine.states.map(\.id))
+        let initialCount = machine.states.filter(\.isInitial).count
+
+        if entity == nil {
+            issues.append(.missingStateMachineEntity(machineID: machine.id, entityID: machine.entityID))
         }
+        if entity?.fields.contains(where: { $0.id == machine.stateFieldID }) != true {
+            issues.append(.invalidStateField(machineID: machine.id, fieldID: machine.stateFieldID))
+        }
+        if initialCount != 1 {
+            issues.append(.invalidInitialStateCount(machineID: machine.id, count: initialCount))
+        }
+
+        for transition in machine.transitions {
+            issues += validateTransition(transition, machineID: machine.id, stateIDs: stateIDs, roleIDs: roleIDs)
+            issues += validateWorkflowReferences(transition, machineID: machine.id, fieldsByID: fieldsByID)
+        }
+
+        return issues
     }
 
-    private func allFieldsByID(_ entities: [EntityDefinition]) -> [String: FieldDefinition] {
-        var fields: [String: FieldDefinition] = [:]
-        for field in entities.flatMap(\.fields) where fields[field.id] == nil {
-            fields[field.id] = field
+    private func validateTransition(
+        _ transition: BusinessTransitionDefinition,
+        machineID _: String,
+        stateIDs: Set<String>,
+        roleIDs: Set<String>
+    ) -> [ProjectSpecificationValidationIssue] {
+        var issues: [ProjectSpecificationValidationIssue] = []
+        for stateID in [transition.fromStateID, transition.toStateID] where !stateIDs.contains(stateID) {
+            issues.append(.missingTransitionState(transitionID: transition.id, stateID: stateID))
         }
-        return fields
+        for roleID in transition.allowedRoleIDs where !roleIDs.contains(roleID) {
+            issues.append(.missingTransitionRole(transitionID: transition.id, roleID: roleID))
+        }
+        return issues
     }
+
+    private func validateWorkflowReferences(
+        _ transition: BusinessTransitionDefinition,
+        machineID: String,
+        fieldsByID: [String: FieldDefinition]
+    ) -> [ProjectSpecificationValidationIssue] {
+        var referencedFieldIDs = transition.guards.flatMap(\.referencedFieldIDs)
+        referencedFieldIDs += transition.sideEffects.compactMap(\.referencedFieldID)
+        return referencedFieldIDs.compactMap { fieldID in
+            guard fieldsByID[fieldID] == nil else { return nil }
+            return .missingWorkflowField(machineID: machineID, fieldID: fieldID)
+        }
+    }
+}
+
+private struct ScreenNavigationValidator {
+    func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
+        let entitiesByID = entityMap(specification.entities)
+        let fieldsByID = fieldMap(specification.entities)
+        let roleIDs = Set(specification.roles.map(\.id))
+        let screenIDs = Set(specification.screens.map(\.id))
+        var issues: [ProjectSpecificationValidationIssue] = []
+
+        for screen in specification.screens {
+            if let entityID = screen.entityID, entitiesByID[entityID] == nil {
+                issues.append(.missingScreenEntity(screenID: screen.id, entityID: entityID))
+            }
+            for fieldID in screen.visibleFieldIDs where fieldsByID[fieldID] == nil {
+                issues.append(.missingScreenField(screenID: screen.id, fieldID: fieldID))
+            }
+            for roleID in screen.allowedRoleIDs where !roleIDs.contains(roleID) {
+                issues.append(.missingScreenRole(screenID: screen.id, roleID: roleID))
+            }
+        }
+
+        for item in specification.navigation.items {
+            if !screenIDs.contains(item.screenID) {
+                issues.append(.missingNavigationScreen(itemID: item.id, screenID: item.screenID))
+            }
+            for roleID in item.allowedRoleIDs where !roleIDs.contains(roleID) {
+                issues.append(.missingNavigationRole(itemID: item.id, roleID: roleID))
+            }
+        }
+
+        return issues
+    }
+}
+
+private struct ConfigurationValidator {
+    func validate(_ specification: ProjectSpecification) -> [ProjectSpecificationValidationIssue] {
+        var issues: [ProjectSpecificationValidationIssue] = []
+
+        if specification.offline.isEnabled,
+           !specification.offline.usesLocalSingleSourceOfTruth
+        {
+            issues.append(.offlineSingleSourceOfTruthRequired)
+        }
+        if specification.offline.isEnabled,
+           specification.backend != .localOnly,
+           !specification.offline.usesSyncOutbox
+        {
+            issues.append(.offlineSyncOutboxRequired)
+        }
+        if let color = specification.design.primaryColorHex, !color.isHexColor {
+            issues.append(.invalidPrimaryColorHex(color))
+        }
+
+        return issues
+    }
+}
+
+private func entityMap(_ entities: [EntityDefinition]) -> [String: EntityDefinition] {
+    uniqueMap(entities, id: \.id)
+}
+
+private func fieldMap(_ entities: [EntityDefinition]) -> [String: FieldDefinition] {
+    uniqueMap(entities.flatMap(\.fields), id: \.id)
+}
+
+private func relationMap(_ relations: [RelationDefinition]) -> [String: RelationDefinition] {
+    uniqueMap(relations, id: \.id)
+}
+
+private func uniqueMap<Value>(
+    _ values: [Value],
+    id: KeyPath<Value, String>
+) -> [String: Value] {
+    var result: [String: Value] = [:]
+    for value in values where result[value[keyPath: id]] == nil {
+        result[value[keyPath: id]] = value
+    }
+    return result
 }
 
 private extension FieldDefaultValue {
@@ -274,19 +449,41 @@ private extension FieldValidationRule {
     func isCompatible(with dataType: FieldDataType) -> Bool {
         switch self {
         case .minimumLength, .maximumLength, .pattern:
-            switch dataType {
-            case .string, .email, .phone, .url, .location:
-                true
-            default:
-                false
-            }
+            [.string, .email, .phone, .url, .location].contains(dataType)
         case .minimumValue, .maximumValue:
-            switch dataType {
-            case .integer, .decimal, .currency, .percentage:
-                true
-            default:
-                false
-            }
+            [.integer, .decimal, .currency, .percentage].contains(dataType)
         }
+    }
+}
+
+private extension BusinessPredicate {
+    var referencedFieldIDs: [String] {
+        switch self {
+        case let .fieldEquals(fieldID, _), let .fieldIsSet(fieldID):
+            [fieldID]
+        case let .all(predicates), let .any(predicates):
+            predicates.flatMap(\.referencedFieldIDs)
+        case let .not(predicate):
+            predicate.referencedFieldIDs
+        }
+    }
+}
+
+private extension BusinessSideEffect {
+    var referencedFieldID: String? {
+        switch self {
+        case let .setField(fieldID, _):
+            fieldID
+        case .appendAuditEntry, .enqueueNotification:
+            nil
+        }
+    }
+}
+
+private extension String {
+    var isHexColor: Bool {
+        let value = hasPrefix("#") ? String(dropFirst()) : self
+        guard value.count == 6 || value.count == 8 else { return false }
+        return value.allSatisfy(\.isHexDigit)
     }
 }
