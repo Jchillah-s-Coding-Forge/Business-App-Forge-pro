@@ -98,8 +98,8 @@ public struct ArchitectureContract: Codable, Equatable, Sendable {
 }
 
 public struct ProjectIdentity: Codable, Equatable, Sendable {
-    public let name: String
-    public let organizationIdentifier: String
+    public var name: String
+    public var organizationIdentifier: String
 
     public init(name: String, organizationIdentifier: String) {
         self.name = name
@@ -108,15 +108,25 @@ public struct ProjectIdentity: Codable, Equatable, Sendable {
 }
 
 public struct ProjectSpecification: Codable, Equatable, Sendable {
-    public let identity: ProjectIdentity
-    public let framework: OutputFramework
-    public let targetPlatforms: Set<TargetPlatform>
-    public let backend: BackendProvider
-    public let flutterStateManagement: FlutterStateManagement?
+    public static let currentSchemaVersion = 1
+
+    public var schemaVersion: Int
+    public var identity: ProjectIdentity
+    public var framework: OutputFramework
+    public var targetPlatforms: Set<TargetPlatform>
+    public var backend: BackendProvider
+    public var flutterStateManagement: FlutterStateManagement?
     public let architecture: ArchitectureContract
-    public let entities: [EntityDefinition]
-    public let relations: [RelationDefinition]
-    public let fieldPresentations: [FieldPresentationDefinition]
+    public var entities: [EntityDefinition]
+    public var relations: [RelationDefinition]
+    public var fieldPresentations: [FieldPresentationDefinition]
+    public var roles: [RoleDefinition]
+    public var stateMachines: [BusinessStateMachineDefinition]
+    public var screens: [ScreenDefinition]
+    public var navigation: NavigationDefinition
+    public var offline: OfflineConfiguration
+    public var design: DesignConfiguration
+    public var templateBaseline: TemplateBaselineDefinition?
 
     public var hasSupportedTargetConfiguration: Bool {
         framework.isAvailable
@@ -125,6 +135,7 @@ public struct ProjectSpecification: Codable, Equatable, Sendable {
     }
 
     public init(
+        schemaVersion: Int = ProjectSpecification.currentSchemaVersion,
         identity: ProjectIdentity,
         framework: OutputFramework,
         targetPlatforms: Set<TargetPlatform>,
@@ -133,8 +144,16 @@ public struct ProjectSpecification: Codable, Equatable, Sendable {
         architecture: ArchitectureContract = .standard,
         entities: [EntityDefinition] = [],
         relations: [RelationDefinition] = [],
-        fieldPresentations: [FieldPresentationDefinition] = []
+        fieldPresentations: [FieldPresentationDefinition] = [],
+        roles: [RoleDefinition] = [],
+        stateMachines: [BusinessStateMachineDefinition] = [],
+        screens: [ScreenDefinition] = [],
+        navigation: NavigationDefinition = NavigationDefinition(),
+        offline: OfflineConfiguration = .businessDefault,
+        design: DesignConfiguration = DesignConfiguration(),
+        templateBaseline: TemplateBaselineDefinition? = nil
     ) {
+        self.schemaVersion = schemaVersion
         self.identity = identity
         self.framework = framework
         self.targetPlatforms = targetPlatforms
@@ -144,5 +163,12 @@ public struct ProjectSpecification: Codable, Equatable, Sendable {
         self.entities = entities
         self.relations = relations
         self.fieldPresentations = fieldPresentations
+        self.roles = roles
+        self.stateMachines = stateMachines
+        self.screens = screens
+        self.navigation = navigation
+        self.offline = offline
+        self.design = design
+        self.templateBaseline = templateBaseline
     }
 }
