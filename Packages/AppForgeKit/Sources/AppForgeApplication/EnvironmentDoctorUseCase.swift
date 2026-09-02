@@ -40,6 +40,7 @@ public struct ToolchainRequirements: Sendable {
                 displayName: "Git",
                 purpose: "Versionsverwaltung und Repository-Initialisierung",
                 isRequired: true,
+                versionConstraint: .init(minimum: SupportedToolVersions.git),
                 installStrategy: .systemManaged
             )
         ]
@@ -52,6 +53,7 @@ public struct ToolchainRequirements: Sendable {
                 displayName: "Flutter SDK",
                 purpose: "Generierung, Analyse, Tests und Builds von Flutter-Projekten",
                 isRequired: true,
+                versionConstraint: .init(minimum: SupportedToolVersions.flutter),
                 installStrategy: .userSelectedLocation
             )
         ]
@@ -64,6 +66,7 @@ public struct ToolchainRequirements: Sendable {
                 displayName: "Xcode",
                 purpose: "Apple SDKs, Simulatoren, Signierung und Builds",
                 isRequired: true,
+                versionConstraint: .init(minimum: SupportedToolVersions.xcode),
                 installStrategy: .externalApplication
             )
         ]
@@ -73,9 +76,10 @@ public struct ToolchainRequirements: Sendable {
         [
             ToolRequirement(
                 id: .androidSDK,
-                displayName: "Android SDK",
-                purpose: "Android Platform Tools und Builds",
+                displayName: "Android Platform Tools",
+                purpose: "Android-Gerätekommunikation und SDK-Buildumgebung",
                 isRequired: true,
+                versionConstraint: .init(minimum: SupportedToolVersions.androidPlatformTools),
                 installStrategy: .externalApplication
             ),
             ToolRequirement(
@@ -83,6 +87,7 @@ public struct ToolchainRequirements: Sendable {
                 displayName: "JDK",
                 purpose: "Android Gradle Toolchain",
                 isRequired: true,
+                versionConstraint: .init(minimum: SupportedToolVersions.java),
                 installStrategy: .externalApplication
             )
         ]
@@ -181,9 +186,9 @@ public struct SystemToolDetector: ToolDetector {
             )
         }
 
-        let version = SemanticVersion(parsing: execution.output)
+        let version = detectedVersion(for: requirement.id, output: execution.output)
         let availability: ToolAvailability = requirement.versionConstraint.accepts(version) ? .ready : .incompatible
-        let detail = availability == .ready ? "Bereit" : "Version erfüllt die Mindestanforderung nicht."
+        let detail = availability == .ready ? "Bereit" : incompatibleDetail(requirement: requirement, version: version)
 
         return ToolDetectionResult(
             requirement: requirement,
@@ -310,6 +315,33 @@ public struct SystemToolDetector: ToolDetector {
         }
     }
 
+    private func detectedVersion(for identifier: ToolIdentifier, output: String) -> SemanticVersion? {
+        if identifier == .androidSDK {
+            let versionLine = output
+                .split(whereSeparator: \.isNewline)
+                .map(String.init)
+                .first { $0.hasPrefix("Version ") }
+
+            if let versionLine {
+                return SemanticVersion(parsing: versionLine)
+            }
+        }
+
+        return SemanticVersion(parsing: output)
+    }
+
+    private func incompatibleDetail(
+        requirement: ToolRequirement,
+        version: SemanticVersion?
+    ) -> String {
+        guard let minimum = requirement.versionConstraint.minimum else {
+            return "Die erkannte Version ist nicht kompatibel."
+        }
+
+        let actual = version?.description ?? "unbekannt"
+        return "Version \(actual) erkannt. AppForge benötigt mindestens \(minimum)."
+    }
+
     private func missingDetail(for identifier: ToolIdentifier) -> String {
         switch identifier {
         case .flutter:
@@ -317,7 +349,7 @@ public struct SystemToolDetector: ToolDetector {
         case .xcode:
             "Xcode wurde nicht gefunden. Die Installation erfolgt über Apples offiziellen Weg."
         case .androidSDK:
-            "Android SDK wurde nicht gefunden. Android Studio kann das SDK verwalten."
+            "Android Platform Tools wurden nicht gefunden. Android Studio kann das SDK verwalten."
         case .java:
             "Kein ausführbares JDK gefunden. Das mit Android Studio gelieferte JDK kann verwendet werden."
         case .git:
@@ -385,6 +417,14 @@ public struct SystemGeneratedProjectOpener: GeneratedProjectOpening {
         process.arguments = arguments
         try process.run()
     }
+}
+
+private enum SupportedToolVersions {
+    static let git = SemanticVersion(major: 2, minor: 40)
+    static let flutter = SemanticVersion(major: 3, minor: 44)
+    static let xcode = SemanticVersion(major: 16, minor: 0)
+    static let androidPlatformTools = SemanticVersion(major: 35, minor: 0)
+    static let java = SemanticVersion(major: 17, minor: 0)
 }
 
 private struct ToolCandidate {
