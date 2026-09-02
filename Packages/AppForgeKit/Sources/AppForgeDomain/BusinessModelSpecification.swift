@@ -338,10 +338,11 @@ public struct ControlCompatibilityValidator: Sendable {
             allowedControls: compatibleControls(for: field.dataType),
             numericRange: presentation.numericRange
         )
+        let selectionOptionsRequired = requiresSelectionOptions(presentation.control)
+            && field.dataType != .boolean
+            && field.options.isEmpty
 
-        if requiresSelectionOptions(presentation.control),
-           field.dataType != .boolean,
-           field.options.isEmpty {
+        if selectionOptionsRequired {
             issues.append(.selectionOptionsRequired)
         }
 
