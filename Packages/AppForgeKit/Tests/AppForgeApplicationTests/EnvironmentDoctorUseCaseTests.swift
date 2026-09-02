@@ -27,6 +27,22 @@ final class EnvironmentDoctorUseCaseTests: XCTestCase {
         XCTAssertTrue(androidReport.results.contains { $0.id == .java })
     }
 
+    func testBuiltInRequiredToolsHaveExplicitMinimumVersions() {
+        let requirements = ToolchainRequirements().requirements(
+            for: .flutter,
+            targetPlatforms: [.iOS, .android]
+        )
+        let required = requirements.filter(\.isRequired)
+
+        XCTAssertFalse(required.isEmpty)
+        XCTAssertTrue(required.allSatisfy { $0.versionConstraint.minimum != nil })
+        XCTAssertNotNil(required.first { $0.id == .git }?.versionConstraint.minimum)
+        XCTAssertNotNil(required.first { $0.id == .flutter }?.versionConstraint.minimum)
+        XCTAssertNotNil(required.first { $0.id == .xcode }?.versionConstraint.minimum)
+        XCTAssertNotNil(required.first { $0.id == .androidSDK }?.versionConstraint.minimum)
+        XCTAssertNotNil(required.first { $0.id == .java }?.versionConstraint.minimum)
+    }
+
     func testMissingRequiredToolMakesReportNotReady() async {
         let detector = StubToolDetector(missing: [.flutter])
         let doctor = EnvironmentDoctorUseCase(detector: detector)
@@ -59,7 +75,7 @@ private struct StubToolDetector: ToolDetector {
         return ToolDetectionResult(
             requirement: requirement,
             availability: availability,
-            version: SemanticVersion(major: 1, minor: 0),
+            version: SemanticVersion(major: 99, minor: 0),
             path: availability == .ready ? path : nil,
             detail: availability == .ready ? "Bereit" : "Fehlt"
         )
