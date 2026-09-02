@@ -1,0 +1,590 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1F8ECD6148B3ADF5EA048FB6 /* AppForgeApplication in Frameworks */ = {isa = PBXBuildFile; productRef = 02DF2813546E19D303CA4433 /* AppForgeApplication */; };
+		2169237E5BBB11DDCF2946E8 /* WorkspaceHomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */; };
+		3858948FEC791AEC22589123 /* AppForgeCore in Frameworks */ = {isa = PBXBuildFile; productRef = D34DA3ECCB06C78E6DEE8454 /* AppForgeCore */; };
+		596BD00CC054EDCD76539F79 /* WorkspaceHomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D0E40A9FDE62F73F320375 /* WorkspaceHomeViewModel.swift */; };
+		6A0CB127FC4A25A1285BFECF /* ProjectSetupViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */; };
+		7C2FDF42A1DD4471BD388831 /* AppForgeDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 2270788993E9C3F3FA63F409 /* AppForgeDomain */; };
+		B34B7CF78B39E9C39A45B552 /* ProjectSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550C17458B1B176817565B39 /* ProjectSetupView.swift */; };
+		C4E78B6A5FD6DEC76ABC1221 /* ProjectSetupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */; };
+		CC32843ECE2CA002EDE36252 /* AppForgeDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 82C6A92B978155B2FB3B0BE2 /* AppForgeDesignSystem */; };
+		D289F72DC0BAA3C49A33EB61 /* AppForgeProApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8DE2371B97E0C2541808A4 /* AppForgeProApp.swift */; };
+		E7CA53A5E09B03131DDDB0B6 /* WorkspaceHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EA82C86E425638AF62D8C1 /* WorkspaceHomeView.swift */; };
+		E81A2CBC55DCEFEAEEB36543 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B95FB21F6C991F9EF79A347E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED3C6FC74739D8D4D24FCEF9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 123524CB83E9CBF6D923890F;
+			remoteInfo = AppForgePro;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = OVERVIEW.md; sourceTree = "<group>"; };
+		14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceHomeViewModelTests.swift; sourceTree = "<group>"; };
+		177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModelTests.swift; sourceTree = "<group>"; };
+		1AB8F0DBFA1F7FAEC8CAAA17 /* MONETIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MONETIZATION.md; sourceTree = "<group>"; };
+		320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		439F0AB5EBB8B7CF6B232067 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		43E990E1112FB6567DAEEAC7 /* AppForgePro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppForgePro.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4CFC68B345B3B408237076FF /* PRODUCT_VISION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRODUCT_VISION.md; sourceTree = "<group>"; };
+		4D55E9AEE487CE52EA349CC5 /* GIT_WORKFLOW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GIT_WORKFLOW.md; sourceTree = "<group>"; };
+		52A30BB954D6A2B6A69AE174 /* PRD.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRD.md; sourceTree = "<group>"; };
+		550C17458B1B176817565B39 /* ProjectSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupView.swift; sourceTree = "<group>"; };
+		5E6F91737C991DC763DE412C /* ADR-001-project-foundation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ADR-001-project-foundation.md"; sourceTree = "<group>"; };
+		5E7CB9DF868D27E6CC1F76F1 /* AppForgeKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppForgeKit; path = Packages/AppForgeKit; sourceTree = SOURCE_ROOT; };
+		7464E48BACC48BE572C2749B /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
+		78D22617FD379D55533F7680 /* ADR-002-architecture-versus-state-management.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ADR-002-architecture-versus-state-management.md"; sourceTree = "<group>"; };
+		7C8DE2371B97E0C2541808A4 /* AppForgeProApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppForgeProApp.swift; sourceTree = "<group>"; };
+		842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppForgeProTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20F2750C50A2573A0D1C120 /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
+		CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModel.swift; sourceTree = "<group>"; };
+		D4EA82C86E425638AF62D8C1 /* WorkspaceHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceHomeView.swift; sourceTree = "<group>"; };
+		DB68F58E8883DA6504CD5D08 /* DEFINITION_OF_DONE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEFINITION_OF_DONE.md; sourceTree = "<group>"; };
+		DD13EAF9A8A29554F06D68A1 /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
+		E1D0E40A9FDE62F73F320375 /* WorkspaceHomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceHomeViewModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3FB7D31A765DDA6A2058DB00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3858948FEC791AEC22589123 /* AppForgeCore in Frameworks */,
+				7C2FDF42A1DD4471BD388831 /* AppForgeDomain in Frameworks */,
+				1F8ECD6148B3ADF5EA048FB6 /* AppForgeApplication in Frameworks */,
+				CC32843ECE2CA002EDE36252 /* AppForgeDesignSystem in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1238B38AD2FF4590EAA6F5CC /* development */ = {
+			isa = PBXGroup;
+			children = (
+				DB68F58E8883DA6504CD5D08 /* DEFINITION_OF_DONE.md */,
+				B20F2750C50A2573A0D1C120 /* GETTING_STARTED.md */,
+				4D55E9AEE487CE52EA349CC5 /* GIT_WORKFLOW.md */,
+			);
+			path = development;
+			sourceTree = "<group>";
+		};
+		1510FF4E7D132837AE735E72 = {
+			isa = PBXGroup;
+			children = (
+				3CF92DFEF8FCAFDA07D15FD0 /* App */,
+				61B797A832067E78C34E69FD /* docs */,
+				EDE7B01AF5986A559F9E4475 /* Features */,
+				3382DF5916E7FBD2119EDDEE /* Packages */,
+				C5240E6E4FFE83318AC3405C /* Tests */,
+				7464E48BACC48BE572C2749B /* project.yml */,
+				439F0AB5EBB8B7CF6B232067 /* README.md */,
+				363E787A86BB609194BC44BD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1D8B56D5E96F4006BA099F8F /* product */ = {
+			isa = PBXGroup;
+			children = (
+				1AB8F0DBFA1F7FAEC8CAAA17 /* MONETIZATION.md */,
+				52A30BB954D6A2B6A69AE174 /* PRD.md */,
+				4CFC68B345B3B408237076FF /* PRODUCT_VISION.md */,
+				DD13EAF9A8A29554F06D68A1 /* ROADMAP.md */,
+			);
+			path = product;
+			sourceTree = "<group>";
+		};
+		2DFE79363D3EFD74C8B1795A /* architecture */ = {
+			isa = PBXGroup;
+			children = (
+				5E6F91737C991DC763DE412C /* ADR-001-project-foundation.md */,
+				78D22617FD379D55533F7680 /* ADR-002-architecture-versus-state-management.md */,
+				1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */,
+			);
+			path = architecture;
+			sourceTree = "<group>";
+		};
+		3382DF5916E7FBD2119EDDEE /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				5E7CB9DF868D27E6CC1F76F1 /* AppForgeKit */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		363E787A86BB609194BC44BD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				43E990E1112FB6567DAEEAC7 /* AppForgePro.app */,
+				842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3CF92DFEF8FCAFDA07D15FD0 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */,
+				7C8DE2371B97E0C2541808A4 /* AppForgeProApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		61B797A832067E78C34E69FD /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				2DFE79363D3EFD74C8B1795A /* architecture */,
+				1238B38AD2FF4590EAA6F5CC /* development */,
+				1D8B56D5E96F4006BA099F8F /* product */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+		8B714069CFFF2BFA60543C4B /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				D4EA82C86E425638AF62D8C1 /* WorkspaceHomeView.swift */,
+				E1D0E40A9FDE62F73F320375 /* WorkspaceHomeViewModel.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		9C9FF4C4BDDC4992FF93859D /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				550C17458B1B176817565B39 /* ProjectSetupView.swift */,
+				CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		BE6BA86D1F005396721A82AD /* AppForgeProTests */ = {
+			isa = PBXGroup;
+			children = (
+				177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */,
+				14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */,
+			);
+			path = AppForgeProTests;
+			sourceTree = "<group>";
+		};
+		C5240E6E4FFE83318AC3405C /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				BE6BA86D1F005396721A82AD /* AppForgeProTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		EDE7B01AF5986A559F9E4475 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				FDBABDC8FCB3231284BC2552 /* ProjectSetup */,
+				EF9E947DF510428D797DEEBF /* Workspace */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		EF9E947DF510428D797DEEBF /* Workspace */ = {
+			isa = PBXGroup;
+			children = (
+				8B714069CFFF2BFA60543C4B /* Presentation */,
+			);
+			path = Workspace;
+			sourceTree = "<group>";
+		};
+		FDBABDC8FCB3231284BC2552 /* ProjectSetup */ = {
+			isa = PBXGroup;
+			children = (
+				9C9FF4C4BDDC4992FF93859D /* Presentation */,
+			);
+			path = ProjectSetup;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		123524CB83E9CBF6D923890F /* AppForgePro */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AA77ECCF4E8A4E96F693661 /* Build configuration list for PBXNativeTarget "AppForgePro" */;
+			buildPhases = (
+				1AA4727BEE563572DB1BB32F /* Sources */,
+				3FB7D31A765DDA6A2058DB00 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AppForgePro;
+			packageProductDependencies = (
+				D34DA3ECCB06C78E6DEE8454 /* AppForgeCore */,
+				2270788993E9C3F3FA63F409 /* AppForgeDomain */,
+				02DF2813546E19D303CA4433 /* AppForgeApplication */,
+				82C6A92B978155B2FB3B0BE2 /* AppForgeDesignSystem */,
+			);
+			productName = AppForgePro;
+			productReference = 43E990E1112FB6567DAEEAC7 /* AppForgePro.app */;
+			productType = "com.apple.product-type.application";
+		};
+		ECC8FFE8129F60BDC6B57595 /* AppForgeProTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 25AF4F3E49DCC58933CCAFB9 /* Build configuration list for PBXNativeTarget "AppForgeProTests" */;
+			buildPhases = (
+				1055FB74A0E52889359631F4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B010F46D876ED2B4CF2F1C9E /* PBXTargetDependency */,
+			);
+			name = AppForgeProTests;
+			packageProductDependencies = (
+			);
+			productName = AppForgeProTests;
+			productReference = 842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		ED3C6FC74739D8D4D24FCEF9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					123524CB83E9CBF6D923890F = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 4F0579D96BA36CD3E35B9F1A /* Build configuration list for PBXProject "AppForgePro" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1510FF4E7D132837AE735E72;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0C864328F5B939BDB31F1CA8 /* XCLocalSwiftPackageReference "Packages/AppForgeKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 363E787A86BB609194BC44BD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				123524CB83E9CBF6D923890F /* AppForgePro */,
+				ECC8FFE8129F60BDC6B57595 /* AppForgeProTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1055FB74A0E52889359631F4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6A0CB127FC4A25A1285BFECF /* ProjectSetupViewModelTests.swift in Sources */,
+				2169237E5BBB11DDCF2946E8 /* WorkspaceHomeViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1AA4727BEE563572DB1BB32F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E81A2CBC55DCEFEAEEB36543 /* AppEnvironment.swift in Sources */,
+				D289F72DC0BAA3C49A33EB61 /* AppForgeProApp.swift in Sources */,
+				B34B7CF78B39E9C39A45B552 /* ProjectSetupView.swift in Sources */,
+				C4E78B6A5FD6DEC76ABC1221 /* ProjectSetupViewModel.swift in Sources */,
+				E7CA53A5E09B03131DDDB0B6 /* WorkspaceHomeView.swift in Sources */,
+				596BD00CC054EDCD76539F79 /* WorkspaceHomeViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B010F46D876ED2B4CF2F1C9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 123524CB83E9CBF6D923890F /* AppForgePro */;
+			targetProxy = B95FB21F6C991F9EF79A347E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		27C8085BA41A98616740243D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AppForge Pro";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © Jchillah's Coding Forge";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pro.appforge.studio;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		38D5B0E3DC8295F7568D5692 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AppForge Pro";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © Jchillah's Coding Forge";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pro.appforge.studio;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		442EC0E4F7151A432BC41A71 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pro.appforge.studio.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AppForgePro.app/Contents/MacOS/AppForgePro";
+			};
+			name = Release;
+		};
+		B6DDF248A8044E665E3A5A2C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pro.appforge.studio.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AppForgePro.app/Contents/MacOS/AppForgePro";
+			};
+			name = Debug;
+		};
+		D0F32C9C031F9598404A5545 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		D3E9E0D4C07770130E6EF42D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		25AF4F3E49DCC58933CCAFB9 /* Build configuration list for PBXNativeTarget "AppForgeProTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B6DDF248A8044E665E3A5A2C /* Debug */,
+				442EC0E4F7151A432BC41A71 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2AA77ECCF4E8A4E96F693661 /* Build configuration list for PBXNativeTarget "AppForgePro" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27C8085BA41A98616740243D /* Debug */,
+				38D5B0E3DC8295F7568D5692 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4F0579D96BA36CD3E35B9F1A /* Build configuration list for PBXProject "AppForgePro" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3E9E0D4C07770130E6EF42D /* Debug */,
+				D0F32C9C031F9598404A5545 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		0C864328F5B939BDB31F1CA8 /* XCLocalSwiftPackageReference "Packages/AppForgeKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/AppForgeKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		02DF2813546E19D303CA4433 /* AppForgeApplication */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppForgeApplication;
+		};
+		2270788993E9C3F3FA63F409 /* AppForgeDomain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppForgeDomain;
+		};
+		82C6A92B978155B2FB3B0BE2 /* AppForgeDesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppForgeDesignSystem;
+		};
+		D34DA3ECCB06C78E6DEE8454 /* AppForgeCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppForgeCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = ED3C6FC74739D8D4D24FCEF9 /* Project object */;
+}

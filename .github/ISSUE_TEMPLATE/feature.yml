@@ -1,0 +1,45 @@
+name: Produktfähigkeit
+description: Nachvollziehbare neue AppForge-Pro-Fähigkeit
+title: "Feature: "
+labels:
+  - type:feature
+body:
+  - type: textarea
+    id: user_value
+    attributes:
+      label: Nutzerwert
+      description: Welche Persona erreicht welches Ziel und warum ist das wichtig?
+      placeholder: Als Unternehmer möchte ich ..., damit ...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Umfang
+      description: Was gehört konkret in dieses Issue und was ausdrücklich nicht?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Akzeptanzkriterien
+      description: Testbare Kriterien als Checkliste
+      value: |
+        - [ ] Akzeptanzkriterium 1
+        - [ ] Akzeptanzkriterium 2
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risiken und Abhängigkeiten
+      description: Sicherheit, Datenmigration, UX, Provider und blockierende Issues
+  - type: checkboxes
+    id: definition
+    attributes:
+      label: Vorbereitungscheck
+      options:
+        - label: Das Issue beschreibt Nutzerwert statt nur Technik.
+          required: true
+        - label: Die Akzeptanzkriterien sind automatisiert oder manuell eindeutig prüfbar.
+          required: true

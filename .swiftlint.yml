@@ -1,0 +1,29 @@
+included:
+  - App
+  - Features
+  - Packages
+  - Tests
+
+excluded:
+  - .build
+  - Packages/AppForgeKit/.build
+  - AppForgePro.xcodeproj
+
+line_length:
+  warning: 120
+  error: 160
+
+file_length:
+  warning: 500
+  error: 800
+
+type_body_length:
+  warning: 300
+  error: 500
+
+identifier_name:
+  min_length: 2
+  excluded:
+    - id
+
+reporter: xcode
