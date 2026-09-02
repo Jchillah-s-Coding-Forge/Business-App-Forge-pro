@@ -74,11 +74,17 @@ public struct VerifiedFlutterSDKInstaller: FlutterSDKInstalling {
             )
         }
 
+        let stagingURL = try makeStagingDirectory(in: parentURL)
+        defer { try? FileManager.default.removeItem(at: stagingURL) }
+        let stagedSDKURL = stagingURL.appendingPathComponent("flutter", isDirectory: true)
+
         await progress(.extracting)
-        try extractor.extract(archiveURL: archiveURL, into: parentURL)
+        try extractor.extract(archiveURL: archiveURL, into: stagingURL)
 
         await progress(.validating)
-        try validator.validate(sdkURL: sdkURL)
+        try validator.validate(sdkURL: stagedSDKURL)
+        try ensureInstallTargetIsAvailable(sdkURL)
+        try FileManager.default.moveItem(at: stagedSDKURL, to: sdkURL)
 
         await progress(.completed)
         return FlutterInstallationResult(sdkPath: sdkURL.path, version: artifact.version)
@@ -97,7 +103,12 @@ public struct VerifiedFlutterSDKInstaller: FlutterSDKInstalling {
                 message: "Der Flutter-Installationspfad darf keine Leerzeichen enthalten."
             )
         }
-        guard FileManager.default.fileExists(atPath: parentURL.path, isDirectory: &isDirectory), isDirectory.boolValue else {
+
+        let directoryExists = FileManager.default.fileExists(
+            atPath: parentURL.path,
+            isDirectory: &isDirectory
+        )
+        guard directoryExists, isDirectory.boolValue else {
             throw AppForgeError.fileSystem(message: "Der gewählte Installationsordner existiert nicht.")
         }
         guard FileManager.default.isWritableFile(atPath: parentURL.path) else {
@@ -116,6 +127,18 @@ public struct VerifiedFlutterSDKInstaller: FlutterSDKInstalling {
             )
         }
     }
+
+    private func makeStagingDirectory(in parentURL: URL) throws -> URL {
+        let stagingURL = parentURL.appendingPathComponent(
+            ".appforge-flutter-install-\(UUID().uuidString)",
+            isDirectory: true
+        )
+        try FileManager.default.createDirectory(
+            at: stagingURL,
+            withIntermediateDirectories: false
+        )
+        return stagingURL
+    }
 }
 
 public struct FlutterReleaseCatalogClient: FlutterReleaseCatalogProviding {
@@ -126,7 +149,9 @@ public struct FlutterReleaseCatalogClient: FlutterReleaseCatalogProviding {
 
     public init() {}
 
-    public func latestStable(for architecture: FlutterSDKArchitecture) async throws -> FlutterReleaseArtifact {
+    public func latestStable(
+        for architecture: FlutterSDKArchitecture
+    ) async throws -> FlutterReleaseArtifact {
         let (data, response) = try await URLSession.shared.data(from: Self.catalogURL)
         try validateHTTPResponse(response)
 
@@ -156,9 +181,12 @@ public struct FlutterReleaseCatalogClient: FlutterReleaseCatalogProviding {
 
     private func validateHTTPResponse(_ response: URLResponse) throws {
         guard let httpResponse = response as? HTTPURLResponse,
-              (200 ..< 300).contains(httpResponse.statusCode)
+              (200 ..< 300).contains(httpResponse.statusCode),
+              httpResponse.url?.host == "storage.googleapis.com"
         else {
-            throw AppForgeError.configuration(message: "Das offizielle Flutter-Release-Manifest ist nicht erreichbar.")
+            throw AppForgeError.configuration(
+                message: "Das offizielle Flutter-Release-Manifest ist nicht erreichbar."
+            )
         }
     }
 
@@ -167,16 +195,20 @@ public struct FlutterReleaseCatalogClient: FlutterReleaseCatalogProviding {
             && release.archive.hasSuffix(".zip")
             && !release.archive.contains("..")
         let isSHA256 = release.sha256.count == 64
-            && release.sha256.allSatisfy { $0.isHexDigit }
+            && release.sha256.allSatisfy(\.isHexDigit)
 
         guard !release.version.isEmpty, isSafeArchive, isSHA256 else {
-            throw AppForgeError.configuration(message: "Das Flutter-Release-Manifest enthält ungültige Artefaktdaten.")
+            throw AppForgeError.configuration(
+                message: "Das Flutter-Release-Manifest enthält ungültige Artefaktdaten."
+            )
         }
     }
 }
 
 public struct SystemFlutterArchiveDownloader: FlutterArchiveDownloading {
-    private static let baseURL = URL(string: "https://storage.googleapis.com/flutter_infra_release/releases/")!
+    private static let baseURL = URL(
+        string: "https://storage.googleapis.com/flutter_infra_release/releases/"
+    )!
 
     public init() {}
 
@@ -199,7 +231,8 @@ public struct SystemFlutterArchiveDownloader: FlutterArchiveDownloading {
 
     private func validateHTTPResponse(_ response: URLResponse) throws {
         guard let httpResponse = response as? HTTPURLResponse,
-              (200 ..< 300).contains(httpResponse.statusCode)
+              (200 ..< 300).contains(httpResponse.statusCode),
+              httpResponse.url?.host == "storage.googleapis.com"
         else {
             throw AppForgeError.configuration(message: "Das Flutter-SDK konnte nicht heruntergeladen werden.")
         }
@@ -262,13 +295,13 @@ public struct SystemFlutterSDKValidator: FlutterSDKValidating {
 
 private enum HostFlutterArchitecture {
     static func current() throws -> FlutterSDKArchitecture {
-        #if arch(arm64)
+#if arch(arm64)
         return .arm64
-        #elseif arch(x86_64)
+#elseif arch(x86_64)
         return .x64
-        #else
+#else
         throw AppForgeError.configuration(message: "Diese Mac-Prozessorarchitektur wird noch nicht unterstützt.")
-        #endif
+#endif
     }
 }
 
