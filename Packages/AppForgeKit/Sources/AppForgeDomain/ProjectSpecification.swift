@@ -98,8 +98,8 @@ public struct ArchitectureContract: Codable, Equatable, Sendable {
 }
 
 public struct ProjectIdentity: Codable, Equatable, Sendable {
-    public let name: String
-    public let organizationIdentifier: String
+    public var name: String
+    public var organizationIdentifier: String
 
     public init(name: String, organizationIdentifier: String) {
         self.name = name
@@ -108,12 +108,25 @@ public struct ProjectIdentity: Codable, Equatable, Sendable {
 }
 
 public struct ProjectSpecification: Codable, Equatable, Sendable {
+    public static let currentSchemaVersion = 1
+
+    public let schemaVersion: Int
     public let identity: ProjectIdentity
     public let framework: OutputFramework
     public let targetPlatforms: Set<TargetPlatform>
     public let backend: BackendProvider
     public let flutterStateManagement: FlutterStateManagement?
     public let architecture: ArchitectureContract
+    public let entities: [EntityDefinition]
+    public let relations: [RelationDefinition]
+    public let fieldPresentations: [FieldPresentationDefinition]
+    public let roles: [RoleDefinition]
+    public let stateMachines: [BusinessStateMachineDefinition]
+    public let screens: [ScreenDefinition]
+    public let navigation: NavigationDefinition
+    public let offline: OfflineConfiguration
+    public let design: DesignConfiguration
+    public let templateBaseline: TemplateBaselineDefinition?
 
     public var hasSupportedTargetConfiguration: Bool {
         framework.isAvailable
@@ -122,18 +135,40 @@ public struct ProjectSpecification: Codable, Equatable, Sendable {
     }
 
     public init(
+        schemaVersion: Int = ProjectSpecification.currentSchemaVersion,
         identity: ProjectIdentity,
         framework: OutputFramework,
         targetPlatforms: Set<TargetPlatform>,
         backend: BackendProvider,
         flutterStateManagement: FlutterStateManagement?,
-        architecture: ArchitectureContract = .standard
+        architecture: ArchitectureContract = .standard,
+        entities: [EntityDefinition] = [],
+        relations: [RelationDefinition] = [],
+        fieldPresentations: [FieldPresentationDefinition] = [],
+        roles: [RoleDefinition] = [],
+        stateMachines: [BusinessStateMachineDefinition] = [],
+        screens: [ScreenDefinition] = [],
+        navigation: NavigationDefinition = NavigationDefinition(),
+        offline: OfflineConfiguration = .businessDefault,
+        design: DesignConfiguration = DesignConfiguration(),
+        templateBaseline: TemplateBaselineDefinition? = nil
     ) {
+        self.schemaVersion = schemaVersion
         self.identity = identity
         self.framework = framework
         self.targetPlatforms = targetPlatforms
         self.backend = backend
         self.flutterStateManagement = flutterStateManagement
         self.architecture = architecture
+        self.entities = entities
+        self.relations = relations
+        self.fieldPresentations = fieldPresentations
+        self.roles = roles
+        self.stateMachines = stateMachines
+        self.screens = screens
+        self.navigation = navigation
+        self.offline = offline
+        self.design = design
+        self.templateBaseline = templateBaseline
     }
 }
