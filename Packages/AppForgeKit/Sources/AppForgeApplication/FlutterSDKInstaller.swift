@@ -157,7 +157,9 @@ public struct FlutterReleaseCatalogClient: FlutterReleaseCatalogProviding {
 
         let manifest = try JSONDecoder().decode(FlutterReleaseManifest.self, from: data)
         guard manifest.baseURL == Self.allowedBaseURL else {
-            throw AppForgeError.configuration(message: "Das Flutter-Release-Manifest verwendet eine unerwartete Quelle.")
+            throw AppForgeError.configuration(
+                message: "Das Flutter-Release-Manifest verwendet eine unerwartete Quelle."
+            )
         }
 
         guard let release = manifest.releases.first(where: { candidate in
@@ -295,13 +297,13 @@ public struct SystemFlutterSDKValidator: FlutterSDKValidating {
 
 private enum HostFlutterArchitecture {
     static func current() throws -> FlutterSDKArchitecture {
-#if arch(arm64)
-        return .arm64
-#elseif arch(x86_64)
-        return .x64
-#else
-        throw AppForgeError.configuration(message: "Diese Mac-Prozessorarchitektur wird noch nicht unterstützt.")
-#endif
+        #if arch(arm64)
+            return .arm64
+        #elseif arch(x86_64)
+            return .x64
+        #else
+            throw AppForgeError.configuration(message: "Diese Mac-Prozessorarchitektur wird noch nicht unterstützt.")
+        #endif
     }
 }
 
