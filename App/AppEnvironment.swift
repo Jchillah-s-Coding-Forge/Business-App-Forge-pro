@@ -13,7 +13,8 @@ struct AppEnvironment {
             EnvironmentDoctorViewModel(
                 doctor: EnvironmentDoctorUseCase(detector: SystemToolDetector()),
                 preferencesStore: UserDefaultsToolchainPreferenceStore(),
-                projectOpener: SystemGeneratedProjectOpener()
+                projectOpener: SystemGeneratedProjectOpener(),
+                flutterInstaller: VerifiedFlutterSDKInstaller()
             )
         }
     )
@@ -26,7 +27,8 @@ struct AppEnvironment {
             EnvironmentDoctorViewModel(
                 doctor: EnvironmentDoctorUseCase(detector: SystemToolDetector()),
                 preferencesStore: UserDefaultsToolchainPreferenceStore(key: "appforge.toolchain.preferences.tests"),
-                projectOpener: SystemGeneratedProjectOpener()
+                projectOpener: SystemGeneratedProjectOpener(),
+                flutterInstaller: VerifiedFlutterSDKInstaller()
             )
         }
     )
