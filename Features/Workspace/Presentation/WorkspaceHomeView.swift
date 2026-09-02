@@ -165,8 +165,9 @@ private struct EnvironmentDoctorView: View {
             }
         } message: {
             Text(
-                "AppForge lädt das offizielle stabile Flutter-SDK, prüft dessen SHA-256 und installiert es unter "
-                    + "\(viewModel.flutterInstallParentPath)/flutter. Ein vorhandener flutter-Ordner wird niemals überschrieben."
+                "AppForge lädt das offizielle stabile Flutter-SDK, prüft dessen SHA-256 und installiert es "
+                    + "unter \(viewModel.flutterInstallParentPath)/flutter. "
+                    + "Ein vorhandener flutter-Ordner wird niemals überschrieben."
             )
         }
     }
