@@ -36,9 +36,15 @@ public enum FlutterInstallationPhase: String, Codable, Equatable, Sendable {
 public struct FlutterInstallationResult: Codable, Equatable, Sendable {
     public let sdkPath: String
     public let version: String
+    public let warnings: [String]
 
-    public init(sdkPath: String, version: String) {
+    public init(
+        sdkPath: String,
+        version: String,
+        warnings: [String] = []
+    ) {
         self.sdkPath = sdkPath
         self.version = version
+        self.warnings = warnings
     }
 }
