@@ -159,8 +159,8 @@ final class ProjectSpecificationAdvancedTests: XCTestCase {
     }
 
     func testOfflineArchitectureCannotDisableSSOTOrRequiredOutbox() {
-        var project = makeProject()
-        project.offline = OfflineConfiguration(
+        var draft = ProjectSpecificationDraft(snapshot: makeProject())
+        draft.offline = OfflineConfiguration(
             isEnabled: true,
             usesLocalSingleSourceOfTruth: false,
             usesSyncOutbox: false,
@@ -168,7 +168,7 @@ final class ProjectSpecificationAdvancedTests: XCTestCase {
             conflictResolution: .manualReview
         )
 
-        let issues = validator.validate(project)
+        let issues = validator.validate(draft.snapshot())
 
         XCTAssertTrue(issues.contains(.offlineSingleSourceOfTruthRequired))
         XCTAssertTrue(issues.contains(.offlineSyncOutboxRequired))
