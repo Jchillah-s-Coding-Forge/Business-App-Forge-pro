@@ -155,6 +155,20 @@ private struct EnvironmentDoctorView: View {
                 await viewModel.scan()
             }
         }
+        .alert(
+            "Flutter SDK installieren?",
+            isPresented: $viewModel.isPresentingFlutterInstallConfirmation
+        ) {
+            Button("Abbrechen", role: .cancel) {}
+            Button("Installieren") {
+                Task { await viewModel.installFlutter() }
+            }
+        } message: {
+            Text(
+                "AppForge lädt das offizielle stabile Flutter-SDK, prüft dessen SHA-256 und installiert es unter "
+                    + "\(viewModel.flutterInstallParentPath)/flutter. Ein vorhandener flutter-Ordner wird niemals überschrieben."
+            )
+        }
     }
 
     private var header: some View {
@@ -177,7 +191,7 @@ private struct EnvironmentDoctorView: View {
                 Label(viewModel.isScanning ? "Prüfe …" : "Jetzt prüfen", systemImage: "stethoscope")
             }
             .buttonStyle(.borderedProminent)
-            .disabled(!viewModel.canScan)
+            .disabled(!viewModel.canScan || viewModel.isInstallingFlutter)
         }
     }
 
@@ -222,20 +236,52 @@ private struct EnvironmentDoctorView: View {
                     Button("Vorhandenes Flutter auswählen") {
                         chooseFlutterSDK()
                     }
+                    .disabled(viewModel.isInstallingFlutter)
+
+                    Button("Flutter installieren …") {
+                        chooseFlutterInstallLocation()
+                    }
+                    .disabled(viewModel.isInstallingFlutter)
 
                     if !viewModel.flutterSDKPath.isEmpty {
                         Button("Auswahl löschen") {
                             viewModel.clearFlutterSDKPath()
-                            Task { await viewModel.scan() }
                         }
+                        .disabled(viewModel.isInstallingFlutter)
                     }
                 }
 
                 Text(
-                    "Der ausgewählte Ordner muss ein Flutter SDK enthalten. AppForge erwartet darin bin/flutter."
+                    "Vorhandenes SDK: Wählen Sie den Flutter-Ordner mit bin/flutter. Neue Installation: "
+                        + "Wählen Sie den übergeordneten Zielordner; AppForge erstellt darin flutter."
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+                if viewModel.isInstallingFlutter, let phase = viewModel.installationPhase {
+                    Divider()
+                    HStack(spacing: AppForgeSpacing.medium) {
+                        ProgressView()
+                            .controlSize(.small)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(installationPhaseTitle(phase))
+                                .font(.headline)
+                            Text(viewModel.flutterInstallParentPath)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                        }
+                    }
+                }
+
+                if !viewModel.installationWarnings.isEmpty {
+                    Divider()
+                    ForEach(viewModel.installationWarnings, id: \.self) { warning in
+                        Label(warning, systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                }
             }
         }
     }
@@ -350,7 +396,30 @@ private struct EnvironmentDoctorView: View {
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
         viewModel.setFlutterSDKPath(url.path)
-        Task { await viewModel.scan() }
+    }
+
+    private func chooseFlutterInstallLocation() {
+        let panel = NSOpenPanel()
+        panel.title = "Installationsordner für Flutter wählen"
+        panel.prompt = "Ordner wählen"
+        panel.message = "AppForge erstellt in diesem Ordner ein neues Unterverzeichnis namens flutter."
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        viewModel.requestFlutterInstallation(into: url.path)
+    }
+
+    private func installationPhaseTitle(_ phase: FlutterInstallationPhase) -> String {
+        switch phase {
+        case .resolvingRelease: "Stabile Flutter-Version wird ermittelt …"
+        case .downloading: "Flutter SDK wird heruntergeladen …"
+        case .verifying: "SHA-256 wird geprüft …"
+        case .extracting: "Flutter SDK wird vorbereitet …"
+        case .validating: "Installation wird validiert …"
+        case .completed: "Flutter SDK ist installiert"
+        }
     }
 
     private func statusIcon(_ availability: ToolAvailability) -> String {
