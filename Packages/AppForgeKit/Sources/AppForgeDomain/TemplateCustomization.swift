@@ -39,26 +39,14 @@ public struct TemplateCustomizationService: Sendable {
 
     public func diff(_ specification: ProjectSpecification) -> [TemplateDiffEntry] {
         diff(
-            entities: specification.entities,
-            relations: specification.relations,
-            presentations: specification.fieldPresentations,
-            roles: specification.roles,
-            stateMachines: specification.stateMachines,
-            screens: specification.screens,
-            navigation: specification.navigation,
+            current: TemplateBusinessModelState(specification: specification),
             baseline: specification.templateBaseline
         )
     }
 
     public func diff(_ draft: ProjectSpecificationDraft) -> [TemplateDiffEntry] {
         diff(
-            entities: draft.entities,
-            relations: draft.relations,
-            presentations: draft.fieldPresentations,
-            roles: draft.roles,
-            stateMachines: draft.stateMachines,
-            screens: draft.screens,
-            navigation: draft.navigation,
+            current: TemplateBusinessModelState(draft: draft),
             baseline: draft.templateBaseline
         )
     }
@@ -80,7 +68,6 @@ public struct TemplateCustomizationService: Sendable {
         else {
             return
         }
-
         replaceOrAppend(baselineEntity, in: &draft.entities)
     }
 
@@ -100,7 +87,6 @@ public struct TemplateCustomizationService: Sendable {
             draft.entities.append(baselineEntity)
             return
         }
-
         replaceOrAppend(baselineField, in: &draft.entities[entityIndex].fields)
     }
 
@@ -155,34 +141,28 @@ public struct TemplateCustomizationService: Sendable {
     }
 
     private func diff(
-        entities: [EntityDefinition],
-        relations: [RelationDefinition],
-        presentations: [FieldPresentationDefinition],
-        roles: [RoleDefinition],
-        stateMachines: [BusinessStateMachineDefinition],
-        screens: [ScreenDefinition],
-        navigation: NavigationDefinition,
+        current: TemplateBusinessModelState,
         baseline: TemplateBaselineDefinition?
     ) -> [TemplateDiffEntry] {
         guard let baseline else { return [] }
         var result: [TemplateDiffEntry] = []
 
-        result += diffIdentified(current: entities, baseline: baseline.entities, kind: .entity)
-        result += diffIdentified(current: relations, baseline: baseline.relations, kind: .relation)
+        result += diffIdentified(current: current.entities, baseline: baseline.entities, kind: .entity)
+        result += diffIdentified(current: current.relations, baseline: baseline.relations, kind: .relation)
         result += diffIdentified(
-            current: presentations,
+            current: current.presentations,
             baseline: baseline.fieldPresentations,
             kind: .presentation
         )
-        result += diffIdentified(current: roles, baseline: baseline.roles, kind: .role)
+        result += diffIdentified(current: current.roles, baseline: baseline.roles, kind: .role)
         result += diffIdentified(
-            current: stateMachines,
+            current: current.stateMachines,
             baseline: baseline.stateMachines,
             kind: .stateMachine
         )
-        result += diffIdentified(current: screens, baseline: baseline.screens, kind: .screen)
+        result += diffIdentified(current: current.screens, baseline: baseline.screens, kind: .screen)
 
-        if navigation != baseline.navigation {
+        if current.navigation != baseline.navigation {
             result.append(
                 TemplateDiffEntry(
                     objectKind: .navigation,
@@ -191,11 +171,10 @@ public struct TemplateCustomizationService: Sendable {
                 )
             )
         }
-
         return result
     }
 
-    private func diffIdentified<Value: Identifiable & Equatable>(
+    private func diffIdentified<Value: Equatable & Identifiable>(
         current: [Value],
         baseline: [Value],
         kind: TemplateObjectKind
@@ -227,5 +206,35 @@ public struct TemplateCustomizationService: Sendable {
         } else {
             values.append(value)
         }
+    }
+}
+
+private struct TemplateBusinessModelState {
+    let entities: [EntityDefinition]
+    let relations: [RelationDefinition]
+    let presentations: [FieldPresentationDefinition]
+    let roles: [RoleDefinition]
+    let stateMachines: [BusinessStateMachineDefinition]
+    let screens: [ScreenDefinition]
+    let navigation: NavigationDefinition
+
+    init(specification: ProjectSpecification) {
+        entities = specification.entities
+        relations = specification.relations
+        presentations = specification.fieldPresentations
+        roles = specification.roles
+        stateMachines = specification.stateMachines
+        screens = specification.screens
+        navigation = specification.navigation
+    }
+
+    init(draft: ProjectSpecificationDraft) {
+        entities = draft.entities
+        relations = draft.relations
+        presentations = draft.fieldPresentations
+        roles = draft.roles
+        stateMachines = draft.stateMachines
+        screens = draft.screens
+        navigation = draft.navigation
     }
 }
