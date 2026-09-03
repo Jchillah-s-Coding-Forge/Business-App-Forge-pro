@@ -16,7 +16,7 @@ enum SystemToolDetectionSupport {
         return nil
     }
 
-    static func run(executablePath: String, arguments: [String]) -> CommandExecution {
+    static func run(executablePath: String, arguments: [String]) -> ToolCommandExecution {
         let process = Process()
         let pipe = Pipe()
         process.executableURL = URL(fileURLWithPath: executablePath)
@@ -30,9 +30,9 @@ enum SystemToolDetectionSupport {
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             let output = (String(data: data, encoding: .utf8) ?? "")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-            return CommandExecution(exitCode: process.terminationStatus, output: output)
+            return ToolCommandExecution(exitCode: process.terminationStatus, output: output)
         } catch {
-            return CommandExecution(exitCode: -1, output: error.localizedDescription)
+            return ToolCommandExecution(exitCode: -1, output: error.localizedDescription)
         }
     }
 
@@ -90,7 +90,7 @@ struct ToolCandidate {
     let versionArguments: [String]?
 }
 
-struct CommandExecution {
+struct ToolCommandExecution {
     let exitCode: Int32
     let output: String
 }
