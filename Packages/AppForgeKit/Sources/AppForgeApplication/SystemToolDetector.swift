@@ -10,11 +10,11 @@ public struct SystemToolDetector: ToolDetector {
     ) async -> ToolDetectionResult {
         switch requirement.id {
         case .xcode:
-            return detectXcode(requirement: requirement)
+            detectXcode(requirement: requirement)
         case .androidSDK:
-            return detectAndroidSDK(requirement: requirement)
+            detectAndroidSDK(requirement: requirement)
         default:
-            return detectExecutableTool(
+            detectExecutableTool(
                 requirement: requirement,
                 flutterSDKPath: flutterSDKPath
             )
@@ -161,7 +161,9 @@ public struct SystemToolDetector: ToolDetector {
                 availability: .missing,
                 version: nil,
                 path: root,
-                detail: execution.output.isEmpty ? "Android Platform Tools konnten nicht ausgeführt werden." : execution.output
+                detail: execution.output.isEmpty
+                    ? "Android Platform Tools konnten nicht ausgeführt werden."
+                    : execution.output
             )
         }
 
