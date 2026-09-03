@@ -4,10 +4,13 @@ public enum ToolIdentifier: String, CaseIterable, Codable, Identifiable, Sendabl
     case git
     case flutter
     case xcode
+    case xcodeGen
     case androidSDK
     case java
     case vsCode
     case androidStudio
+    case supabaseCLI
+    case docker
 
     public var id: String {
         rawValue

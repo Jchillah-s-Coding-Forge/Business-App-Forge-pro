@@ -35,6 +35,9 @@ final class EnvironmentDoctorViewModel {
     private let preferencesStore: any ToolchainPreferenceStore
     private let projectOpener: any GeneratedProjectOpening
     private let flutterInstaller: any FlutterSDKInstalling
+    private let reportExporter: any ToolchainReportExporting
+    private let setupAdvisor: ToolSetupAdvisor
+    private let externalURLLauncher: any ExternalURLLaunching
     private var configurationRevision = 0
 
     var selectedPlatforms: Set<TargetPlatform> = [.iOS, .android]
@@ -59,12 +62,18 @@ final class EnvironmentDoctorViewModel {
         doctor: EnvironmentDoctorUseCase,
         preferencesStore: any ToolchainPreferenceStore,
         projectOpener: any GeneratedProjectOpening,
-        flutterInstaller: any FlutterSDKInstalling
+        flutterInstaller: any FlutterSDKInstalling,
+        reportExporter: any ToolchainReportExporting = JSONToolchainReportExporter(),
+        setupAdvisor: ToolSetupAdvisor = ToolSetupAdvisor(),
+        externalURLLauncher: any ExternalURLLaunching = SystemExternalURLLauncher()
     ) {
         self.doctor = doctor
         self.preferencesStore = preferencesStore
         self.projectOpener = projectOpener
         self.flutterInstaller = flutterInstaller
+        self.reportExporter = reportExporter
+        self.setupAdvisor = setupAdvisor
+        self.externalURLLauncher = externalURLLauncher
 
         let preferences = preferencesStore.load()
         flutterSDKPath = preferences.flutterSDKPath ?? ""
@@ -163,6 +172,36 @@ final class EnvironmentDoctorViewModel {
         guard revision == configurationRevision else { return }
         report = newReport
         isScanning = false
+    }
+
+    func exportReport(to url: URL) {
+        guard let report else {
+            errorMessage = "Es gibt noch keinen Toolchain-Report zum Speichern."
+            return
+        }
+
+        do {
+            try reportExporter.export(report, to: url)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func setupRecommendation(for result: ToolDetectionResult) -> ToolSetupRecommendation? {
+        guard result.availability != .ready else { return nil }
+        return setupAdvisor.recommendation(for: result.id)
+    }
+
+    func openSetup(for result: ToolDetectionResult) {
+        guard let recommendation = setupRecommendation(for: result) else { return }
+
+        do {
+            try externalURLLauncher.open(urlString: recommendation.urlString)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func openGeneratedProject(at url: URL) {
