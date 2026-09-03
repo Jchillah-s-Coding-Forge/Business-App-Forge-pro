@@ -8,10 +8,10 @@ public struct PackageResolver: Sendable {
         self.contractValidator = contractValidator
     }
 
-    public func resolve<Registry: PackageRegistry>(
+    public func resolve(
         requests: [ForgePackageRequirement],
         specification: ProjectSpecification,
-        registry: Registry
+        registry: some PackageRegistry
     ) throws -> ResolvedProductGraph {
         let initialState = ResolutionState(
             selected: [:],
@@ -26,10 +26,10 @@ public struct PackageResolver: Sendable {
         return try makeGraph(from: selected)
     }
 
-    private func resolveState<Registry: PackageRegistry>(
+    private func resolveState(
         _ incomingState: ResolutionState,
         specification: ProjectSpecification,
-        registry: Registry
+        registry: some PackageRegistry
     ) throws -> [ForgePackageID: ForgePackageContract] {
         guard !incomingState.pending.isEmpty else {
             try validateConflicts(incomingState.selected)
@@ -81,11 +81,11 @@ public struct PackageResolver: Sendable {
         )
     }
 
-    private func validatedCandidates<Registry: PackageRegistry>(
+    private func validatedCandidates(
         for packageID: ForgePackageID,
         constraints: [ForgeVersionConstraint],
         specification: ProjectSpecification,
-        registry: Registry
+        registry: some PackageRegistry
     ) throws -> [ForgePackageContract] {
         let registered = registry.contracts(for: packageID)
         guard !registered.isEmpty else {
@@ -192,7 +192,9 @@ public struct PackageResolver: Sendable {
         var result: [ForgePackageContract] = []
 
         func visit(_ packageID: ForgePackageID) throws {
-            if permanent.contains(packageID) { return }
+            if permanent.contains(packageID) {
+                return
+            }
             if temporary.contains(packageID) {
                 let cycleStart = path.firstIndex(of: packageID) ?? path.startIndex
                 let cycle = Array(path[cycleStart...]) + [packageID]
@@ -218,8 +220,12 @@ public struct PackageResolver: Sendable {
     }
 
     static func contractSort(_ lhs: ForgePackageContract, _ rhs: ForgePackageContract) -> Bool {
-        if lhs.version < rhs.version { return false }
-        if rhs.version < lhs.version { return true }
+        if lhs.version < rhs.version {
+            return false
+        }
+        if rhs.version < lhs.version {
+            return true
+        }
         if lhs.version.description != rhs.version.description {
             return lhs.version.description < rhs.version.description
         }
@@ -227,7 +233,9 @@ public struct PackageResolver: Sendable {
     }
 
     private static func requirementSort(_ lhs: ForgePackageRequirement, _ rhs: ForgePackageRequirement) -> Bool {
-        if lhs.packageID != rhs.packageID { return lhs.packageID < rhs.packageID }
+        if lhs.packageID != rhs.packageID {
+            return lhs.packageID < rhs.packageID
+        }
         return lhs.versionConstraint.description < rhs.versionConstraint.description
     }
 }

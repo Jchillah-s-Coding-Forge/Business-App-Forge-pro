@@ -56,10 +56,14 @@ public struct ForgeSemanticVersion:
         }
 
         let prerelease = Self.parseIdentifiers(prereleaseValue, numericLeadingZeroForbidden: true)
-        if prereleaseValue != nil, prerelease == nil { return nil }
+        if prereleaseValue != nil, prerelease == nil {
+            return nil
+        }
 
         let buildMetadata = Self.parseIdentifiers(build, numericLeadingZeroForbidden: false)
-        if build != nil, buildMetadata == nil { return nil }
+        if build != nil, buildMetadata == nil {
+            return nil
+        }
 
         self.init(
             major: major,
@@ -82,9 +86,15 @@ public struct ForgeSemanticVersion:
     }
 
     public static func < (lhs: ForgeSemanticVersion, rhs: ForgeSemanticVersion) -> Bool {
-        if lhs.major != rhs.major { return lhs.major < rhs.major }
-        if lhs.minor != rhs.minor { return lhs.minor < rhs.minor }
-        if lhs.patch != rhs.patch { return lhs.patch < rhs.patch }
+        if lhs.major != rhs.major {
+            return lhs.major < rhs.major
+        }
+        if lhs.minor != rhs.minor {
+            return lhs.minor < rhs.minor
+        }
+        if lhs.patch != rhs.patch {
+            return lhs.patch < rhs.patch
+        }
 
         if lhs.prerelease.isEmpty != rhs.prerelease.isEmpty {
             return !lhs.prerelease.isEmpty
@@ -96,7 +106,9 @@ public struct ForgeSemanticVersion:
         for index in 0 ..< min(lhs.prerelease.count, rhs.prerelease.count) {
             let left = lhs.prerelease[index]
             let right = rhs.prerelease[index]
-            if left == right { continue }
+            if left == right {
+                continue
+            }
 
             let leftNumber = Int(left)
             let rightNumber = Int(right)

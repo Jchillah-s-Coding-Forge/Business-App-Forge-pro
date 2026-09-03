@@ -12,19 +12,19 @@ final class PackageResolverTests: XCTestCase {
         let inventoryV1 = try package(
             "feature.inventory",
             "1.5.0",
-            dependencies: [try requirement("foundation.core", from: "2.0.0", to: "3.0.0")],
+            dependencies: [requirement("foundation.core", from: "2.0.0", to: "3.0.0")],
             requires: ["identity.current_user"]
         )
         let inventoryV2 = try package(
             "feature.inventory",
             "2.5.0",
-            dependencies: [try requirement("foundation.core", from: "2.0.0", to: "3.0.0")],
+            dependencies: [requirement("foundation.core", from: "2.0.0", to: "3.0.0")],
             requires: ["identity.current_user"]
         )
         let policy = try package(
             "policy.legacy",
             "1.0.0",
-            dependencies: [try requirement("feature.inventory", from: "1.0.0", to: "2.0.0")]
+            dependencies: [requirement("feature.inventory", from: "1.0.0", to: "2.0.0")]
         )
         let registry = try InMemoryPackageRegistry(contracts: [inventoryV2, policy, core, inventoryV1])
 
@@ -35,7 +35,7 @@ final class PackageResolverTests: XCTestCase {
         )
 
         XCTAssertEqual(
-            graph.packages.map { $0.contract.id.rawValue },
+            graph.packages.map(\.contract.id.rawValue),
             ["foundation.core", "feature.inventory", "policy.legacy"]
         )
         XCTAssertEqual(
@@ -162,9 +162,9 @@ private func requirement(
     from minimum: String,
     to maximum: String
 ) throws -> ForgePackageRequirement {
-    ForgePackageRequirement(
+    try ForgePackageRequirement(
         packageID: ForgePackageID(packageID),
-        versionConstraint: .range(from: try version(minimum), to: try version(maximum))
+        versionConstraint: .range(from: version(minimum), to: version(maximum))
     )
 }
 
@@ -178,9 +178,9 @@ private func package(
     frameworks: [OutputFramework] = [.flutter],
     backends: [BackendProvider] = [.supabase]
 ) throws -> ForgePackageContract {
-    ForgePackageContract(
+    try ForgePackageContract(
         id: ForgePackageID(packageID),
-        version: try version(versionValue),
+        version: version(versionValue),
         kind: .feature,
         dependencies: dependencies,
         requiredCapabilities: requires,

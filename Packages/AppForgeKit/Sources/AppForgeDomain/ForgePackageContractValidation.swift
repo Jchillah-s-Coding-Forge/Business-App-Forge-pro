@@ -21,7 +21,9 @@ public enum ForgePackageContractValidationIssue: Equatable, Sendable {
 public struct ForgePackageContractValidationReport: Equatable, Sendable {
     public let issues: [ForgePackageContractValidationIssue]
 
-    public var isValid: Bool { issues.isEmpty }
+    public var isValid: Bool {
+        issues.isEmpty
+    }
 
     public init(issues: [ForgePackageContractValidationIssue]) {
         self.issues = issues

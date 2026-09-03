@@ -23,7 +23,9 @@ public struct ForgePackageID:
         self.init(rawValue: value)
     }
 
-    public var description: String { rawValue }
+    public var description: String {
+        rawValue
+    }
 
     public static func < (lhs: ForgePackageID, rhs: ForgePackageID) -> Bool {
         lhs.rawValue < rhs.rawValue
@@ -53,7 +55,9 @@ public struct ForgeCapabilityID:
         self.init(rawValue: value)
     }
 
-    public var description: String { rawValue }
+    public var description: String {
+        rawValue
+    }
 
     public static func < (lhs: ForgeCapabilityID, rhs: ForgeCapabilityID) -> Bool {
         lhs.rawValue < rhs.rawValue

@@ -26,10 +26,10 @@ public struct ResolveProductPackagesUseCase: Sendable {
         self.lockfileBuilder = lockfileBuilder
     }
 
-    public func callAsFunction<Registry: PackageRegistry>(
+    public func callAsFunction(
         specification: ProjectSpecification,
         requests: [ForgePackageRequirement],
-        registry: Registry
+        registry: some PackageRegistry
     ) throws -> PackageResolutionOutput {
         let specificationIssues = specificationValidator.validate(specification)
         guard specificationIssues.isEmpty else {

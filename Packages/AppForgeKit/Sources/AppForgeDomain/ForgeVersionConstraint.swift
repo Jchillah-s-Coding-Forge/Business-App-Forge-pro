@@ -36,9 +36,15 @@ public struct ForgeVersionConstraint: Codable, Equatable, Sendable, CustomString
     }
 
     public func accepts(_ version: ForgeSemanticVersion) -> Bool {
-        if let exact, version != exact { return false }
-        if let minimumInclusive, version < minimumInclusive { return false }
-        if let maximumExclusive, version >= maximumExclusive { return false }
+        if let exact, version != exact {
+            return false
+        }
+        if let minimumInclusive, version < minimumInclusive {
+            return false
+        }
+        if let maximumExclusive, version >= maximumExclusive {
+            return false
+        }
         return true
     }
 
@@ -47,14 +53,20 @@ public struct ForgeVersionConstraint: Codable, Equatable, Sendable, CustomString
             return false
         }
         if let exact {
-            if let minimumInclusive, exact < minimumInclusive { return false }
-            if let maximumExclusive, exact >= maximumExclusive { return false }
+            if let minimumInclusive, exact < minimumInclusive {
+                return false
+            }
+            if let maximumExclusive, exact >= maximumExclusive {
+                return false
+            }
         }
         return true
     }
 
     public var description: String {
-        if let exact { return "=\(exact)" }
+        if let exact {
+            return "=\(exact)"
+        }
         switch (minimumInclusive, maximumExclusive) {
         case let (.some(minimum), .some(maximum)):
             return ">=\(minimum) <\(maximum)"

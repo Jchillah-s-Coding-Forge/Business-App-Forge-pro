@@ -5,9 +5,9 @@ final class ForgePackageContractValidatorTests: XCTestCase {
     private let validator = ForgePackageContractValidator()
 
     func testAcceptsPinnedGitHubSource() throws {
-        let contract = ForgePackageContract(
+        let contract = try ForgePackageContract(
             id: "feature.inventory",
-            version: try version("2.0.0"),
+            version: version("2.0.0"),
             kind: .feature,
             providedCapabilities: ["inventory.list"],
             supportedFrameworks: [.flutter],
@@ -24,9 +24,9 @@ final class ForgePackageContractValidatorTests: XCTestCase {
     }
 
     func testRejectsUnpinnedRemoteSourceAndInvalidIdentifiers() throws {
-        let contract = ForgePackageContract(
+        let contract = try ForgePackageContract(
             id: "Inventory",
-            version: try version("1.0.0"),
+            version: version("1.0.0"),
             kind: .feature,
             requiredCapabilities: ["invalid"],
             source: ForgePackageSource(
@@ -45,13 +45,13 @@ final class ForgePackageContractValidatorTests: XCTestCase {
 
     func testRejectsSelfDependenciesAndUnsatisfiableRanges() throws {
         let packageID = ForgePackageID("feature.inventory")
-        let constraint = ForgeVersionConstraint(
-            minimumInclusive: try version("2.0.0"),
-            maximumExclusive: try version("2.0.0")
+        let constraint = try ForgeVersionConstraint(
+            minimumInclusive: version("2.0.0"),
+            maximumExclusive: version("2.0.0")
         )
-        let contract = ForgePackageContract(
+        let contract = try ForgePackageContract(
             id: packageID,
-            version: try version("1.0.0"),
+            version: version("1.0.0"),
             kind: .feature,
             dependencies: [ForgePackageRequirement(packageID: packageID, versionConstraint: constraint)]
         )
