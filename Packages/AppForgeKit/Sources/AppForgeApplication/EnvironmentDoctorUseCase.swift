@@ -29,7 +29,7 @@ public struct ToolchainRequirements: Sendable {
             requirements += androidRequirements
         }
 
-        requirements += optionalIDERequirements
+        requirements += optionalDeveloperRequirements
         return requirements
     }
 
@@ -63,8 +63,8 @@ public struct ToolchainRequirements: Sendable {
         [
             ToolRequirement(
                 id: .xcode,
-                displayName: "Xcode",
-                purpose: "Apple SDKs, Simulatoren, Signierung und Builds",
+                displayName: "Xcode + Command Line Tools",
+                purpose: "Apple SDKs, Simulatoren, Signierung, Compiler und Builds",
                 isRequired: true,
                 versionConstraint: .init(minimum: SupportedToolVersions.xcode),
                 installStrategy: .externalApplication
@@ -76,8 +76,8 @@ public struct ToolchainRequirements: Sendable {
         [
             ToolRequirement(
                 id: .androidSDK,
-                displayName: "Android Platform Tools",
-                purpose: "Android-Gerätekommunikation und SDK-Buildumgebung",
+                displayName: "Android SDK",
+                purpose: "Platform Tools, Command-line Tools, Build Tools, Plattformen und Lizenzen",
                 isRequired: true,
                 versionConstraint: .init(minimum: SupportedToolVersions.androidPlatformTools),
                 installStrategy: .externalApplication
@@ -93,7 +93,7 @@ public struct ToolchainRequirements: Sendable {
         ]
     }
 
-    private var optionalIDERequirements: [ToolRequirement] {
+    private var optionalDeveloperRequirements: [ToolRequirement] {
         [
             ToolRequirement(
                 id: .vsCode,
@@ -105,7 +105,28 @@ public struct ToolchainRequirements: Sendable {
             ToolRequirement(
                 id: .androidStudio,
                 displayName: "Android Studio",
-                purpose: "Optionale Android-IDE mit SDK- und Flutter-Unterstützung",
+                purpose: "Optionale Android-IDE und komfortable Android-SDK-Verwaltung",
+                isRequired: false,
+                installStrategy: .externalApplication
+            ),
+            ToolRequirement(
+                id: .xcodeGen,
+                displayName: "XcodeGen",
+                purpose: "Optionales Entwicklerwerkzeug zur reproduzierbaren Regenerierung des AppForge-Xcode-Projekts",
+                isRequired: false,
+                installStrategy: .manual
+            ),
+            ToolRequirement(
+                id: .supabaseCLI,
+                displayName: "Supabase CLI",
+                purpose: "Optional für lokale Supabase-Entwicklung, Migrationen und Backend-Validierung",
+                isRequired: false,
+                installStrategy: .manual
+            ),
+            ToolRequirement(
+                id: .docker,
+                displayName: "Docker-kompatible Runtime",
+                purpose: "Optional für den lokalen Supabase-Stack",
                 isRequired: false,
                 installStrategy: .externalApplication
             )
@@ -145,220 +166,6 @@ public struct EnvironmentDoctorUseCase: Sendable {
         }
 
         return ToolchainReport(results: results)
-    }
-}
-
-public struct SystemToolDetector: ToolDetector {
-    public init() {}
-
-    public func detect(
-        requirement: ToolRequirement,
-        flutterSDKPath: String?
-    ) async -> ToolDetectionResult {
-        guard let candidate = candidate(for: requirement.id, flutterSDKPath: flutterSDKPath) else {
-            return ToolDetectionResult(
-                requirement: requirement,
-                availability: .missing,
-                version: nil,
-                path: nil,
-                detail: missingDetail(for: requirement.id)
-            )
-        }
-
-        guard let arguments = candidate.versionArguments else {
-            return ToolDetectionResult(
-                requirement: requirement,
-                availability: .ready,
-                version: nil,
-                path: candidate.path,
-                detail: "Gefunden"
-            )
-        }
-
-        let execution = run(executablePath: candidate.executablePath, arguments: arguments)
-        guard execution.exitCode == 0 else {
-            return ToolDetectionResult(
-                requirement: requirement,
-                availability: .missing,
-                version: nil,
-                path: candidate.path,
-                detail: execution.output.isEmpty ? "Werkzeug konnte nicht ausgeführt werden." : execution.output
-            )
-        }
-
-        let version = detectedVersion(for: requirement.id, output: execution.output)
-        let availability: ToolAvailability = requirement.versionConstraint.accepts(version) ? .ready : .incompatible
-        let detail = availability == .ready ? "Bereit" : incompatibleDetail(requirement: requirement, version: version)
-
-        return ToolDetectionResult(
-            requirement: requirement,
-            availability: availability,
-            version: version,
-            path: candidate.path,
-            detail: detail
-        )
-    }
-
-    private func candidate(for identifier: ToolIdentifier, flutterSDKPath: String?) -> ToolCandidate? {
-        switch identifier {
-        case .git:
-            executableCandidate(command: "git", arguments: ["--version"])
-        case .flutter:
-            flutterCandidate(preferredSDKPath: flutterSDKPath)
-        case .xcode:
-            executableCandidate(command: "xcodebuild", arguments: ["-version"])
-        case .androidSDK:
-            androidSDKCandidate()
-        case .java:
-            executableCandidate(command: "java", arguments: ["-version"])
-        case .vsCode:
-            applicationCandidate(
-                applicationPath: "/Applications/Visual Studio Code.app",
-                command: "code",
-                arguments: ["--version"]
-            )
-        case .androidStudio:
-            applicationCandidate(
-                applicationPath: "/Applications/Android Studio.app",
-                command: nil,
-                arguments: nil
-            )
-        }
-    }
-
-    private func flutterCandidate(preferredSDKPath: String?) -> ToolCandidate? {
-        if let preferredSDKPath, !preferredSDKPath.isEmpty {
-            let sdkRoot = NSString(string: preferredSDKPath).expandingTildeInPath
-            let executable = URL(fileURLWithPath: sdkRoot)
-                .appendingPathComponent("bin")
-                .appendingPathComponent("flutter")
-                .path
-
-            guard FileManager.default.isExecutableFile(atPath: executable) else { return nil }
-            return ToolCandidate(path: sdkRoot, executablePath: executable, versionArguments: ["--version"])
-        }
-
-        return executableCandidate(command: "flutter", arguments: ["--version"])
-    }
-
-    private func androidSDKCandidate() -> ToolCandidate? {
-        let environment = ProcessInfo.processInfo.environment
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        let roots = [
-            environment["ANDROID_SDK_ROOT"],
-            environment["ANDROID_HOME"],
-            "\(home)/Library/Android/sdk"
-        ].compactMap(\.self)
-
-        for root in roots {
-            let adb = URL(fileURLWithPath: root)
-                .appendingPathComponent("platform-tools")
-                .appendingPathComponent("adb")
-                .path
-            if FileManager.default.isExecutableFile(atPath: adb) {
-                return ToolCandidate(path: root, executablePath: adb, versionArguments: ["version"])
-            }
-        }
-
-        return nil
-    }
-
-    private func applicationCandidate(
-        applicationPath: String,
-        command: String?,
-        arguments: [String]?
-    ) -> ToolCandidate? {
-        if let command, let executable = executablePath(for: command) {
-            return ToolCandidate(path: executable, executablePath: executable, versionArguments: arguments)
-        }
-
-        guard FileManager.default.fileExists(atPath: applicationPath) else { return nil }
-        return ToolCandidate(path: applicationPath, executablePath: applicationPath, versionArguments: nil)
-    }
-
-    private func executableCandidate(command: String, arguments: [String]) -> ToolCandidate? {
-        guard let path = executablePath(for: command) else { return nil }
-        return ToolCandidate(path: path, executablePath: path, versionArguments: arguments)
-    }
-
-    private func executablePath(for command: String) -> String? {
-        let environment = ProcessInfo.processInfo.environment
-        let pathValue = environment["PATH"] ?? "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
-
-        for folder in pathValue.split(separator: ":") {
-            let candidate = URL(fileURLWithPath: String(folder)).appendingPathComponent(command).path
-            if FileManager.default.isExecutableFile(atPath: candidate) {
-                return candidate
-            }
-        }
-
-        return nil
-    }
-
-    private func run(executablePath: String, arguments: [String]) -> CommandExecution {
-        let process = Process()
-        let pipe = Pipe()
-        process.executableURL = URL(fileURLWithPath: executablePath)
-        process.arguments = arguments
-        process.standardOutput = pipe
-        process.standardError = pipe
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = (String(data: data, encoding: .utf8) ?? "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            return CommandExecution(exitCode: process.terminationStatus, output: output)
-        } catch {
-            return CommandExecution(exitCode: -1, output: error.localizedDescription)
-        }
-    }
-
-    private func detectedVersion(for identifier: ToolIdentifier, output: String) -> SemanticVersion? {
-        if identifier == .androidSDK {
-            let versionLine = output
-                .split(whereSeparator: \.isNewline)
-                .map(String.init)
-                .first { $0.hasPrefix("Version ") }
-
-            if let versionLine {
-                return SemanticVersion(parsing: versionLine)
-            }
-        }
-
-        return SemanticVersion(parsing: output)
-    }
-
-    private func incompatibleDetail(
-        requirement: ToolRequirement,
-        version: SemanticVersion?
-    ) -> String {
-        guard let minimum = requirement.versionConstraint.minimum else {
-            return "Die erkannte Version ist nicht kompatibel."
-        }
-
-        let actual = version?.description ?? "unbekannt"
-        return "Version \(actual) erkannt. AppForge benötigt mindestens \(minimum)."
-    }
-
-    private func missingDetail(for identifier: ToolIdentifier) -> String {
-        switch identifier {
-        case .flutter:
-            "Kein gültiges Flutter SDK gefunden. Wählen Sie ein vorhandenes SDK oder einen Installationsort."
-        case .xcode:
-            "Xcode wurde nicht gefunden. Die Installation erfolgt über Apples offiziellen Weg."
-        case .androidSDK:
-            "Android Platform Tools wurden nicht gefunden. Android Studio kann das SDK verwalten."
-        case .java:
-            "Kein ausführbares JDK gefunden. Das mit Android Studio gelieferte JDK kann verwendet werden."
-        case .git:
-            "Git wurde nicht gefunden."
-        case .vsCode:
-            "VS Code ist optional und wurde nicht gefunden."
-        case .androidStudio:
-            "Android Studio ist optional und wurde nicht gefunden."
-        }
     }
 }
 
@@ -419,21 +226,10 @@ public struct SystemGeneratedProjectOpener: GeneratedProjectOpening {
     }
 }
 
-private enum SupportedToolVersions {
+enum SupportedToolVersions {
     static let git = SemanticVersion(major: 2, minor: 40)
     static let flutter = SemanticVersion(major: 3, minor: 44)
     static let xcode = SemanticVersion(major: 16, minor: 0)
     static let androidPlatformTools = SemanticVersion(major: 35, minor: 0)
     static let java = SemanticVersion(major: 17, minor: 0)
-}
-
-private struct ToolCandidate {
-    let path: String
-    let executablePath: String
-    let versionArguments: [String]?
-}
-
-private struct CommandExecution {
-    let exitCode: Int32
-    let output: String
 }
