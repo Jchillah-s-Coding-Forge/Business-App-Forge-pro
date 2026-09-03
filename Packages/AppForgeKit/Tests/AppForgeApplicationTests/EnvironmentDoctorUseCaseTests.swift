@@ -43,6 +43,26 @@ final class EnvironmentDoctorUseCaseTests: XCTestCase {
         XCTAssertNotNil(required.first { $0.id == .java }?.versionConstraint.minimum)
     }
 
+    func testDeveloperConvenienceToolsAreAlwaysOptional() {
+        let requirements = ToolchainRequirements().requirements(
+            for: .flutter,
+            targetPlatforms: [.iOS, .android]
+        )
+        let optionalIdentifiers: Set<ToolIdentifier> = [
+            .vsCode,
+            .androidStudio,
+            .xcodeGen,
+            .supabaseCLI,
+            .docker
+        ]
+
+        for identifier in optionalIdentifiers {
+            let requirement = requirements.first { $0.id == identifier }
+            XCTAssertNotNil(requirement)
+            XCTAssertFalse(requirement?.isRequired == true)
+        }
+    }
+
     func testMissingRequiredToolMakesReportNotReady() async {
         let detector = StubToolDetector(missing: [.flutter])
         let doctor = EnvironmentDoctorUseCase(detector: detector)
