@@ -133,7 +133,7 @@
 		363E787A86BB609194BC44BD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				43E990E1112FB656AAEEAC7 /* AppForgePro.app */,
+				43E990E1112FB6567DAEEAC7 /* AppForgePro.app */,
 				842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */,
 			);
 			name = Products;
