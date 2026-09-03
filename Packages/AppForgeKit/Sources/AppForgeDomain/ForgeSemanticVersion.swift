@@ -1,13 +1,6 @@
 import Foundation
 
-public struct ForgeSemanticVersion:
-    Codable,
-    Hashable,
-    Comparable,
-    Sendable,
-    LosslessStringConvertible,
-    CustomStringConvertible
-{
+public struct ForgeSemanticVersion: Codable, Hashable, Comparable, Sendable {
     public let major: Int
     public let minor: Int
     public let patch: Int
@@ -95,36 +88,42 @@ public struct ForgeSemanticVersion:
         if lhs.patch != rhs.patch {
             return lhs.patch < rhs.patch
         }
+        return prereleasePrecedes(lhs.prerelease, rhs.prerelease)
+    }
 
-        if lhs.prerelease.isEmpty != rhs.prerelease.isEmpty {
-            return !lhs.prerelease.isEmpty
-        }
-        if lhs.prerelease.isEmpty {
+    private static func prereleasePrecedes(_ lhs: [String], _ rhs: [String]) -> Bool {
+        if lhs.isEmpty {
             return false
         }
+        if rhs.isEmpty {
+            return true
+        }
 
-        for index in 0 ..< min(lhs.prerelease.count, rhs.prerelease.count) {
-            let left = lhs.prerelease[index]
-            let right = rhs.prerelease[index]
+        for index in 0 ..< min(lhs.count, rhs.count) {
+            let left = lhs[index]
+            let right = rhs[index]
             if left == right {
                 continue
             }
-
-            let leftNumber = Int(left)
-            let rightNumber = Int(right)
-            switch (leftNumber, rightNumber) {
-            case let (.some(leftValue), .some(rightValue)):
-                return leftValue < rightValue
-            case (.some, .none):
-                return true
-            case (.none, .some):
-                return false
-            case (.none, .none):
-                return left < right
-            }
+            return identifierPrecedes(left, right)
         }
 
-        return lhs.prerelease.count < rhs.prerelease.count
+        return lhs.count < rhs.count
+    }
+
+    private static func identifierPrecedes(_ lhs: String, _ rhs: String) -> Bool {
+        let leftNumber = Int(lhs)
+        let rightNumber = Int(rhs)
+        switch (leftNumber, rightNumber) {
+        case let (.some(leftValue), .some(rightValue)):
+            return leftValue < rightValue
+        case (.some, .none):
+            return true
+        case (.none, .some):
+            return false
+        case (.none, .none):
+            return lhs < rhs
+        }
     }
 
     private static func isValidCoreNumber(_ value: String) -> Bool {
@@ -142,11 +141,8 @@ public struct ForgeSemanticVersion:
         let parts = value.split(separator: ".", omittingEmptySubsequences: false).map(String.init)
         for part in parts {
             guard !part.isEmpty, part.allSatisfy(Self.isSemVerIdentifierCharacter) else { return nil }
-            if numericLeadingZeroForbidden,
-               part.allSatisfy(\.isNumber),
-               part.count > 1,
-               part.hasPrefix("0")
-            {
+            let hasInvalidNumericLeadingZero = part.allSatisfy(\.isNumber) && part.count > 1 && part.hasPrefix("0")
+            if numericLeadingZeroForbidden && hasInvalidNumericLeadingZero {
                 return nil
             }
         }
@@ -157,3 +153,5 @@ public struct ForgeSemanticVersion:
         character.isASCII && (character.isLetter || character.isNumber || character == "-")
     }
 }
+
+extension ForgeSemanticVersion: LosslessStringConvertible, CustomStringConvertible {}

@@ -1,14 +1,6 @@
 import Foundation
 
-public struct ForgePackageID:
-    RawRepresentable,
-    Codable,
-    Hashable,
-    Comparable,
-    Sendable,
-    CustomStringConvertible,
-    ExpressibleByStringLiteral
-{
+public struct ForgePackageID: RawRepresentable, Codable, Hashable, Comparable, Sendable {
     public let rawValue: String
 
     public init(rawValue: String) {
@@ -17,14 +9,6 @@ public struct ForgePackageID:
 
     public init(_ rawValue: String) {
         self.init(rawValue: rawValue)
-    }
-
-    public init(stringLiteral value: String) {
-        self.init(rawValue: value)
-    }
-
-    public var description: String {
-        rawValue
     }
 
     public static func < (lhs: ForgePackageID, rhs: ForgePackageID) -> Bool {
@@ -32,15 +16,19 @@ public struct ForgePackageID:
     }
 }
 
-public struct ForgeCapabilityID:
-    RawRepresentable,
-    Codable,
-    Hashable,
-    Comparable,
-    Sendable,
-    CustomStringConvertible,
-    ExpressibleByStringLiteral
-{
+extension ForgePackageID: CustomStringConvertible {
+    public var description: String {
+        rawValue
+    }
+}
+
+extension ForgePackageID: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(rawValue: value)
+    }
+}
+
+public struct ForgeCapabilityID: RawRepresentable, Codable, Hashable, Comparable, Sendable {
     public let rawValue: String
 
     public init(rawValue: String) {
@@ -51,15 +39,19 @@ public struct ForgeCapabilityID:
         self.init(rawValue: rawValue)
     }
 
-    public init(stringLiteral value: String) {
-        self.init(rawValue: value)
+    public static func < (lhs: ForgeCapabilityID, rhs: ForgeCapabilityID) -> Bool {
+        lhs.rawValue < rhs.rawValue
     }
+}
 
+extension ForgeCapabilityID: CustomStringConvertible {
     public var description: String {
         rawValue
     }
+}
 
-    public static func < (lhs: ForgeCapabilityID, rhs: ForgeCapabilityID) -> Bool {
-        lhs.rawValue < rhs.rawValue
+extension ForgeCapabilityID: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(rawValue: value)
     }
 }
