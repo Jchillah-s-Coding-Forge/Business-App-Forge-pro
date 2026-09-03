@@ -142,7 +142,7 @@ public struct ForgeSemanticVersion: Codable, Hashable, Comparable, Sendable {
         for part in parts {
             guard !part.isEmpty, part.allSatisfy(Self.isSemVerIdentifierCharacter) else { return nil }
             let hasInvalidNumericLeadingZero = part.allSatisfy(\.isNumber) && part.count > 1 && part.hasPrefix("0")
-            if numericLeadingZeroForbidden && hasInvalidNumericLeadingZero {
+            if numericLeadingZeroForbidden, hasInvalidNumericLeadingZero {
                 return nil
             }
         }
