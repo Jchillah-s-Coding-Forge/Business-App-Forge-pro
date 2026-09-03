@@ -327,6 +327,13 @@ private struct EnvironmentDoctorView: View {
                         Text(report.generatedAt, format: .dateTime.hour().minute().second())
                             .font(.caption)
                             .foregroundStyle(.secondary)
+
+                        Button {
+                            saveToolchainReport()
+                        } label: {
+                            Label("Report sichern", systemImage: "square.and.arrow.down")
+                        }
+                        .buttonStyle(.bordered)
                     }
 
                     Divider()
@@ -380,9 +387,19 @@ private struct EnvironmentDoctorView: View {
 
             Spacer()
 
-            if let version = result.version {
-                Text(version.description)
-                    .font(.caption.monospaced())
+            VStack(alignment: .trailing, spacing: AppForgeSpacing.small) {
+                if let version = result.version {
+                    Text(version.description)
+                        .font(.caption.monospaced())
+                }
+
+                if let recommendation = viewModel.setupRecommendation(for: result) {
+                    Button(recommendation.title) {
+                        viewModel.openSetup(for: result)
+                    }
+                    .buttonStyle(.bordered)
+                    .help(recommendation.detail)
+                }
             }
         }
     }
@@ -410,6 +427,17 @@ private struct EnvironmentDoctorView: View {
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
         viewModel.requestFlutterInstallation(into: url.path)
+    }
+
+    private func saveToolchainReport() {
+        let panel = NSSavePanel()
+        panel.title = "Toolchain-Report speichern"
+        panel.prompt = "Speichern"
+        panel.nameFieldStringValue = "appforge-toolchain-report.json"
+        panel.canCreateDirectories = true
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        viewModel.exportReport(to: url)
     }
 
     private func installationPhaseTitle(_ phase: FlutterInstallationPhase) -> String {
