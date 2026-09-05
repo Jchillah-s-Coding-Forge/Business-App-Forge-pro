@@ -52,8 +52,7 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
         _ sdkRootPath: String
     ) throws -> FlutterSDKPaths {
         let rootURL = URL(
-            fileURLWithPath:
-                NSString(string: sdkRootPath).expandingTildeInPath,
+            fileURLWithPath: NSString(string: sdkRootPath).expandingTildeInPath,
             isDirectory: true
         )
         .standardizedFileURL
@@ -64,10 +63,7 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
             atPath: rootURL.path,
             isDirectory: &isDirectory
         )
-        guard !sdkRootPath.isEmpty,
-              rootExists,
-              isDirectory.boolValue
-        else {
+        guard !sdkRootPath.isEmpty, rootExists, isDirectory.boolValue else {
             throw FlutterMaterializationError.invalidFlutterSDKPath
         }
 
@@ -81,11 +77,9 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
             .resolvingSymlinksInPath()
         let rootPrefix = rootURL.path + "/"
 
-        guard executableURL.path.hasPrefix(rootPrefix),
-              FileManager.default.isExecutableFile(
-                  atPath: executableURL.path
-              )
-        else {
+        let executableIsValid = executableURL.path.hasPrefix(rootPrefix)
+            && FileManager.default.isExecutableFile(atPath: executableURL.path)
+        guard executableIsValid else {
             throw FlutterMaterializationError.invalidFlutterSDKPath
         }
 
@@ -133,13 +127,10 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
 enum FlutterToolchainProcessEnvironment {
     static func make(
         sdkRootPath: String,
-        inherited: [String: String] =
-            ProcessInfo.processInfo.environment
+        inherited: [String: String] = ProcessInfo.processInfo.environment
     ) -> [String: String] {
         var environment = [
-            "PATH":
-                sdkRootPath
-                    + "/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+            "PATH": sdkRootPath + "/bin:/usr/bin:/bin:/usr/sbin:/sbin",
             "CI": "true",
             "TERM": "dumb",
             "LANG": "en_US.UTF-8",
@@ -148,9 +139,7 @@ enum FlutterToolchainProcessEnvironment {
         ]
 
         for key in ["HOME", "TMPDIR"] {
-            if let value = inherited[key],
-               !value.isEmpty
-            {
+            if let value = inherited[key], !value.isEmpty {
                 environment[key] = value
             }
         }
