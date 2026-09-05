@@ -177,7 +177,7 @@ private final class BoundedToolchainOutputCapture {
         let data = try input.readToEnd() ?? Data()
         try removeOutputFile()
 
-        let decoded = String(decoding: data, as: UTF8.self)
+        let decoded = String(bytes: data, encoding: .utf8) ?? ""
         let sanitized = sanitize(decoded)
         return truncated
             ? "[output truncated]\n" + sanitized
