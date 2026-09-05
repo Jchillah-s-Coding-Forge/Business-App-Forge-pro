@@ -10,8 +10,17 @@ struct EnvironmentDoctorView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppForgeSpacing.large) {
                 header
+                EnvironmentModeCard(viewModel: viewModel)
                 platformSelection
-                flutterConfiguration
+
+                if viewModel.developmentEnvironmentMode == .nixReproducible {
+                    NixEnvironmentConfigurationView(
+                        viewModel: viewModel
+                    )
+                } else {
+                    flutterConfiguration
+                }
+
                 ideConfiguration
                 reportSection
             }
@@ -108,10 +117,14 @@ struct EnvironmentDoctorView: View {
                     }
                     .disabled(viewModel.isInstallingFlutter)
 
-                    Button("Flutter installieren …") {
-                        chooseFlutterInstallLocation()
+                    if viewModel.developmentEnvironmentMode
+                        == .appForgeManaged
+                    {
+                        Button("Flutter installieren …") {
+                            chooseFlutterInstallLocation()
+                        }
+                        .disabled(viewModel.isInstallingFlutter)
                     }
-                    .disabled(viewModel.isInstallingFlutter)
 
                     if !viewModel.flutterSDKPath.isEmpty {
                         Button("Auswahl löschen") {
@@ -122,8 +135,7 @@ struct EnvironmentDoctorView: View {
                 }
 
                 Text(
-                    "Vorhandenes SDK: Wählen Sie den Flutter-Ordner mit bin/flutter. Neue Installation: "
-                        + "Wählen Sie den übergeordneten Zielordner; AppForge erstellt darin flutter."
+                    flutterConfigurationDetail
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -186,8 +198,10 @@ struct EnvironmentDoctorView: View {
                 VStack(alignment: .leading, spacing: AppForgeSpacing.medium) {
                     HStack {
                         Label(
-                            report.isReady ? "Umgebung bereit" : "Einrichtung erforderlich",
-                            systemImage: report.isReady ? "checkmark.seal.fill" : "exclamationmark.triangle.fill"
+                            reportHeaderTitle(report),
+                            systemImage: report.isReady
+                                ? "checkmark.seal.fill"
+                                : "exclamationmark.triangle.fill"
                         )
                         .font(.headline)
 
@@ -203,6 +217,18 @@ struct EnvironmentDoctorView: View {
                             Label("Report sichern", systemImage: "square.and.arrow.down")
                         }
                         .buttonStyle(.bordered)
+                    }
+
+                    if viewModel.developmentEnvironmentMode
+                        == .nixReproducible
+                    {
+                        Text(
+                            "Dieser Report beschreibt weiterhin die lokal installierte Toolchain. "
+                                + "Der reproduzierbare Nix-Status und das provisionierte Environment "
+                                + "werden separat oben angezeigt."
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
 
                     Divider()
@@ -271,6 +297,31 @@ struct EnvironmentDoctorView: View {
                 }
             }
         }
+    }
+
+    private var flutterConfigurationDetail: String {
+        if viewModel.developmentEnvironmentMode == .existingToolchain {
+            return "Wählen Sie ein bereits installiertes Flutter-SDK mit bin/flutter. "
+                + "AppForge installiert in diesem Modus keine SDKs."
+        }
+
+        return "Vorhandenes SDK: Wählen Sie den Flutter-Ordner mit bin/flutter. "
+            + "Neue Installation: Wählen Sie den übergeordneten Zielordner; "
+            + "AppForge erstellt darin flutter."
+    }
+
+    private func reportHeaderTitle(
+        _ report: ToolchainReport
+    ) -> String {
+        if viewModel.developmentEnvironmentMode == .nixReproducible {
+            return report.isReady
+                ? "Lokale Toolchain bereit"
+                : "Lokale Toolchain unvollständig"
+        }
+
+        return report.isReady
+            ? "Umgebung bereit"
+            : "Einrichtung erforderlich"
     }
 
     private func chooseFlutterSDK() {
