@@ -240,8 +240,7 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         FlutterToolchainReceipt(
             flutter: runtime.identity,
             projectPackageName: packageName,
-            organizationIdentifier:
-                specification.identity.organizationIdentifier,
+            organizationIdentifier: specification.identity.organizationIdentifier,
             targetPlatforms: FlutterMaterializationPlatformMapper.sortedPlatforms(
                 specification.targetPlatforms
             ),
