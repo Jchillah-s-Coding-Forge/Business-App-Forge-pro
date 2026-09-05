@@ -449,8 +449,7 @@ final class EnvironmentDoctorViewModel {
                     ? nil
                     : flutterSDKPath,
                 preferredIDE: preferredIDE,
-                developmentEnvironmentMode:
-                    developmentEnvironmentMode
+                developmentEnvironmentMode: developmentEnvironmentMode
             )
         )
     }
