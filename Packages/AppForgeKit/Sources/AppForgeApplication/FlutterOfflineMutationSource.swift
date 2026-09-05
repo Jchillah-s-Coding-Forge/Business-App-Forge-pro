@@ -6,7 +6,60 @@ struct FlutterOfflineMutationSource {
     let typeName: String
 
     func saveLines() -> [String] {
-        var lines = [
+        var lines = savePreludeLines
+        if specification.offline.usesSyncOutbox {
+            lines += saveOutboxLines
+        }
+        lines += [
+            "    });",
+            "  }"
+        ]
+        return lines
+    }
+
+    func deleteLines() -> [String] {
+        specification.offline.usesSyncOutbox
+            ? tombstoneDeleteLines
+            : hardDeleteLines
+    }
+
+    func enqueueLines() -> [String] {
+        guard specification.offline.usesSyncOutbox else {
+            return []
+        }
+
+        return [
+            "  Future<void> _enqueue(",
+            "    DatabaseExecutor txn, {",
+            "    required String recordId,",
+            "    required int revision,",
+            "    required SyncOperation operation,",
+            "    required String? payloadJson,",
+            "    required String createdAt,",
+            "  }) async {",
+            "    final idempotencyKey =",
+            "        '\(entity.identity.code):$recordId:$revision:\${operation.name}';",
+            "    await txn.insert(",
+            "      '_sync_outbox',",
+            "      <String, Object?>{",
+            "        'id': idempotencyKey,",
+            "        'entity_code': '\(entity.identity.code)',",
+            "        'record_id': recordId,",
+            "        'operation': operation.name,",
+            "        'payload_json': payloadJson,",
+            "        'idempotency_key': idempotencyKey,",
+            "        'created_at': createdAt,",
+            "        'attempt_count': 0,",
+            "        'last_error': null,",
+            "      },",
+            "      conflictAlgorithm: ConflictAlgorithm.abort,",
+            "    );",
+            "  }"
+        ]
+    }
+
+    private var savePreludeLines: [String] {
+        [
             "  Future<void> save({",
             "    required String recordId,",
             "    required \(typeName) value,",
@@ -39,46 +92,40 @@ struct FlutterOfflineMutationSource {
             "        conflictAlgorithm: ConflictAlgorithm.replace,",
             "      );"
         ]
-
-        if specification.offline.usesSyncOutbox {
-            lines += [
-                "",
-                "      final operation = current.isEmpty",
-                "          ? SyncOperation.create",
-                "          : SyncOperation.update;",
-                "      await _enqueue(",
-                "        txn,",
-                "        recordId: recordId,",
-                "        revision: revision,",
-                "        operation: operation,",
-                "        payloadJson: jsonEncode(row),",
-                "        createdAt: now,",
-                "      );"
-            ]
-        }
-
-        lines += [
-            "    });",
-            "  }"
-        ]
-        return lines
     }
 
-    func deleteLines() -> [String] {
-        guard specification.offline.usesSyncOutbox else {
-            return [
-                "  Future<void> delete(String recordId) async {",
-                "    final db = await _database.database;",
-                "    await db.delete(",
-                "      _table,",
-                "      where: '\"_record_id\" = ?',",
-                "      whereArgs: <Object?>[recordId],",
-                "    );",
-                "  }"
-            ]
-        }
+    private var saveOutboxLines: [String] {
+        [
+            "",
+            "      final operation = current.isEmpty",
+            "          ? SyncOperation.create",
+            "          : SyncOperation.update;",
+            "      await _enqueue(",
+            "        txn,",
+            "        recordId: recordId,",
+            "        revision: revision,",
+            "        operation: operation,",
+            "        payloadJson: jsonEncode(row),",
+            "        createdAt: now,",
+            "      );"
+        ]
+    }
 
-        return [
+    private var hardDeleteLines: [String] {
+        [
+            "  Future<void> delete(String recordId) async {",
+            "    final db = await _database.database;",
+            "    await db.delete(",
+            "      _table,",
+            "      where: '\"_record_id\" = ?',",
+            "      whereArgs: <Object?>[recordId],",
+            "    );",
+            "  }"
+        ]
+    }
+
+    private var tombstoneDeleteLines: [String] {
+        [
             "  Future<void> delete(String recordId) async {",
             "    final db = await _database.database;",
             "    await db.transaction((txn) async {",
@@ -117,41 +164,6 @@ struct FlutterOfflineMutationSource {
             "        createdAt: now,",
             "      );",
             "    });",
-            "  }"
-        ]
-    }
-
-    func enqueueLines() -> [String] {
-        guard specification.offline.usesSyncOutbox else {
-            return []
-        }
-
-        return [
-            "  Future<void> _enqueue(",
-            "    DatabaseExecutor txn, {",
-            "    required String recordId,",
-            "    required int revision,",
-            "    required SyncOperation operation,",
-            "    required String? payloadJson,",
-            "    required String createdAt,",
-            "  }) async {",
-            "    final idempotencyKey =",
-            "        '\(entity.identity.code):$recordId:$revision:\${operation.name}';",
-            "    await txn.insert(",
-            "      '_sync_outbox',",
-            "      <String, Object?>{",
-            "        'id': idempotencyKey,",
-            "        'entity_code': '\(entity.identity.code)',",
-            "        'record_id': recordId,",
-            "        'operation': operation.name,",
-            "        'payload_json': payloadJson,",
-            "        'idempotency_key': idempotencyKey,",
-            "        'created_at': createdAt,",
-            "        'attempt_count': 0,",
-            "        'last_error': null,",
-            "      },",
-            "      conflictAlgorithm: ConflictAlgorithm.abort,",
-            "    );",
             "  }"
         ]
     }
