@@ -32,8 +32,11 @@ Die Roadmap ist fähigkeitsorientiert. Ein Meilenstein endet erst nach Nutzerabn
 ## M4 — Demo, Offline & Backends
 
 - rollenbasierter Evaluationsmodus
-- SQLite-SSOT, atomare Outbox und Sync-Status
-- Konfliktstrategien und Tombstones
+- SQLite-SSOT mit schema-versionierten Migrationen
+- lokale Repository-/Data-Source-Schicht als Single Source of Truth
+- atomare Entity-Mutation + Sync-Outbox in derselben SQLite-Transaktion
+- persistente Idempotency Keys, Sync-Status und Tombstone-Deletes
+- typisierte Konfliktstrategien aus der ProjectSpecification
 - Supabase-Adapter, Migrationen, RLS-Tests und geführtes Setup
 - Firebase-Adapter und äquivalente Security Rules
 

@@ -43,6 +43,7 @@
 		3D7A65FE528418672DBABCB2 /* FLUTTER_MATERIALIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FLUTTER_MATERIALIZATION.md; sourceTree = "<group>"; };
 		439F0AB5EBB8B7CF6B232067 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		43E990E1112FB6567DAEEAC7 /* AppForgePro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppForgePro.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4946437F18B83E95D334BAAB /* OFFLINE_FIRST_STORAGE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = OFFLINE_FIRST_STORAGE.md; sourceTree = "<group>"; };
 		4CFC68B345B3B408237076FF /* PRODUCT_VISION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRODUCT_VISION.md; sourceTree = "<group>"; };
 		4D55E9AEE487CE52EA349CC5 /* GIT_WORKFLOW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GIT_WORKFLOW.md; sourceTree = "<group>"; };
 		52A30BB954D6A2B6A69AE174 /* PRD.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRD.md; sourceTree = "<group>"; };
@@ -121,6 +122,7 @@
 				78D22617FD379D55533F7680 /* ADR-002-architecture-versus-state-management.md */,
 				3D7A65FE528418672DBABCB2 /* FLUTTER_MATERIALIZATION.md */,
 				025C9C5D1DDE698406E4300B /* FLUTTER_RENDERER.md */,
+				4946437F18B83E95D334BAAB /* OFFLINE_FIRST_STORAGE.md */,
 				1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */,
 				BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */,
 				254E43A26745EB0060206E87 /* PROJECT_SPECIFICATION.md */,

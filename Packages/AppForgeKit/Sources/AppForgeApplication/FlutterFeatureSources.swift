@@ -32,6 +32,14 @@ struct FlutterFeatureSources {
                 contents: useCaseDart(featureName: featureName, typeName: typeName)
             ),
             GeneratedFile(
+                relativePath: "lib/features/\(featureName)/domain/use_cases/save_\(featureName).dart",
+                contents: saveUseCaseDart(featureName: featureName, typeName: typeName)
+            ),
+            GeneratedFile(
+                relativePath: "lib/features/\(featureName)/domain/use_cases/delete_\(featureName).dart",
+                contents: deleteUseCaseDart(featureName: featureName, typeName: typeName)
+            ),
+            GeneratedFile(
                 relativePath: "lib/features/\(featureName)/presentation/view_models/\(featureName)_view_model.dart",
                 contents: viewModelDart(featureName: featureName, typeName: typeName)
             )
@@ -112,6 +120,11 @@ struct FlutterFeatureSources {
             "",
             "abstract interface class \(typeName)Repository {",
             "  Future<List<\(typeName)>> fetchAll();",
+            "  Future<void> save({",
+            "    required String recordId,",
+            "    required \(typeName) value,",
+            "  });",
+            "  Future<void> delete(String recordId);",
             "}",
             ""
         ])
@@ -131,6 +144,47 @@ struct FlutterFeatureSources {
             "  final \(typeName)Repository _repository;",
             "",
             "  Future<List<\(typeName)>> call() => _repository.fetchAll();",
+            "}",
+            ""
+        ])
+    }
+
+    private func saveUseCaseDart(
+        featureName: String,
+        typeName: String
+    ) -> String {
+        FlutterGeneratedText.lines([
+            "import '../entities/\(featureName).dart';",
+            "import '../repositories/\(featureName)_repository.dart';",
+            "",
+            "class Save\(typeName) {",
+            "  const Save\(typeName)(this._repository);",
+            "",
+            "  final \(typeName)Repository _repository;",
+            "",
+            "  Future<void> call({",
+            "    required String recordId,",
+            "    required \(typeName) value,",
+            "  }) =>",
+            "      _repository.save(recordId: recordId, value: value);",
+            "}",
+            ""
+        ])
+    }
+
+    private func deleteUseCaseDart(
+        featureName: String,
+        typeName: String
+    ) -> String {
+        FlutterGeneratedText.lines([
+            "import '../repositories/\(featureName)_repository.dart';",
+            "",
+            "class Delete\(typeName) {",
+            "  const Delete\(typeName)(this._repository);",
+            "",
+            "  final \(typeName)Repository _repository;",
+            "",
+            "  Future<void> call(String recordId) => _repository.delete(recordId);",
             "}",
             ""
         ])
