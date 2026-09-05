@@ -129,6 +129,14 @@ public struct ToolchainRequirements: Sendable {
                 purpose: "Optional für den lokalen Supabase-Stack",
                 isRequired: false,
                 installStrategy: .externalApplication
+            ),
+            ToolRequirement(
+                id: .nix,
+                displayName: "Nix",
+                purpose: "Optionale reproduzierbare Entwicklungsumgebung mit gepinnten Toolchains",
+                isRequired: false,
+                versionConstraint: .init(minimum: SupportedToolVersions.nix),
+                installStrategy: .manual
             )
         ]
     }
@@ -232,4 +240,5 @@ enum SupportedToolVersions {
     static let xcode = SemanticVersion(major: 16, minor: 0)
     static let androidPlatformTools = SemanticVersion(major: 35, minor: 0)
     static let java = SemanticVersion(major: 17, minor: 0)
+    static let nix = SemanticVersion(major: 2, minor: 4)
 }
