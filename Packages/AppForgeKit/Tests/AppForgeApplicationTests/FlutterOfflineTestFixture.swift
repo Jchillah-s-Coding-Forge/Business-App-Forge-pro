@@ -30,7 +30,31 @@ enum FlutterOfflineTestFixture {
         offline: OfflineConfiguration,
         additionalFields: [FieldDefinition] = []
     ) -> ProjectSpecification {
-        let fields = [
+        let customer = EntityDefinition(
+            identity: DefinitionIdentity(
+                id: "entity.customer",
+                code: "customer",
+                label: "Customer"
+            ),
+            fields: baseFields + additionalFields
+        )
+
+        return ProjectSpecification(
+            identity: ProjectIdentity(
+                name: "Offline Business",
+                organizationIdentifier: "de.example"
+            ),
+            framework: .flutter,
+            targetPlatforms: [.iOS, .android],
+            backend: backend,
+            flutterStateManagement: .riverpod,
+            entities: [customer],
+            offline: offline
+        )
+    }
+
+    private static var baseFields: [FieldDefinition] {
+        [
             FieldDefinition(
                 identity: DefinitionIdentity(
                     id: "field.customer.name",
@@ -65,29 +89,7 @@ enum FlutterOfflineTestFixture {
                 ),
                 dataType: .dateTime
             )
-        ] + additionalFields
-
-        let customer = EntityDefinition(
-            identity: DefinitionIdentity(
-                id: "entity.customer",
-                code: "customer",
-                label: "Customer"
-            ),
-            fields: fields
-        )
-
-        return ProjectSpecification(
-            identity: ProjectIdentity(
-                name: "Offline Business",
-                organizationIdentifier: "de.example"
-            ),
-            framework: .flutter,
-            targetPlatforms: [.iOS, .android],
-            backend: backend,
-            flutterStateManagement: .riverpod,
-            entities: [customer],
-            offline: offline
-        )
+        ]
     }
 
     static func makeGraph(
