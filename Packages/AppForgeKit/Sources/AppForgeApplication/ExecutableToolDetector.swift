@@ -77,6 +77,8 @@ struct ExecutableToolDetector {
             executableCandidate(command: "supabase", arguments: ["--version"])
         case .docker:
             executableCandidate(command: "docker", arguments: ["--version"])
+        case .nix:
+            executableCandidate(command: "nix", arguments: ["--version"])
         }
     }
 
