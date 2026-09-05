@@ -33,6 +33,9 @@ struct ProjectSetupView: View {
         }
     }
 
+}
+
+private extension ProjectSetupView {
     private var projectSection: some View {
         Section("Projekt") {
             TextField(
