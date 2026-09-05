@@ -156,10 +156,9 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
                 identity: inspection.identity,
                 executionMode: .directSDK,
                 nixProvenance: nil,
-                commandBuilder:
-                    DirectFlutterCommandRequestBuilder(
-                        inspection: inspection
-                    )
+                commandBuilder: DirectFlutterCommandRequestBuilder(
+                    inspection: inspection
+                )
             )
 
         case let .nixEnvironment(
@@ -174,10 +173,9 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
                 identity: inspection.identity,
                 executionMode: .nixEnvironment,
                 nixProvenance: inspection.provenance,
-                commandBuilder:
-                    NixFlutterCommandRequestBuilder(
-                        inspection: inspection
-                    )
+                commandBuilder: NixFlutterCommandRequestBuilder(
+                    inspection: inspection
+                )
             )
         }
     }
@@ -192,15 +190,13 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         let packageName = try FlutterDartNaming.packageName(
             from: specification.identity.name
         )
-        let platformNames =
-            try FlutterMaterializationPlatformMapper.names(
-                for: specification.targetPlatforms
-            )
+        let platformNames = try FlutterMaterializationPlatformMapper.names(
+            for: specification.targetPlatforms
+        )
 
         try executor.createProject(
             packageName: packageName,
-            organizationIdentifier:
-                specification.identity.organizationIdentifier,
+            organizationIdentifier: specification.identity.organizationIdentifier,
             platformNames: platformNames,
             in: workspace.stagingRoot
         )
@@ -246,10 +242,9 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
             projectPackageName: packageName,
             organizationIdentifier:
                 specification.identity.organizationIdentifier,
-            targetPlatforms:
-                FlutterMaterializationPlatformMapper.sortedPlatforms(
-                    specification.targetPlatforms
-                ),
+            targetPlatforms: FlutterMaterializationPlatformMapper.sortedPlatforms(
+                specification.targetPlatforms
+            ),
             pubspecLockSHA256: lockHash,
             validatedSteps: [
                 .inspectToolchain,
