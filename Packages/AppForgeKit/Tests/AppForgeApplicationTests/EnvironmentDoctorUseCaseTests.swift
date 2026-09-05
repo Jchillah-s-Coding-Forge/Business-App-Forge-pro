@@ -53,7 +53,8 @@ final class EnvironmentDoctorUseCaseTests: XCTestCase {
             .androidStudio,
             .xcodeGen,
             .supabaseCLI,
-            .docker
+            .docker,
+            .nix
         ]
 
         for identifier in optionalIdentifiers {
