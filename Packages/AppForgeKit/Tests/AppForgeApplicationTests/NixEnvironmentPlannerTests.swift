@@ -14,7 +14,7 @@ final class NixEnvironmentPlannerTests: XCTestCase {
 
         XCTAssertEqual(
             plan.systems,
-            [.aarch64Darwin, .x86_64Darwin]
+            [.aarch64Darwin, .x86Darwin]
         )
         XCTAssertEqual(
             plan.packages,
