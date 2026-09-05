@@ -49,26 +49,26 @@ final class NixBootstrapPreparationTests: XCTestCase {
         let parent = try NixBootstrapTestSupport.temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: parent) }
 
+        let redirectURL = try XCTUnwrap(
+            URL(string: "https://example.com/install")
+        )
         let downloader = StubNixInstallerDownloader(
             result: NixBootstrapTestSupport.download(
-                responseURL: URL(
-                    string: "https://example.com/install"
-                )!
+                responseURL: redirectURL
             )
         )
 
-        await XCTAssertThrowsErrorAsync(
-            try await PrepareNixBootstrapUseCase(
+        let error = await captureError {
+            _ = try await PrepareNixBootstrapUseCase(
                 downloader: downloader
             )(
                 workspaceParentURL: parent
             )
-        ) { error in
-            XCTAssertEqual(
-                error as? NixBootstrapError,
-                .unexpectedResponseURL
-            )
         }
+        XCTAssertEqual(
+            error as? NixBootstrapError,
+            .unexpectedResponseURL
+        )
         XCTAssertTrue(
             NixBootstrapTestSupport.bootstrapDirectories(
                 in: parent
@@ -80,10 +80,12 @@ final class NixBootstrapPreparationTests: XCTestCase {
         let parent = try NixBootstrapTestSupport.temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: parent) }
 
-        var text = String(
-            data: NixBootstrapTestSupport.installer(),
-            encoding: .utf8
-        )!
+        var text = try XCTUnwrap(
+            String(
+                data: NixBootstrapTestSupport.installer(),
+                encoding: .utf8
+            )
+        )
         text = text.replacingOccurrences(
             of: NixBootstrapReleasePolicy.current
                 .aarch64DarwinTarballSHA256,
@@ -95,18 +97,17 @@ final class NixBootstrapPreparationTests: XCTestCase {
             )
         )
 
-        await XCTAssertThrowsErrorAsync(
-            try await PrepareNixBootstrapUseCase(
+        let error = await captureError {
+            _ = try await PrepareNixBootstrapUseCase(
                 downloader: downloader
             )(
                 workspaceParentURL: parent
             )
-        ) { error in
-            XCTAssertEqual(
-                error as? NixBootstrapError,
-                .installerStructureMismatch
-            )
         }
+        XCTAssertEqual(
+            error as? NixBootstrapError,
+            .installerStructureMismatch
+        )
         XCTAssertTrue(
             NixBootstrapTestSupport.bootstrapDirectories(
                 in: parent
@@ -129,31 +130,29 @@ final class NixBootstrapPreparationTests: XCTestCase {
             )
         )
 
-        await XCTAssertThrowsErrorAsync(
-            try await PrepareNixBootstrapUseCase(
+        let error = await captureError {
+            _ = try await PrepareNixBootstrapUseCase(
                 downloader: downloader
             )(
                 workspaceParentURL: parent
             )
-        ) { error in
-            XCTAssertEqual(
-                error as? NixBootstrapError,
-                .installerTooLarge(
-                    maximumBytes: policy.maximumInstallerBytes
-                )
-            )
         }
+        XCTAssertEqual(
+            error as? NixBootstrapError,
+            .installerTooLarge(
+                maximumBytes: policy.maximumInstallerBytes
+            )
+        )
     }
 }
 
-private func XCTAssertThrowsErrorAsync<T>(
-    _ expression: @autoclosure () async throws -> T,
-    _ errorHandler: (Error) -> Void
-) async {
+private func captureError(
+    _ operation: () async throws -> Void
+) async -> Error? {
     do {
-        _ = try await expression()
-        XCTFail("Expected error")
+        try await operation()
+        return nil
     } catch {
-        errorHandler(error)
+        return error
     }
 }
