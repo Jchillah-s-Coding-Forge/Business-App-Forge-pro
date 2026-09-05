@@ -24,6 +24,8 @@ Die Roadmap ist fähigkeitsorientiert. Ein Meilenstein endet erst nach Nutzerabn
 ## M3 — Package System & Flutter Renderer
 
 - Package Contract und Registry
+- validierte gebündelte Produktions-Registry mit minimalem `foundation.core`
+- End-to-End-Orchestrierung aus Resolve → Render → Materialize
 - Dependency Resolver und Kompatibilitätsprüfung
 - `forge.lock` mit Integritätsinformationen
 - deterministischer Flutter-Renderer
