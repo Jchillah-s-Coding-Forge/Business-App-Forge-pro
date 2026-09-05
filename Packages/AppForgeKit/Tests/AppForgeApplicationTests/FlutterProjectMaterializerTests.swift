@@ -181,9 +181,12 @@ final class FlutterProjectMaterializerTests: XCTestCase {
         )
 
         XCTAssertEqual(decoded, result.receipt)
+        XCTAssertEqual(decoded.schemaVersion, 2)
         XCTAssertEqual(decoded.flutter.flutterVersion, "3.47.2")
         XCTAssertEqual(decoded.targetPlatforms, [.android, .iOS])
         XCTAssertEqual(decoded.pubspecLockSHA256.count, 64)
+        XCTAssertEqual(decoded.executionMode, .directSDK)
+        XCTAssertNil(decoded.nixEnvironment)
 
         let receiptText = String(
             bytes: receiptData,
