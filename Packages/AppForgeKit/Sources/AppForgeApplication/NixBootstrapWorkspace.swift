@@ -103,12 +103,15 @@ struct NixBootstrapWorkspace {
 
         let installer = root.appendingPathComponent(installerName)
         let command = root.appendingPathComponent(commandName)
-        guard installer.path == URL(
+        let preparedInstallerPath = URL(
             fileURLWithPath: prepared.installerPath
-        ).standardizedFileURL.path,
-        command.path == URL(
+        ).standardizedFileURL.path
+        let preparedCommandPath = URL(
             fileURLWithPath: prepared.commandPath
         ).standardizedFileURL.path
+
+        guard installer.path == preparedInstallerPath,
+              command.path == preparedCommandPath
         else {
             throw NixBootstrapError.invalidPreparedWorkspace
         }
