@@ -25,7 +25,8 @@ public struct GenerationPlan: Equatable, Sendable {
             guard file.relativePath.isSafeGeneratedRelativePath else {
                 throw GenerationPlanError.invalidRelativePath(file.relativePath)
             }
-            guard seen.insert(file.relativePath).inserted else {
+            let collisionKey = file.relativePath.lowercased()
+            guard seen.insert(collisionKey).inserted else {
                 throw GenerationPlanError.duplicatePath(file.relativePath)
             }
         }
