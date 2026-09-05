@@ -68,6 +68,16 @@ enum FlutterDartNaming {
             : camelCase
     }
 
+    static func isUsableIdentifier(_ value: String) -> Bool {
+        guard value != "_" else {
+            return false
+        }
+        return value.range(
+            of: "^[A-Za-z_][A-Za-z0-9_]*$",
+            options: .regularExpression
+        ) != nil
+    }
+
     static func dartType(for field: FieldDefinition) -> String {
         let baseType: String
         switch field.dataType {
