@@ -70,6 +70,7 @@ public enum NixBootstrapError: Error, Equatable, Sendable {
     case installerStructureMismatch
     case installerDigestMismatch
     case confirmationMismatch
+    case releasePolicyMismatch
     case invalidPreparedWorkspace
     case terminalLaunchFailed
 }
