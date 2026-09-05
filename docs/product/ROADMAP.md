@@ -17,6 +17,8 @@ Die Roadmap ist fähigkeitsorientiert. Ein Meilenstein endet erst nach Nutzerabn
 - Framework-, Plattform-, Backend- und State-Management-Hilfen
 - Rollen-, Entity-, Beziehungs- und Designmodell
 - Validierung und Preview-Zusammenfassung
+- Environment Doctor mit optionalem Nix-Reproducible-Modus
+- deterministische `flake.nix`-/`flake.lock`-Provisionierung und Toolchain-Provenienz
 
 ## M3 — Package System & Flutter Renderer
 
