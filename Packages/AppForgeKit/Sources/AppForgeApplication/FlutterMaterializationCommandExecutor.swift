@@ -5,14 +5,6 @@ struct FlutterMaterializationCommandExecutor {
     let commandBuilder: any FlutterCommandRequestBuilding
     let runner: any ToolchainCommandRunning
 
-    init(
-        commandBuilder: any FlutterCommandRequestBuilding,
-        runner: any ToolchainCommandRunning
-    ) {
-        self.commandBuilder = commandBuilder
-        self.runner = runner
-    }
-
     func createProject(
         packageName: String,
         organizationIdentifier: String,
