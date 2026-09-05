@@ -61,8 +61,7 @@ struct FlutterEnvironmentConfigurationView: View {
     @ViewBuilder
     private var installationProgress: some View {
         if viewModel.isInstallingFlutter,
-           let phase = viewModel.installationPhase
-        {
+           let phase = viewModel.installationPhase {
             Divider()
             HStack(spacing: AppForgeSpacing.medium) {
                 ProgressView()
