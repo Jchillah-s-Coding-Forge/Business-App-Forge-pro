@@ -38,7 +38,7 @@ struct FlutterOfflineMutationSource {
             "    required String createdAt,",
             "  }) async {",
             "    final idempotencyKey =",
-            "        '\(entity.identity.code):$recordId:$revision:\${operation.name}';",
+            "        '\(entity.identity.code):$recordId:$revision:${operation.name}';",
             "    await txn.insert(",
             "      '_sync_outbox',",
             "      <String, Object?>{",
