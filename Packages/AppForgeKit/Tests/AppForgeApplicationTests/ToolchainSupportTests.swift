@@ -63,7 +63,8 @@ final class ToolchainSupportTests: XCTestCase {
             .androidStudio,
             .xcodeGen,
             .supabaseCLI,
-            .docker
+            .docker,
+            .nix
         ]
 
         for identifier in identifiers {
