@@ -40,7 +40,7 @@ final class PackageResolverTests: XCTestCase {
         )
         XCTAssertEqual(
             graph.packages.first { $0.contract.id.rawValue == "feature.inventory" }?.contract.version,
-            try version("1.5.0")
+            try forgeVersion("1.5.0")
         )
     }
 
@@ -149,7 +149,7 @@ private func projectSpecification() -> ProjectSpecification {
     )
 }
 
-private func version(_ value: String) throws -> ForgeSemanticVersion {
+private func forgeVersion(_ value: String) throws -> ForgeSemanticVersion {
     try XCTUnwrap(ForgeSemanticVersion(value))
 }
 
@@ -164,7 +164,7 @@ private func requirement(
 ) throws -> ForgePackageRequirement {
     try ForgePackageRequirement(
         packageID: ForgePackageID(packageID),
-        versionConstraint: .range(from: version(minimum), to: version(maximum))
+        versionConstraint: .range(from: forgeVersion(minimum), to: forgeVersion(maximum))
     )
 }
 
@@ -180,7 +180,7 @@ private func package(
 ) throws -> ForgePackageContract {
     try ForgePackageContract(
         id: ForgePackageID(packageID),
-        version: version(versionValue),
+        version: forgeVersion(versionValue),
         kind: .feature,
         dependencies: dependencies,
         requiredCapabilities: requires,
