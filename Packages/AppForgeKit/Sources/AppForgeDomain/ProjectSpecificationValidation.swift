@@ -13,6 +13,11 @@ public enum ProjectDefinitionKind: String, Equatable, Sendable {
 
 public enum ProjectSpecificationValidationIssue: Equatable, Sendable {
     case unsupportedSchemaVersion(Int)
+    case emptyProjectName
+    case invalidOrganizationIdentifier(String)
+    case unsupportedTargetConfiguration
+    case flutterStateManagementRequired
+    case flutterStateManagementNotApplicable
     case invalidStableID(kind: ProjectDefinitionKind, id: String)
     case invalidCode(kind: ProjectDefinitionKind, id: String, code: String)
     case emptyLabel(kind: ProjectDefinitionKind, id: String)
