@@ -121,8 +121,7 @@ final class MacOSOpenLauncherTests: XCTestCase {
             runner: runner
         )
         let commandURL = URL(
-            fileURLWithPath:
-                "/tmp/.appforge-nix-bootstrap-test/install.command"
+            fileURLWithPath: "/tmp/.appforge-nix-bootstrap-test/install.command"
         )
 
         try launcher.launch(commandURL: commandURL)
