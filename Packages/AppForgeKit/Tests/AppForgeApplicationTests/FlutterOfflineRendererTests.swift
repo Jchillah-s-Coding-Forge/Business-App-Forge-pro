@@ -71,7 +71,7 @@ final class FlutterOfflineRendererTests: XCTestCase {
         XCTAssertTrue(local.contains("'_sync_status': SyncStatus.deleted.name"))
         XCTAssertTrue(
             local.contains(
-                "customer:$recordId:$revision:\${operation.name}"
+                "customer:$recordId:$revision:${operation.name}"
             )
         )
         XCTAssertFalse(local.contains("await db.delete("))
