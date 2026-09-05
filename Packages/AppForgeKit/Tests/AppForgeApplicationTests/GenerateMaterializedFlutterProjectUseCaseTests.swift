@@ -3,10 +3,10 @@ import AppForgeDomain
 import Foundation
 import XCTest
 
-final class GenerateMaterializedFlutterProjectUseCaseTests: XCTestCase {
+final class BuildFlutterProjectUseCaseTests: XCTestCase {
     func testBundledGenerationPassesResolvedProductToDirectMaterializer() throws {
         let recorder = RecordingProjectMaterializer()
-        let useCase = GenerateMaterializedFlutterProjectUseCase(
+        let useCase = BuildFlutterProjectUseCase(
             materializer: recorder
         )
         let targetURL = URL(
@@ -24,47 +24,21 @@ final class GenerateMaterializedFlutterProjectUseCaseTests: XCTestCase {
         )
 
         let input = try XCTUnwrap(recorder.lastInput)
-        XCTAssertEqual(
-            input.specification,
-            specification
+        assertMaterializerInput(
+            input,
+            specification: specification,
+            targetURL: targetURL
         )
-        XCTAssertEqual(
-            input.toolchain,
-            .directSDK(path: "/selected/flutter")
-        )
-        XCTAssertEqual(
-            input.targetURL,
-            targetURL
-        )
-        XCTAssertEqual(
-            input.renderedProduct.graph,
-            result.graph
-        )
-        XCTAssertEqual(
-            input.renderedProduct.lockfile,
-            result.lockfile
-        )
-        XCTAssertEqual(
-            input.renderedProduct.plan,
-            result.plan
-        )
-        XCTAssertEqual(
-            result.graph.packages.map(\.contract.id),
-            [BundledPackageRegistry.foundationCoreID]
-        )
-        XCTAssertEqual(
-            result.projectPath,
-            targetURL.path
-        )
-        XCTAssertEqual(
-            result.toolchainReceipt.executionMode,
-            .directSDK
+        assertBuildResult(
+            result,
+            input: input,
+            targetURL: targetURL
         )
     }
 
     func testBundledGenerationPreservesNixToolchainSelection() throws {
         let recorder = RecordingProjectMaterializer()
-        let useCase = GenerateMaterializedFlutterProjectUseCase(
+        let useCase = BuildFlutterProjectUseCase(
             materializer: recorder
         )
         let toolchain = FlutterMaterializationToolchain
@@ -90,7 +64,7 @@ final class GenerateMaterializedFlutterProjectUseCaseTests: XCTestCase {
 
     func testResolutionFailureDoesNotStartMaterializer() throws {
         let recorder = RecordingProjectMaterializer()
-        let useCase = GenerateMaterializedFlutterProjectUseCase(
+        let useCase = BuildFlutterProjectUseCase(
             materializer: recorder
         )
         let registry = try InMemoryPackageRegistry(
@@ -121,7 +95,7 @@ final class GenerateMaterializedFlutterProjectUseCaseTests: XCTestCase {
 
     func testRendererFailureDoesNotStartMaterializer() throws {
         let recorder = RecordingProjectMaterializer()
-        let useCase = GenerateMaterializedFlutterProjectUseCase(
+        let useCase = BuildFlutterProjectUseCase(
             renderer: FailingProjectRenderer(),
             materializer: recorder
         )
@@ -147,6 +121,47 @@ final class GenerateMaterializedFlutterProjectUseCaseTests: XCTestCase {
         XCTAssertNil(recorder.lastInput)
     }
 
+    private func assertMaterializerInput(
+        _ input: FlutterMaterializationInput,
+        specification: ProjectSpecification,
+        targetURL: URL
+    ) {
+        XCTAssertEqual(input.specification, specification)
+        XCTAssertEqual(
+            input.toolchain,
+            .directSDK(path: "/selected/flutter")
+        )
+        XCTAssertEqual(input.targetURL, targetURL)
+    }
+
+    private func assertBuildResult(
+        _ result: MaterializedFlutterGenerationResult,
+        input: FlutterMaterializationInput,
+        targetURL: URL
+    ) {
+        XCTAssertEqual(
+            input.renderedProduct.graph,
+            result.graph
+        )
+        XCTAssertEqual(
+            input.renderedProduct.lockfile,
+            result.lockfile
+        )
+        XCTAssertEqual(
+            input.renderedProduct.plan,
+            result.plan
+        )
+        XCTAssertEqual(
+            result.graph.packages.map(\.contract.id),
+            [BundledPackageRegistry.foundationCoreID]
+        )
+        XCTAssertEqual(result.projectPath, targetURL.path)
+        XCTAssertEqual(
+            result.toolchainReceipt.executionMode,
+            .directSDK
+        )
+    }
+
     private func makeSpecification() -> ProjectSpecification {
         ProjectSpecification(
             identity: ProjectIdentity(
@@ -161,10 +176,7 @@ final class GenerateMaterializedFlutterProjectUseCaseTests: XCTestCase {
     }
 }
 
-private final class RecordingProjectMaterializer:
-    FlutterProjectMaterializing,
-    @unchecked Sendable
-{
+private final class RecordingProjectMaterializer: FlutterProjectMaterializing, @unchecked Sendable {
     private let lock = NSLock()
     private var storedInput: FlutterMaterializationInput?
 
