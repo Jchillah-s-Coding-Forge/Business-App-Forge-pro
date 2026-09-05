@@ -2,19 +2,15 @@ import AppForgeDomain
 import Foundation
 
 struct FlutterMaterializationCommandExecutor {
-    let inspection: FlutterToolchainInspection
+    let commandBuilder: any FlutterCommandRequestBuilding
     let runner: any ToolchainCommandRunning
-    let environment: [String: String]
 
     init(
-        inspection: FlutterToolchainInspection,
+        commandBuilder: any FlutterCommandRequestBuilding,
         runner: any ToolchainCommandRunning
     ) {
-        self.inspection = inspection
+        self.commandBuilder = commandBuilder
         self.runner = runner
-        environment = FlutterToolchainProcessEnvironment.make(
-            sdkRootPath: inspection.sdkRootPath
-        )
     }
 
     func createProject(
@@ -88,11 +84,9 @@ struct FlutterMaterializationCommandExecutor {
         _ invocation: FlutterMaterializationInvocation
     ) throws {
         let result = try runner.run(
-            ToolchainCommandRequest(
-                executablePath: inspection.flutterExecutablePath,
-                arguments: invocation.arguments,
-                workingDirectoryPath: invocation.workingDirectory.path,
-                environment: environment,
+            commandBuilder.request(
+                flutterArguments: invocation.arguments,
+                workingDirectory: invocation.workingDirectory,
                 timeoutSeconds: invocation.timeoutSeconds
             )
         )
