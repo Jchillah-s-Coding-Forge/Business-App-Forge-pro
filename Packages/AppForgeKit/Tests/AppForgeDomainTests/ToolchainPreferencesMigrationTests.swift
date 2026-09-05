@@ -4,13 +4,13 @@ import XCTest
 
 final class ToolchainPreferencesMigrationTests: XCTestCase {
     func testLegacyPreferencesDecodeWithoutEnvironmentMode() throws {
-        let data = try XCTUnwrap(
+        let data = Data(
             """
             {
               "flutterSDKPath": "/existing/flutter",
               "preferredIDE": "VS Code"
             }
-            """.data(using: .utf8)
+            """.utf8
         )
 
         let preferences = try JSONDecoder().decode(
