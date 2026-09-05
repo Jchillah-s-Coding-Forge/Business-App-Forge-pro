@@ -120,10 +120,8 @@ enum NixFlutterMaterializerTestSupport {
     ) throws {
         let receipt = NixEnvironmentReceipt(
             nixVersion: "2.35.2",
-            nixpkgsLockedRevision:
-                receiptRevision ?? provenance.revision,
-            flakeLockSHA256:
-                receiptLockSHA256 ?? provenance.lockSHA256,
+            nixpkgsLockedRevision: receiptRevision ?? provenance.revision,
+            flakeLockSHA256: receiptLockSHA256 ?? provenance.lockSHA256,
             systems: plan.systems,
             packages: plan.packages,
             unmanagedRequirements: plan.unmanagedRequirements,
@@ -318,8 +316,7 @@ final class NixMaterializationToolchainRunner: ToolchainCommandRunning, @uncheck
 
         if request.arguments.contains("create") {
             try createBootstrapProject(
-                workingDirectoryPath:
-                    request.workingDirectoryPath
+                workingDirectoryPath: request.workingDirectoryPath
             )
         }
 
@@ -327,8 +324,7 @@ final class NixMaterializationToolchainRunner: ToolchainCommandRunning, @uncheck
             && request.arguments.contains("get")
         if isPubGet {
             try writePubspecLock(
-                workingDirectoryPath:
-                    request.workingDirectoryPath
+                workingDirectoryPath: request.workingDirectoryPath
             )
         }
 
@@ -428,7 +424,6 @@ final class NixMaterializationToolchainRunner: ToolchainCommandRunning, @uncheck
         )
     }
 }
-
 
 private struct EnvironmentProvenance {
     let revision: String
