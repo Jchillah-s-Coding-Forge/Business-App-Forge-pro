@@ -364,9 +364,9 @@ private final class NixProvisioningRunner: ToolchainCommandRunning, @unchecked S
         if arguments == ["--version"] {
             return .version
         }
-        if arguments.contains("flake"),
-           arguments.contains("lock")
-        {
+        let isLockCommand = arguments.contains("flake")
+            && arguments.contains("lock")
+        if isLockCommand {
             return .lock
         }
         return .validateFlutter
