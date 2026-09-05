@@ -1,9 +1,13 @@
 import Foundation
 
-public enum DevelopmentEnvironmentMode: String, CaseIterable, Codable, Sendable {
+public enum DevelopmentEnvironmentMode: String, CaseIterable, Codable, Identifiable, Sendable {
     case appForgeManaged
     case existingToolchain
     case nixReproducible
+
+    public var id: String {
+        rawValue
+    }
 }
 
 public enum NixEnvironmentSystem: String, CaseIterable, Codable, Comparable, Sendable {

@@ -171,9 +171,15 @@ public enum PreferredIDE: String, CaseIterable, Codable, Identifiable, Sendable 
 public struct ToolchainPreferences: Codable, Equatable, Sendable {
     public var flutterSDKPath: String?
     public var preferredIDE: PreferredIDE
+    public var developmentEnvironmentMode: DevelopmentEnvironmentMode?
 
-    public init(flutterSDKPath: String? = nil, preferredIDE: PreferredIDE = .vsCode) {
+    public init(
+        flutterSDKPath: String? = nil,
+        preferredIDE: PreferredIDE = .vsCode,
+        developmentEnvironmentMode: DevelopmentEnvironmentMode? = nil
+    ) {
         self.flutterSDKPath = flutterSDKPath
         self.preferredIDE = preferredIDE
+        self.developmentEnvironmentMode = developmentEnvironmentMode
     }
 }

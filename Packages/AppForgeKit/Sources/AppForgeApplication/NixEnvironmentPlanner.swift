@@ -6,9 +6,19 @@ public struct NixEnvironmentPlanner: Sendable {
     public func plan(
         for specification: ProjectSpecification
     ) throws -> NixEnvironmentPlan {
-        guard specification.framework == .flutter else {
+        try plan(
+            framework: specification.framework,
+            targetPlatforms: specification.targetPlatforms
+        )
+    }
+
+    public func plan(
+        framework: OutputFramework,
+        targetPlatforms: Set<TargetPlatform>
+    ) throws -> NixEnvironmentPlan {
+        guard framework == .flutter else {
             throw NixEnvironmentError.unsupportedFramework(
-                specification.framework
+                framework
             )
         }
 
@@ -18,11 +28,11 @@ public struct NixEnvironmentPlanner: Sendable {
         ]
         var unmanaged = Set<ToolIdentifier>()
 
-        if specification.targetPlatforms.contains(.android) {
+        if targetPlatforms.contains(.android) {
             packages.insert(.jdk17)
             unmanaged.insert(.androidSDK)
         }
-        if specification.targetPlatforms.contains(.iOS) {
+        if targetPlatforms.contains(.iOS) {
             unmanaged.insert(.xcode)
         }
 
