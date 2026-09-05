@@ -10,11 +10,13 @@ struct FlutterToolchainIdentityParser: Sendable {
         guard let version = stringValue(
             in: dictionary,
             keys: ["flutterVersion", "frameworkVersion"]
-        ),
-        let channel = dictionary["channel"] as? String,
-        let frameworkRevision = dictionary["frameworkRevision"] as? String,
-        let engineRevision = dictionary["engineRevision"] as? String,
-        let dartSDKVersion = dictionary["dartSdkVersion"] as? String
+        ) else {
+            throw FlutterMaterializationError.invalidFlutterToolchainMetadata
+        }
+        guard let channel = dictionary["channel"] as? String,
+              let frameworkRevision = dictionary["frameworkRevision"] as? String,
+              let engineRevision = dictionary["engineRevision"] as? String,
+              let dartSDKVersion = dictionary["dartSdkVersion"] as? String
         else {
             throw FlutterMaterializationError.invalidFlutterToolchainMetadata
         }
@@ -51,10 +53,8 @@ struct FlutterToolchainIdentityParser: Sendable {
 
         let json = String(output[firstBrace ... lastBrace])
         let data = Data(json.utf8)
-        guard let object = try? JSONSerialization.jsonObject(
-            with: data
-        ),
-        let dictionary = object as? [String: Any]
+        guard let object = try? JSONSerialization.jsonObject(with: data),
+              let dictionary = object as? [String: Any]
         else {
             throw FlutterMaterializationError.invalidFlutterToolchainMetadata
         }
