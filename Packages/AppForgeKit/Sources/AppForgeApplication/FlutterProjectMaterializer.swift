@@ -56,13 +56,14 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
             throw FlutterMaterializationError.generationPlanMismatch
         }
 
-        let inspection = try inspector.inspect(
-            sdkRootPath: flutterSDKPath
-        )
         let target = targetURL.standardizedFileURL
         let parent = target.deletingLastPathComponent()
         try validateTargetParent(parent)
         try ensureTargetIsAvailable(target)
+
+        let inspection = try inspector.inspect(
+            sdkRootPath: flutterSDKPath
+        )
 
         let stagingRoot = parent.appendingPathComponent(
             ".appforge-materialize-\(UUID().uuidString)",
@@ -171,7 +172,16 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
                 receipt: receipt
             )
         } catch {
-            try? cleanup(stagingRoot)
+            do {
+                try cleanup(stagingRoot)
+            } catch let cleanupError {
+                let message = "Flutter-Materialisierung fehlgeschlagen und das Staging-Verzeichnis "
+                    + "konnte nicht vollständig entfernt werden. Ursprünglicher Fehler: "
+                    + error.localizedDescription
+                    + " Cleanup-Fehler: "
+                    + cleanupError.localizedDescription
+                throw AppForgeError.fileSystem(message: message)
+            }
             throw error
         }
     }
