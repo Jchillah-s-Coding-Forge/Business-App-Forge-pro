@@ -59,11 +59,26 @@ struct FlutterSourceBuilder {
     ) throws -> [GeneratedFile] {
         let featureName = FlutterDartNaming.snakeCase(entity.identity.code)
         let typeName = FlutterDartNaming.typeName(entity.identity.code)
+        guard FlutterDartNaming.isUsableIdentifier(featureName),
+              FlutterDartNaming.isUsableIdentifier(typeName)
+        else {
+            throw FlutterRendererError.invalidGeneratedIdentifier(
+                definitionID: entity.id,
+                code: entity.identity.code
+            )
+        }
+
         let fields = entity.fields.sorted(by: Self.fieldSort)
         var generatedNames = Set<String>()
 
         for field in fields {
             let identifier = FlutterDartNaming.memberName(field.identity.code)
+            guard FlutterDartNaming.isUsableIdentifier(identifier) else {
+                throw FlutterRendererError.invalidGeneratedIdentifier(
+                    definitionID: field.id,
+                    code: field.identity.code
+                )
+            }
             guard generatedNames.insert(identifier).inserted else {
                 throw FlutterRendererError.duplicateGeneratedIdentifier(
                     entityID: entity.id,
@@ -412,7 +427,9 @@ struct FlutterSourceBuilder {
             rendererVersion: rendererVersion,
             projectSchemaVersion: specification.schemaVersion,
             packageName: packageName,
-            forgePackages: graph.packages.map { $0.contract.id.rawValue },
+            forgePackages: graph.packages
+                .map { $0.contract.id.rawValue }
+                .sorted(),
             files: paths
         )
         let encoder = JSONEncoder()
