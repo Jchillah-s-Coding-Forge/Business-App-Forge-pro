@@ -77,7 +77,28 @@ struct ExecutableToolDetector {
             executableCandidate(command: "supabase", arguments: ["--version"])
         case .docker:
             executableCandidate(command: "docker", arguments: ["--version"])
+        case .nix:
+            nixCandidate()
         }
+    }
+
+    private func nixCandidate() -> ToolCandidate? {
+        if let candidate = executableCandidate(
+            command: "nix",
+            arguments: ["--version"]
+        ) {
+            return candidate
+        }
+
+        let standardPath = "/nix/var/nix/profiles/default/bin/nix"
+        guard FileManager.default.isExecutableFile(atPath: standardPath) else {
+            return nil
+        }
+        return ToolCandidate(
+            path: standardPath,
+            executablePath: standardPath,
+            versionArguments: ["--version"]
+        )
     }
 
     private func flutterCandidate(preferredSDKPath: String?) -> ToolCandidate? {

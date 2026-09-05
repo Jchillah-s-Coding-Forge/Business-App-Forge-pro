@@ -74,12 +74,25 @@ enum SystemToolDetectionSupport {
             "VS Code ist optional und wurde nicht gefunden."
         case .androidStudio:
             "Android Studio ist optional und wurde nicht gefunden."
+        case .xcodeGen, .supabaseCLI, .docker, .nix:
+            optionalMissingDetail(for: identifier)
+        }
+    }
+
+    private static func optionalMissingDetail(
+        for identifier: ToolIdentifier
+    ) -> String {
+        switch identifier {
         case .xcodeGen:
             "XcodeGen ist optional und wurde nicht gefunden."
         case .supabaseCLI:
             "Supabase CLI ist optional und wurde nicht gefunden."
         case .docker:
             "Keine Docker-kompatible CLI wurde gefunden. Sie wird nur für lokale Backend-Stacks benötigt."
+        case .nix:
+            "Nix wurde nicht gefunden. Der optionale reproduzierbare Environment-Modus benötigt Nix."
+        default:
+            "Das optionale Werkzeug wurde nicht gefunden."
         }
     }
 }
