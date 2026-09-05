@@ -33,6 +33,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		025C9C5D1DDE698406E4300B /* FLUTTER_RENDERER.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FLUTTER_RENDERER.md; sourceTree = "<group>"; };
 		1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = OVERVIEW.md; sourceTree = "<group>"; };
 		14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceHomeViewModelTests.swift; sourceTree = "<group>"; };
 		177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModelTests.swift; sourceTree = "<group>"; };
@@ -117,6 +118,7 @@
 			children = (
 				5E6F91737C991DC763DE412C /* ADR-001-project-foundation.md */,
 				78D22617FD379D55533F7680 /* ADR-002-architecture-versus-state-management.md */,
+				025C9C5D1DDE698406E4300B /* FLUTTER_RENDERER.md */,
 				1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */,
 				BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */,
 				254E43A26745EB0060206E87 /* PROJECT_SPECIFICATION.md */,
