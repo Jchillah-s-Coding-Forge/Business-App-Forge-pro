@@ -224,7 +224,7 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
             atPath: parent.path,
             isDirectory: &isDirectory
         ),
-        isDirectory.boolValue
+              isDirectory.boolValue
         else {
             throw AppForgeError.fileSystem(
                 message: "Der Zielordner für die Flutter-Materialisierung existiert nicht."
@@ -253,7 +253,7 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
             atPath: projectURL.path,
             isDirectory: &isDirectory
         ),
-        isDirectory.boolValue
+              isDirectory.boolValue
         else {
             throw AppForgeError.generation(
                 message: "Flutter hat keinen vollständigen Projektordner erzeugt."
