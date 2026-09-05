@@ -200,7 +200,6 @@ struct FlutterProjectCoreSources {
             ".packages",
             "build/",
             "coverage/",
-            "pubspec.lock",
             ".idea/",
             ".vscode/",
             ""

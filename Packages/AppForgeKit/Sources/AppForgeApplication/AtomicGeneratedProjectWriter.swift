@@ -26,8 +26,8 @@ public struct AtomicGeneratedProjectWriter: GeneratedProjectWriting {
                 at: stagingURL,
                 withIntermediateDirectories: false
             )
-            try writeFiles(
-                plan.files,
+            try GenerationPlanFileWriter().write(
+                plan: plan,
                 into: stagingURL,
                 fileManager: fileManager
             )
@@ -75,28 +75,6 @@ public struct AtomicGeneratedProjectWriter: GeneratedProjectWriting {
             throw AppForgeError.fileSystem(
                 message: "Am gewählten Ziel existiert bereits eine Datei oder ein Projekt."
             )
-        }
-    }
-
-    private func writeFiles(
-        _ files: [GeneratedFile],
-        into rootURL: URL,
-        fileManager: FileManager
-    ) throws {
-        for file in files {
-            let destinationURL = rootURL.appendingPathComponent(file.relativePath)
-            let parentURL = destinationURL.deletingLastPathComponent()
-
-            try fileManager.createDirectory(
-                at: parentURL,
-                withIntermediateDirectories: true
-            )
-            guard let data = file.contents.data(using: .utf8) else {
-                throw AppForgeError.generation(
-                    message: "Die Datei \(file.relativePath) konnte nicht als UTF-8 codiert werden."
-                )
-            }
-            try data.write(to: destinationURL, options: .atomic)
         }
     }
 

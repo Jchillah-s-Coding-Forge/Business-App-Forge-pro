@@ -40,6 +40,7 @@
 		1AB8F0DBFA1F7FAEC8CAAA17 /* MONETIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MONETIZATION.md; sourceTree = "<group>"; };
 		254E43A26745EB0060206E87 /* PROJECT_SPECIFICATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PROJECT_SPECIFICATION.md; sourceTree = "<group>"; };
 		320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		3D7A65FE528418672DBABCB2 /* FLUTTER_MATERIALIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FLUTTER_MATERIALIZATION.md; sourceTree = "<group>"; };
 		439F0AB5EBB8B7CF6B232067 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		43E990E1112FB6567DAEEAC7 /* AppForgePro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppForgePro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CFC68B345B3B408237076FF /* PRODUCT_VISION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRODUCT_VISION.md; sourceTree = "<group>"; };
@@ -118,6 +119,7 @@
 			children = (
 				5E6F91737C991DC763DE412C /* ADR-001-project-foundation.md */,
 				78D22617FD379D55533F7680 /* ADR-002-architecture-versus-state-management.md */,
+				3D7A65FE528418672DBABCB2 /* FLUTTER_MATERIALIZATION.md */,
 				025C9C5D1DDE698406E4300B /* FLUTTER_RENDERER.md */,
 				1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */,
 				BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */,
