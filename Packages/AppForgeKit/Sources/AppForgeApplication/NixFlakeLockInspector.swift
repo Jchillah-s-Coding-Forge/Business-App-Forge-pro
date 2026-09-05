@@ -7,7 +7,7 @@ struct NixFlakeLockProvenance: Equatable {
     let sha256: String
 }
 
-struct NixFlakeLockInspector {
+struct NixFlakeLockInspector: Sendable {
     func inspect(
         lockFileURL: URL
     ) throws -> NixFlakeLockProvenance {
