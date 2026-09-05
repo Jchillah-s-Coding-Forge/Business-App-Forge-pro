@@ -11,6 +11,7 @@ public enum ToolIdentifier: String, CaseIterable, Codable, Identifiable, Sendabl
     case androidStudio
     case supabaseCLI
     case docker
+    case nix
 
     public var id: String {
         rawValue
