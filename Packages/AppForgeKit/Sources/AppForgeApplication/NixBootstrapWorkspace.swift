@@ -77,6 +77,11 @@ struct NixBootstrapWorkspace {
         )
     }
 
+    func commandIsIntact() throws -> Bool {
+        let data = try Data(contentsOf: commandURL)
+        return data == Data(Self.commandContents.utf8)
+    }
+
     func cleanup(
         fileManager: FileManager = .default
     ) throws {
