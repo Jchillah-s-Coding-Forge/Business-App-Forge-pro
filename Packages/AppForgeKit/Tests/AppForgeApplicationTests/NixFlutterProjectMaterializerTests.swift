@@ -197,6 +197,21 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
         fixture: NixFlutterMaterializationFixture
     ) {
         XCTAssertEqual(requests.count, 6)
+        assertNixExecutableRequests(requests)
+        XCTAssertEqual(
+            requests[0].arguments,
+            ["--version"]
+        )
+        assertNixDevelopRequests(
+            Array(requests.dropFirst()),
+            fixture: fixture
+        )
+        assertFlutterSteps(requests)
+    }
+
+    private func assertNixExecutableRequests(
+        _ requests: [ToolchainCommandRequest]
+    ) {
         XCTAssertTrue(
             requests.allSatisfy {
                 $0.executablePath == "/nix/bin/nix"
@@ -207,23 +222,26 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
                 !$0.executablePath.contains("/bin/sh")
             }
         )
-        XCTAssertEqual(
-            requests[0].arguments,
-            ["--version"]
-        )
+    }
 
-        for request in requests.dropFirst() {
+    private func assertNixDevelopRequests(
+        _ requests: [ToolchainCommandRequest],
+        fixture: NixFlutterMaterializationFixture
+    ) {
+        let expectedPrefix = [
+            "--extra-experimental-features",
+            "nix-command flakes",
+            "develop",
+            fixture.environmentURL.path,
+            "--command",
+            "flutter",
+            "--no-version-check"
+        ]
+
+        for request in requests {
             XCTAssertEqual(
                 Array(request.arguments.prefix(7)),
-                [
-                    "--extra-experimental-features",
-                    "nix-command flakes",
-                    "develop",
-                    fixture.environmentURL.path,
-                    "--command",
-                    "flutter",
-                    "--no-version-check"
-                ]
+                expectedPrefix
             )
             XCTAssertNil(
                 request.environment["GITHUB_TOKEN"]
@@ -232,7 +250,11 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
                 request.environment["OPENAI_API_KEY"]
             )
         }
+    }
 
+    private func assertFlutterSteps(
+        _ requests: [ToolchainCommandRequest]
+    ) {
         XCTAssertTrue(
             requests[2].arguments.contains("create")
         )
