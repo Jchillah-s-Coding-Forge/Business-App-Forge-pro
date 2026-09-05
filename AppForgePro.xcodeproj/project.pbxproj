@@ -40,6 +40,7 @@
 		1AB8F0DBFA1F7FAEC8CAAA17 /* MONETIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MONETIZATION.md; sourceTree = "<group>"; };
 		254E43A26745EB0060206E87 /* PROJECT_SPECIFICATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PROJECT_SPECIFICATION.md; sourceTree = "<group>"; };
 		320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		35E41EDA1844AD5B74B10C55 /* NIX_BOOTSTRAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIX_BOOTSTRAP.md; sourceTree = "<group>"; };
 		3D7A65FE528418672DBABCB2 /* FLUTTER_MATERIALIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FLUTTER_MATERIALIZATION.md; sourceTree = "<group>"; };
 		439F0AB5EBB8B7CF6B232067 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		43E990E1112FB6567DAEEAC7 /* AppForgePro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppForgePro.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,6 +125,7 @@
 				8841645D83E2B35759B9C582 /* DEVELOPMENT_ENVIRONMENTS.md */,
 				3D7A65FE528418672DBABCB2 /* FLUTTER_MATERIALIZATION.md */,
 				025C9C5D1DDE698406E4300B /* FLUTTER_RENDERER.md */,
+				35E41EDA1844AD5B74B10C55 /* NIX_BOOTSTRAP.md */,
 				4946437F18B83E95D334BAAB /* OFFLINE_FIRST_STORAGE.md */,
 				1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */,
 				BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */,
