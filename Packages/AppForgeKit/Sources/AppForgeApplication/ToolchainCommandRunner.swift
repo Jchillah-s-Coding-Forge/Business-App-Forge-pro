@@ -45,7 +45,7 @@ public protocol ToolchainCommandRunning: Sendable {
 }
 
 public struct SystemToolchainCommandRunner: ToolchainCommandRunning {
-    private static let outputLimit = 65_536
+    private static let outputLimit = 65536
 
     public init() {}
 
@@ -71,7 +71,7 @@ public struct SystemToolchainCommandRunner: ToolchainCommandRunning {
             atPath: workingDirectoryURL.path,
             isDirectory: &isDirectory
         ),
-        isDirectory.boolValue
+              isDirectory.boolValue
         else {
             throw AppForgeError.fileSystem(
                 message: "Das Arbeitsverzeichnis für den Toolchain-Prozess existiert nicht."
