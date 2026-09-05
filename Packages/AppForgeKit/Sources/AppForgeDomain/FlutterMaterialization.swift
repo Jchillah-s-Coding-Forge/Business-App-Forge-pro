@@ -8,6 +8,32 @@ public enum FlutterMaterializationStep: String, Codable, Equatable, Sendable {
     case test
 }
 
+public enum FlutterMaterializationToolchain: Equatable, Sendable {
+    case directSDK(path: String)
+    case nixEnvironment(
+        environmentPath: String,
+        nixExecutablePath: String
+    )
+}
+
+public enum FlutterToolchainExecutionMode: String, Codable, Equatable, Sendable {
+    case directSDK
+    case nixEnvironment
+}
+
+public struct FlutterNixEnvironmentProvenance: Codable, Equatable, Sendable {
+    public let nixpkgsLockedRevision: String
+    public let flakeLockSHA256: String
+
+    public init(
+        nixpkgsLockedRevision: String,
+        flakeLockSHA256: String
+    ) {
+        self.nixpkgsLockedRevision = nixpkgsLockedRevision
+        self.flakeLockSHA256 = flakeLockSHA256
+    }
+}
+
 public struct FlutterToolchainIdentity: Codable, Equatable, Sendable {
     public let flutterVersion: String
     public let channel: String
@@ -31,7 +57,7 @@ public struct FlutterToolchainIdentity: Codable, Equatable, Sendable {
 }
 
 public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
-    public static let currentSchemaVersion = 1
+    public static let currentSchemaVersion = 2
     public static let defaultFileName = "appforge.toolchain.json"
 
     public let schemaVersion: Int
@@ -41,6 +67,8 @@ public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
     public let targetPlatforms: [TargetPlatform]
     public let pubspecLockSHA256: String
     public let validatedSteps: [FlutterMaterializationStep]
+    public let executionMode: FlutterToolchainExecutionMode?
+    public let nixEnvironment: FlutterNixEnvironmentProvenance?
 
     public init(
         schemaVersion: Int = FlutterToolchainReceipt.currentSchemaVersion,
@@ -49,7 +77,9 @@ public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
         organizationIdentifier: String,
         targetPlatforms: [TargetPlatform],
         pubspecLockSHA256: String,
-        validatedSteps: [FlutterMaterializationStep]
+        validatedSteps: [FlutterMaterializationStep],
+        executionMode: FlutterToolchainExecutionMode? = .directSDK,
+        nixEnvironment: FlutterNixEnvironmentProvenance? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.flutter = flutter
@@ -58,6 +88,8 @@ public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
         self.targetPlatforms = targetPlatforms
         self.pubspecLockSHA256 = pubspecLockSHA256
         self.validatedSteps = validatedSteps
+        self.executionMode = executionMode
+        self.nixEnvironment = nixEnvironment
     }
 }
 
@@ -80,6 +112,9 @@ public enum FlutterMaterializationError: Error, Equatable, Sendable {
     case invalidFlutterSDKPath
     case invalidFlutterToolchainMetadata
     case incompatibleFlutterVersion(actual: String, minimum: String)
+    case invalidNixEnvironment
+    case nixEnvironmentReceiptMismatch
+    case nixEnvironmentMissingFlutter
     case targetAlreadyExists
     case generationPlanMismatch
     case missingPubspecLock

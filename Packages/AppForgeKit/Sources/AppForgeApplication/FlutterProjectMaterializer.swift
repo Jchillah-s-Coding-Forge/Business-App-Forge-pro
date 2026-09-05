@@ -20,8 +20,20 @@ public struct FlutterRenderedProduct: Equatable, Sendable {
 public struct FlutterMaterializationInput: Equatable, Sendable {
     public let specification: ProjectSpecification
     public let renderedProduct: FlutterRenderedProduct
-    public let flutterSDKPath: String
+    public let toolchain: FlutterMaterializationToolchain
     public let targetURL: URL
+
+    public init(
+        specification: ProjectSpecification,
+        renderedProduct: FlutterRenderedProduct,
+        toolchain: FlutterMaterializationToolchain,
+        targetURL: URL
+    ) {
+        self.specification = specification
+        self.renderedProduct = renderedProduct
+        self.toolchain = toolchain
+        self.targetURL = targetURL
+    }
 
     public init(
         specification: ProjectSpecification,
@@ -29,10 +41,12 @@ public struct FlutterMaterializationInput: Equatable, Sendable {
         flutterSDKPath: String,
         targetURL: URL
     ) {
-        self.specification = specification
-        self.renderedProduct = renderedProduct
-        self.flutterSDKPath = flutterSDKPath
-        self.targetURL = targetURL
+        self.init(
+            specification: specification,
+            renderedProduct: renderedProduct,
+            toolchain: .directSDK(path: flutterSDKPath),
+            targetURL: targetURL
+        )
     }
 }
 
@@ -53,17 +67,25 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
     private let specificationValidator: ProjectSpecificationValidator
     private let renderer: any FlutterProjectRendering
     private let inspector: any FlutterToolchainInspecting
+    private let nixInspector: SystemNixFlutterToolchainInspector
     private let runner: any ToolchainCommandRunning
 
     public init(
-        specificationValidator: ProjectSpecificationValidator = ProjectSpecificationValidator(),
-        renderer: any FlutterProjectRendering = DeterministicFlutterProjectRenderer(),
-        inspector: any FlutterToolchainInspecting = SystemFlutterToolchainInspector(),
-        runner: any ToolchainCommandRunning = SystemToolchainCommandRunner()
+        specificationValidator: ProjectSpecificationValidator =
+            ProjectSpecificationValidator(),
+        renderer: any FlutterProjectRendering =
+            DeterministicFlutterProjectRenderer(),
+        inspector: any FlutterToolchainInspecting =
+            SystemFlutterToolchainInspector(),
+        runner: any ToolchainCommandRunning =
+            SystemToolchainCommandRunner()
     ) {
         self.specificationValidator = specificationValidator
         self.renderer = renderer
         self.inspector = inspector
+        nixInspector = SystemNixFlutterToolchainInspector(
+            runner: runner
+        )
         self.runner = runner
     }
 
@@ -75,21 +97,21 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
             input.targetURL
         )
 
-        let inspection = try inspector.inspect(
-            sdkRootPath: input.flutterSDKPath
+        let runtime = try makeRuntime(
+            toolchain: input.toolchain
         )
         let workspace = try FlutterMaterializationWorkspace.create(
             targetURL: input.targetURL
         )
         let executor = FlutterMaterializationCommandExecutor(
-            inspection: inspection,
+            commandBuilder: runtime.commandBuilder,
             runner: runner
         )
 
         do {
             return try materialize(
                 input,
-                inspection: inspection,
+                runtime: runtime,
                 workspace: workspace,
                 executor: executor
             )
@@ -102,9 +124,13 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         _ input: FlutterMaterializationInput
     ) throws {
         let specification = input.specification
-        let issues = specificationValidator.validate(specification)
+        let issues = specificationValidator.validate(
+            specification
+        )
         guard issues.isEmpty else {
-            throw FlutterMaterializationError.invalidSpecification(issues)
+            throw FlutterMaterializationError.invalidSpecification(
+                issues
+            )
         }
 
         let rendered = input.renderedProduct
@@ -118,9 +144,45 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         }
     }
 
+    private func makeRuntime(
+        toolchain: FlutterMaterializationToolchain
+    ) throws -> FlutterMaterializationToolchainRuntime {
+        switch toolchain {
+        case let .directSDK(path):
+            let inspection = try inspector.inspect(
+                sdkRootPath: path
+            )
+            return FlutterMaterializationToolchainRuntime(
+                identity: inspection.identity,
+                executionMode: .directSDK,
+                nixProvenance: nil,
+                commandBuilder: DirectFlutterCommandRequestBuilder(
+                    inspection: inspection
+                )
+            )
+
+        case let .nixEnvironment(
+            environmentPath,
+            nixExecutablePath
+        ):
+            let inspection = try nixInspector.inspect(
+                environmentPath: environmentPath,
+                nixExecutablePath: nixExecutablePath
+            )
+            return FlutterMaterializationToolchainRuntime(
+                identity: inspection.identity,
+                executionMode: .nixEnvironment,
+                nixProvenance: inspection.provenance,
+                commandBuilder: NixFlutterCommandRequestBuilder(
+                    inspection: inspection
+                )
+            )
+        }
+    }
+
     private func materialize(
         _ input: FlutterMaterializationInput,
-        inspection: FlutterToolchainInspection,
+        runtime: FlutterMaterializationToolchainRuntime,
         workspace: FlutterMaterializationWorkspace,
         executor: FlutterMaterializationCommandExecutor
     ) throws -> FlutterMaterializationResult {
@@ -140,15 +202,23 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         )
         try workspace.validateCreatedProject()
         try workspace.prepareForOverlay()
-        try workspace.write(plan: input.renderedProduct.plan)
+        try workspace.write(
+            plan: input.renderedProduct.plan
+        )
 
-        try executor.resolveDependencies(in: workspace.projectURL)
-        try executor.analyze(projectURL: workspace.projectURL)
-        try executor.test(projectURL: workspace.projectURL)
+        try executor.resolveDependencies(
+            in: workspace.projectURL
+        )
+        try executor.analyze(
+            projectURL: workspace.projectURL
+        )
+        try executor.test(
+            projectURL: workspace.projectURL
+        )
 
         let receipt = try makeReceipt(
             specification: specification,
-            inspection: inspection,
+            runtime: runtime,
             packageName: packageName,
             lockHash: workspace.pubspecLockSHA256()
         )
@@ -163,12 +233,12 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
 
     private func makeReceipt(
         specification: ProjectSpecification,
-        inspection: FlutterToolchainInspection,
+        runtime: FlutterMaterializationToolchainRuntime,
         packageName: String,
         lockHash: String
     ) -> FlutterToolchainReceipt {
         FlutterToolchainReceipt(
-            flutter: inspection.identity,
+            flutter: runtime.identity,
             projectPackageName: packageName,
             organizationIdentifier: specification.identity.organizationIdentifier,
             targetPlatforms: FlutterMaterializationPlatformMapper.sortedPlatforms(
@@ -181,7 +251,9 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
                 .pubGet,
                 .analyze,
                 .test
-            ]
+            ],
+            executionMode: runtime.executionMode,
+            nixEnvironment: runtime.nixProvenance
         )
     }
 }
