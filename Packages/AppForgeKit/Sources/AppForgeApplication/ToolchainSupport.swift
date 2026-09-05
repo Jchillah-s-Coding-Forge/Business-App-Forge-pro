@@ -102,6 +102,12 @@ public struct ToolSetupAdvisor: Sendable {
                 detail: "Öffnet die offizielle Docker-Desktop-Anleitung für macOS.",
                 urlString: "https://docs.docker.com/desktop/setup/install/mac-install/"
             )
+        case .nix:
+            ToolSetupRecommendation(
+                title: "Nix einrichten",
+                detail: "Öffnet die offizielle Nix-Installationsanleitung. AppForge installiert Nix nicht still.",
+                urlString: "https://nixos.org/download/"
+            )
         case .git:
             nil
         }
