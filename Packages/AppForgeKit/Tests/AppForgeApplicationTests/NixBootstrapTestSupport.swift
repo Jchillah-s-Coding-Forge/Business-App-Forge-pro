@@ -27,9 +27,9 @@ enum NixBootstrapTestSupport {
     ) -> NixInstallerDownload {
         NixInstallerDownload(
             data: data ?? installer(policy: policy),
-            responseURL: responseURL ?? URL(
-                string: policy.installerURLString
-            )!,
+            responseURL: responseURL
+                ?? URL(string: policy.installerURLString)
+                ?? URL(fileURLWithPath: "/invalid-nix-policy-url"),
             statusCode: statusCode
         )
     }
