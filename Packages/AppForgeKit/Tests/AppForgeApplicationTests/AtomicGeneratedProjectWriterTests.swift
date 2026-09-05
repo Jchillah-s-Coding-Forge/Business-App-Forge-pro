@@ -58,7 +58,9 @@ final class AtomicGeneratedProjectWriterTests: XCTestCase {
                 to: targetURL
             )
         ) { error in
-            guard case .fileSystem = error as? AppForgeError else {
+            guard let appForgeError = error as? AppForgeError,
+                  case .fileSystem = appForgeError
+            else {
                 return XCTFail("Expected fileSystem error, got \(error)")
             }
         }
