@@ -113,6 +113,36 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
     private func parseIdentity(
         _ output: String
     ) throws -> FlutterToolchainIdentity {
+        let dictionary = try machineVersionDictionary(output)
+        guard let version = stringValue(
+            in: dictionary,
+            keys: ["flutterVersion", "frameworkVersion"]
+        ),
+        let channel = dictionary["channel"] as? String,
+        let frameworkRevision = dictionary["frameworkRevision"] as? String,
+        let engineRevision = dictionary["engineRevision"] as? String,
+        let dartSDKVersion = dictionary["dartSdkVersion"] as? String,
+        !version.isEmpty,
+        !channel.isEmpty,
+        frameworkRevision.isGitRevision,
+        engineRevision.isGitRevision,
+        !dartSDKVersion.isEmpty
+        else {
+            throw FlutterMaterializationError.invalidFlutterToolchainMetadata
+        }
+
+        return FlutterToolchainIdentity(
+            flutterVersion: version,
+            channel: channel,
+            frameworkRevision: frameworkRevision,
+            engineRevision: engineRevision,
+            dartSDKVersion: dartSDKVersion
+        )
+    }
+
+    private func machineVersionDictionary(
+        _ output: String
+    ) throws -> [String: Any] {
         guard let firstBrace = output.firstIndex(of: "{"),
               let lastBrace = output.lastIndex(of: "}"),
               firstBrace <= lastBrace
@@ -122,26 +152,19 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
 
         let json = String(output[firstBrace ... lastBrace])
         guard let data = json.data(using: .utf8),
-              let machine = try? JSONDecoder().decode(
-                  FlutterMachineVersion.self,
-                  from: data
-              ),
-              !machine.version.isEmpty,
-              !machine.channel.isEmpty,
-              machine.frameworkRevision.isGitRevision,
-              machine.engineRevision.isGitRevision,
-              !machine.dartSDKVersion.isEmpty
+              let object = try? JSONSerialization.jsonObject(with: data),
+              let dictionary = object as? [String: Any]
         else {
             throw FlutterMaterializationError.invalidFlutterToolchainMetadata
         }
+        return dictionary
+    }
 
-        return FlutterToolchainIdentity(
-            flutterVersion: machine.version,
-            channel: machine.channel,
-            frameworkRevision: machine.frameworkRevision,
-            engineRevision: machine.engineRevision,
-            dartSDKVersion: machine.dartSDKVersion
-        )
+    private func stringValue(
+        in dictionary: [String: Any],
+        keys: [String]
+    ) -> String? {
+        keys.lazy.compactMap { dictionary[$0] as? String }.first
     }
 
     private func validateMinimumVersion(
@@ -181,45 +204,6 @@ enum FlutterToolchainProcessEnvironment {
         }
 
         return environment
-    }
-}
-
-private struct FlutterMachineVersion: Decodable {
-    let version: String
-    let channel: String
-    let frameworkRevision: String
-    let engineRevision: String
-    let dartSDKVersion: String
-
-    private enum CodingKeys: String, CodingKey {
-        case flutterVersion
-        case frameworkVersion
-        case channel
-        case frameworkRevision
-        case engineRevision
-        case dartSDKVersion
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        version = try container.decodeIfPresent(
-            String.self,
-            forKey: .flutterVersion
-        )
-            ?? container.decode(String.self, forKey: .frameworkVersion)
-        channel = try container.decode(String.self, forKey: .channel)
-        frameworkRevision = try container.decode(
-            String.self,
-            forKey: .frameworkRevision
-        )
-        engineRevision = try container.decode(
-            String.self,
-            forKey: .engineRevision
-        )
-        dartSDKVersion = try container.decode(
-            String.self,
-            forKey: .dartSDKVersion
-        )
     }
 }
 
