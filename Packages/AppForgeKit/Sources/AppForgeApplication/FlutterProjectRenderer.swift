@@ -13,6 +13,7 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
     case invalidSpecification([ProjectSpecificationValidationIssue])
     case lockfileMismatch
     case invalidProjectPackageName(String)
+    case invalidGeneratedIdentifier(definitionID: String, code: String)
     case duplicateGeneratedIdentifier(entityID: String, identifier: String)
     case encodingFailed
 }
