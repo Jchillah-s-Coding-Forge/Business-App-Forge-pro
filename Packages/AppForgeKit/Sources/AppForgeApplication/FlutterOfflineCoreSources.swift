@@ -13,7 +13,7 @@ struct FlutterOfflineCoreSources {
             specification: specification
         ).createStatements()
 
-        return [
+        var files = [
             GeneratedFile(
                 relativePath: "lib/core/storage/app_database.dart",
                 contents: appDatabase()
@@ -23,26 +23,33 @@ struct FlutterOfflineCoreSources {
                 contents: databaseMigrations(statements: statements)
             ),
             GeneratedFile(
-                relativePath: "lib/core/sync/sync_operation.dart",
-                contents: syncOperation()
-            ),
-            GeneratedFile(
                 relativePath: "lib/core/sync/sync_status.dart",
                 contents: syncStatus()
             ),
             GeneratedFile(
                 relativePath: "lib/core/sync/sync_policy.dart",
                 contents: syncPolicy()
-            ),
-            GeneratedFile(
-                relativePath: "lib/core/sync/sync_outbox_entry.dart",
-                contents: syncOutboxEntry()
-            ),
-            GeneratedFile(
-                relativePath: "lib/core/sync/sync_outbox_repository.dart",
-                contents: syncOutboxRepository()
             )
         ]
+
+        if specification.offline.usesSyncOutbox {
+            files += [
+                GeneratedFile(
+                    relativePath: "lib/core/sync/sync_operation.dart",
+                    contents: syncOperation()
+                ),
+                GeneratedFile(
+                    relativePath: "lib/core/sync/sync_outbox_entry.dart",
+                    contents: syncOutboxEntry()
+                ),
+                GeneratedFile(
+                    relativePath: "lib/core/sync/sync_outbox_repository.dart",
+                    contents: syncOutboxRepository()
+                )
+            ]
+        }
+
+        return files
     }
 
     private func appDatabase() -> String {
