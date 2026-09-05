@@ -39,6 +39,7 @@ public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
     public let projectPackageName: String
     public let organizationIdentifier: String
     public let targetPlatforms: [TargetPlatform]
+    public let pubspecLockSHA256: String
     public let validatedSteps: [FlutterMaterializationStep]
 
     public init(
@@ -47,6 +48,7 @@ public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
         projectPackageName: String,
         organizationIdentifier: String,
         targetPlatforms: [TargetPlatform],
+        pubspecLockSHA256: String,
         validatedSteps: [FlutterMaterializationStep]
     ) {
         self.schemaVersion = schemaVersion
@@ -54,6 +56,7 @@ public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
         self.projectPackageName = projectPackageName
         self.organizationIdentifier = organizationIdentifier
         self.targetPlatforms = targetPlatforms
+        self.pubspecLockSHA256 = pubspecLockSHA256
         self.validatedSteps = validatedSteps
     }
 }
@@ -78,6 +81,8 @@ public enum FlutterMaterializationError: Error, Equatable, Sendable {
     case invalidFlutterToolchainMetadata
     case incompatibleFlutterVersion(actual: String, minimum: String)
     case targetAlreadyExists
+    case generationPlanMismatch
+    case missingPubspecLock
     case unsupportedTargetPlatform(TargetPlatform)
     case commandTimedOut(FlutterMaterializationStep)
     case commandFailed(
