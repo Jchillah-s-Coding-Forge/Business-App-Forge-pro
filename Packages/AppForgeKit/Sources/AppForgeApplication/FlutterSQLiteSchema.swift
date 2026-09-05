@@ -13,8 +13,10 @@ struct FlutterSQLiteSchema {
         }
 
         for entity in specification.entities.sorted(by: Self.entitySort) {
-            statements.append(try entityTableStatement(entity))
-            statements += try entityIndexStatements(entity)
+            let tableStatement = try entityTableStatement(entity)
+            let indexes = try entityIndexStatements(entity)
+            statements.append(tableStatement)
+            statements += indexes
         }
 
         return statements
