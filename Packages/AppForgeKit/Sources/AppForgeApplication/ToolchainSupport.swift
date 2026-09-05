@@ -84,6 +84,17 @@ public struct ToolSetupAdvisor: Sendable {
                 detail: "Öffnet die offizielle VS-Code-Installationsanleitung für macOS.",
                 urlString: "https://code.visualstudio.com/docs/setup/mac"
             )
+        case .xcodeGen, .supabaseCLI, .docker, .nix:
+            optionalRecommendation(for: identifier)
+        case .git:
+            nil
+        }
+    }
+
+    private func optionalRecommendation(
+        for identifier: ToolIdentifier
+    ) -> ToolSetupRecommendation? {
+        switch identifier {
         case .xcodeGen:
             ToolSetupRecommendation(
                 title: "XcodeGen-Anleitung",
@@ -108,7 +119,7 @@ public struct ToolSetupAdvisor: Sendable {
                 detail: "Öffnet die offizielle Nix-Installationsanleitung. AppForge installiert Nix nicht still.",
                 urlString: "https://nixos.org/download/"
             )
-        case .git:
+        default:
             nil
         }
     }
