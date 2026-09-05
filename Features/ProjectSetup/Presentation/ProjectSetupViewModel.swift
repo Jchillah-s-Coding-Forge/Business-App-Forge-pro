@@ -67,36 +67,6 @@ final class ProjectSetupViewModel {
             )
     }
 
-    var canGenerateProject: Bool {
-        canPrepareProject
-            && resolvedToolchain != nil
-            && !isGeneratingProject
-    }
-
-    var developmentEnvironmentMode: DevelopmentEnvironmentMode {
-        toolchainPreferences.developmentEnvironmentMode
-            ?? .appForgeManaged
-    }
-
-    var preferredIDE: PreferredIDE {
-        toolchainPreferences.preferredIDE
-    }
-
-    var toolchainSummary: String {
-        switch developmentEnvironmentMode {
-        case .appForgeManaged:
-            directToolchainSummary(
-                prefix: "AppForge Managed"
-            )
-        case .existingToolchain:
-            directToolchainSummary(
-                prefix: "Existing Toolchain"
-            )
-        case .nixReproducible:
-            nixToolchainSummary
-        }
-    }
-
     var specification: ProjectSpecification {
         ProjectSpecification(
             identity: ProjectIdentity(
@@ -131,10 +101,6 @@ final class ProjectSetupViewModel {
         }
     }
 
-    func refreshToolchainPreferences() {
-        toolchainPreferences = preferencesStore.load()
-    }
-
     func prepareProject() {
         guard validateProjectForAction() else {
             return
@@ -143,6 +109,110 @@ final class ProjectSetupViewModel {
         summaryMessage = canGenerateProject
             ? "Projektentwurf und Build-Umgebung sind bereit."
             : toolchainMissingMessage
+    }
+
+    private func validateProjectForAction() -> Bool {
+        guard !normalizedProjectName.isEmpty else {
+            summaryMessage =
+                "Bitte geben Sie einen Projektnamen ein."
+            return false
+        }
+
+        guard isOrganizationIdentifierValid else {
+            summaryMessage =
+                "Bitte verwenden Sie eine portable Organisationskennung wie de.meinefirma."
+            return false
+        }
+
+        guard framework.isAvailable else {
+            summaryMessage =
+                "Dieser Renderer ist noch nicht produktionsbereit. Bitte verwenden Sie Flutter."
+            return false
+        }
+
+        guard !targetPlatforms.isEmpty,
+              targetPlatforms.isSubset(
+                  of: framework.supportedPlatforms
+              )
+        else {
+            summaryMessage =
+                "Bitte wählen Sie mindestens eine vom Framework unterstützte Zielplattform."
+            return false
+        }
+
+        return true
+    }
+
+    private var normalizedProjectName: String {
+        projectName.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+    }
+
+    private var normalizedOrganizationIdentifier: String {
+        organizationIdentifier.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        ).lowercased()
+    }
+
+    private var isOrganizationIdentifierValid: Bool {
+        let components = normalizedOrganizationIdentifier
+            .split(
+                separator: ".",
+                omittingEmptySubsequences: false
+            )
+        guard components.count >= 2 else {
+            return false
+        }
+
+        return components.allSatisfy { component in
+            guard let first = component.first,
+                  first.isLowercase
+            else {
+                return false
+            }
+
+            return component.allSatisfy { character in
+                character.isLowercase
+                    || character.isNumber
+            }
+        }
+    }
+}
+
+extension ProjectSetupViewModel {
+    var canGenerateProject: Bool {
+        canPrepareProject
+            && resolvedToolchain != nil
+            && !isGeneratingProject
+    }
+
+    var developmentEnvironmentMode: DevelopmentEnvironmentMode {
+        toolchainPreferences.developmentEnvironmentMode
+            ?? .appForgeManaged
+    }
+
+    var preferredIDE: PreferredIDE {
+        toolchainPreferences.preferredIDE
+    }
+
+    var toolchainSummary: String {
+        switch developmentEnvironmentMode {
+        case .appForgeManaged:
+            directToolchainSummary(
+                prefix: "AppForge Managed"
+            )
+        case .existingToolchain:
+            directToolchainSummary(
+                prefix: "Existing Toolchain"
+            )
+        case .nixReproducible:
+            nixToolchainSummary
+        }
+    }
+
+    func refreshToolchainPreferences() {
+        toolchainPreferences = preferencesStore.load()
     }
 
     func generateProject(
@@ -157,11 +227,7 @@ final class ProjectSetupViewModel {
             return
         }
 
-        isGeneratingProject = true
-        generatedProjectPath = nil
-        generatedToolchainReceipt = nil
-        summaryMessage = "Flutter-Projekt wird erzeugt …"
-        defer { isGeneratingProject = false }
+        beginGeneration()
 
         let builder = projectBuilder
         let currentSpecification = specification
@@ -176,15 +242,12 @@ final class ProjectSetupViewModel {
                     targetURL: targetURL
                 )
             }.value
-
-            generatedProjectPath = result.projectPath
-            generatedToolchainReceipt =
-                result.toolchainReceipt
-            summaryMessage =
-                "Flutter-Projekt erfolgreich erzeugt."
+            completeGeneration(result)
         } catch {
             summaryMessage = error.localizedDescription
         }
+
+        isGeneratingProject = false
     }
 
     func openGeneratedProject() {
@@ -205,6 +268,22 @@ final class ProjectSetupViewModel {
         } catch {
             summaryMessage = error.localizedDescription
         }
+    }
+
+    private func beginGeneration() {
+        isGeneratingProject = true
+        generatedProjectPath = nil
+        generatedToolchainReceipt = nil
+        summaryMessage = "Flutter-Projekt wird erzeugt …"
+    }
+
+    private func completeGeneration(
+        _ result: MaterializedFlutterGenerationResult
+    ) {
+        generatedProjectPath = result.projectPath
+        generatedToolchainReceipt = result.toolchainReceipt
+        summaryMessage =
+            "Flutter-Projekt erfolgreich erzeugt."
     }
 
     private var resolvedToolchain: FlutterMaterializationToolchain? {
@@ -266,38 +345,6 @@ final class ProjectSetupViewModel {
         }
     }
 
-    private func validateProjectForAction() -> Bool {
-        guard !normalizedProjectName.isEmpty else {
-            summaryMessage =
-                "Bitte geben Sie einen Projektnamen ein."
-            return false
-        }
-
-        guard isOrganizationIdentifierValid else {
-            summaryMessage =
-                "Bitte verwenden Sie eine portable Organisationskennung wie de.meinefirma."
-            return false
-        }
-
-        guard framework.isAvailable else {
-            summaryMessage =
-                "Dieser Renderer ist noch nicht produktionsbereit. Bitte verwenden Sie Flutter."
-            return false
-        }
-
-        guard !targetPlatforms.isEmpty,
-              targetPlatforms.isSubset(
-                  of: framework.supportedPlatforms
-              )
-        else {
-            summaryMessage =
-                "Bitte wählen Sie mindestens eine vom Framework unterstützte Zielplattform."
-            return false
-        }
-
-        return true
-    }
-
     private func normalizedPreference(
         _ value: String?
     ) -> String? {
@@ -308,41 +355,5 @@ final class ProjectSetupViewModel {
             in: .whitespacesAndNewlines
         )
         return normalized.isEmpty ? nil : normalized
-    }
-
-    private var normalizedProjectName: String {
-        projectName.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        )
-    }
-
-    private var normalizedOrganizationIdentifier: String {
-        organizationIdentifier.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        ).lowercased()
-    }
-
-    private var isOrganizationIdentifierValid: Bool {
-        let components = normalizedOrganizationIdentifier
-            .split(
-                separator: ".",
-                omittingEmptySubsequences: false
-            )
-        guard components.count >= 2 else {
-            return false
-        }
-
-        return components.allSatisfy { component in
-            guard let first = component.first,
-                  first.isLowercase
-            else {
-                return false
-            }
-
-            return component.allSatisfy { character in
-                character.isLowercase
-                    || character.isNumber
-            }
-        }
     }
 }
