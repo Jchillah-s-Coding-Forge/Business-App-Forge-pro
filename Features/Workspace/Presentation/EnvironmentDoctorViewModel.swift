@@ -93,58 +93,6 @@ final class EnvironmentDoctorViewModel {
         !flutterInstallParentPath.isEmpty && !isInstallingFlutter
     }
 
-    var nixResult: ToolDetectionResult? {
-        report?.results.first { $0.id == .nix }
-    }
-
-    var isNixReady: Bool {
-        nixResult?.availability == .ready
-    }
-
-    var shouldOfferNixBootstrap: Bool {
-        developmentEnvironmentMode == .nixReproducible
-            && !isNixReady
-    }
-
-    var canPrepareNixBootstrap: Bool {
-        shouldOfferNixBootstrap
-            && preparedNixBootstrap == nil
-            && !isPreparingNixBootstrap
-    }
-
-    var canLaunchNixBootstrap: Bool {
-        developmentEnvironmentMode == .nixReproducible
-            && preparedNixBootstrap != nil
-            && isNixBootstrapConfirmed
-            && !hasLaunchedNixBootstrap
-    }
-
-    var canProvisionNixEnvironment: Bool {
-        developmentEnvironmentMode == .nixReproducible
-            && isNixReady
-            && !isProvisioningNixEnvironment
-    }
-
-    func setDevelopmentEnvironmentMode(
-        _ mode: DevelopmentEnvironmentMode
-    ) {
-        guard developmentEnvironmentMode != mode else {
-            return
-        }
-
-        if developmentEnvironmentMode == .nixReproducible,
-           mode != .nixReproducible
-        {
-            cleanupPreparedNixBootstrap()
-            nixProvisioningResult = nil
-            nixProvisionTargetPath = ""
-        }
-
-        developmentEnvironmentMode = mode
-        persistPreferences()
-        configurationDidChange()
-    }
-
     func setTarget(
         _ platform: TargetPlatform,
         enabled: Bool
@@ -205,77 +153,6 @@ final class EnvironmentDoctorViewModel {
                 }
             }
             await completeFlutterInstallation(result)
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    func prepareNixBootstrap() async {
-        guard canPrepareNixBootstrap else {
-            return
-        }
-
-        isPreparingNixBootstrap = true
-        isNixBootstrapConfirmed = false
-        hasLaunchedNixBootstrap = false
-        errorMessage = nil
-        defer { isPreparingNixBootstrap = false }
-
-        do {
-            preparedNixBootstrap = try await nixBootstrapPreparer.prepare(
-                workspaceParentURL: nixBootstrapWorkspaceParentURL
-            )
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    func launchNixBootstrap() {
-        guard canLaunchNixBootstrap,
-              let preparedNixBootstrap
-        else {
-            return
-        }
-
-        do {
-            try nixBootstrapLauncher.launch(
-                prepared: preparedNixBootstrap,
-                confirmation: NixBootstrapConfirmation(
-                    approvedInstallerSHA256:
-                    preparedNixBootstrap.installerSHA256
-                )
-            )
-            hasLaunchedNixBootstrap = true
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    func cancelNixBootstrapPreparation() {
-        cleanupPreparedNixBootstrap()
-    }
-
-    func provisionNixEnvironment(
-        to targetURL: URL
-    ) async {
-        guard canProvisionNixEnvironment,
-              let nixExecutablePath = nixResult?.path
-        else {
-            return
-        }
-
-        do {
-            let plan = try nixEnvironmentPlanner.plan(
-                framework: .flutter,
-                targetPlatforms: selectedPlatforms
-            )
-            let input = NixEnvironmentProvisioningInput(
-                plan: plan,
-                nixExecutablePath: nixExecutablePath,
-                targetURL: targetURL
-            )
-            try await runNixProvisioning(input)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -383,6 +260,154 @@ final class EnvironmentDoctorViewModel {
         await scan()
     }
 
+    private func configurationDidChange() {
+        configurationRevision += 1
+        report = nil
+        isScanning = false
+
+        guard canScan else {
+            return
+        }
+        Task { await scan() }
+    }
+
+    private func persistPreferences() {
+        preferencesStore.save(
+            ToolchainPreferences(
+                flutterSDKPath: flutterSDKPath.isEmpty
+                    ? nil
+                    : flutterSDKPath,
+                preferredIDE: preferredIDE,
+                developmentEnvironmentMode: developmentEnvironmentMode
+            )
+        )
+    }
+}
+
+extension EnvironmentDoctorViewModel {
+    var nixResult: ToolDetectionResult? {
+        report?.results.first { $0.id == .nix }
+    }
+
+    var isNixReady: Bool {
+        nixResult?.availability == .ready
+    }
+
+    var shouldOfferNixBootstrap: Bool {
+        developmentEnvironmentMode == .nixReproducible
+            && !isNixReady
+    }
+
+    var canPrepareNixBootstrap: Bool {
+        shouldOfferNixBootstrap
+            && preparedNixBootstrap == nil
+            && !isPreparingNixBootstrap
+    }
+
+    var canLaunchNixBootstrap: Bool {
+        developmentEnvironmentMode == .nixReproducible
+            && preparedNixBootstrap != nil
+            && isNixBootstrapConfirmed
+            && !hasLaunchedNixBootstrap
+    }
+
+    var canProvisionNixEnvironment: Bool {
+        developmentEnvironmentMode == .nixReproducible
+            && isNixReady
+            && !isProvisioningNixEnvironment
+    }
+
+    func setDevelopmentEnvironmentMode(
+        _ mode: DevelopmentEnvironmentMode
+    ) {
+        guard developmentEnvironmentMode != mode else {
+            return
+        }
+
+        let leavingNix = developmentEnvironmentMode == .nixReproducible
+            && mode != .nixReproducible
+        if leavingNix {
+            cleanupPreparedNixBootstrap()
+            nixProvisioningResult = nil
+            nixProvisionTargetPath = ""
+        }
+
+        developmentEnvironmentMode = mode
+        persistPreferences()
+        configurationDidChange()
+    }
+
+    func prepareNixBootstrap() async {
+        guard canPrepareNixBootstrap else {
+            return
+        }
+
+        isPreparingNixBootstrap = true
+        isNixBootstrapConfirmed = false
+        hasLaunchedNixBootstrap = false
+        errorMessage = nil
+        defer { isPreparingNixBootstrap = false }
+
+        do {
+            preparedNixBootstrap = try await nixBootstrapPreparer.prepare(
+                workspaceParentURL: nixBootstrapWorkspaceParentURL
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func launchNixBootstrap() {
+        guard canLaunchNixBootstrap,
+              let preparedNixBootstrap
+        else {
+            return
+        }
+
+        do {
+            try nixBootstrapLauncher.launch(
+                prepared: preparedNixBootstrap,
+                confirmation: NixBootstrapConfirmation(
+                    approvedInstallerSHA256:
+                    preparedNixBootstrap.installerSHA256
+                )
+            )
+            hasLaunchedNixBootstrap = true
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelNixBootstrapPreparation() {
+        cleanupPreparedNixBootstrap()
+    }
+
+    func provisionNixEnvironment(
+        to targetURL: URL
+    ) async {
+        guard canProvisionNixEnvironment,
+              let nixExecutablePath = nixResult?.path
+        else {
+            return
+        }
+
+        do {
+            let plan = try nixEnvironmentPlanner.plan(
+                framework: .flutter,
+                targetPlatforms: selectedPlatforms
+            )
+            let input = NixEnvironmentProvisioningInput(
+                plan: plan,
+                nixExecutablePath: nixExecutablePath,
+                targetURL: targetURL
+            )
+            try await runNixProvisioning(input)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     private func runNixProvisioning(
         _ input: NixEnvironmentProvisioningInput
     ) async throws {
@@ -429,28 +454,5 @@ final class EnvironmentDoctorViewModel {
         } catch {
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func configurationDidChange() {
-        configurationRevision += 1
-        report = nil
-        isScanning = false
-
-        guard canScan else {
-            return
-        }
-        Task { await scan() }
-    }
-
-    private func persistPreferences() {
-        preferencesStore.save(
-            ToolchainPreferences(
-                flutterSDKPath: flutterSDKPath.isEmpty
-                    ? nil
-                    : flutterSDKPath,
-                preferredIDE: preferredIDE,
-                developmentEnvironmentMode: developmentEnvironmentMode
-            )
-        )
     }
 }
