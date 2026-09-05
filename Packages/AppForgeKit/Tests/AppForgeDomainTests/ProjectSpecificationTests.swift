@@ -26,6 +26,23 @@ final class ProjectSpecificationTests: XCTestCase {
         XCTAssertEqual(decoded, original)
     }
 
+    func testValidatorRejectsInvalidProjectRootConfiguration() {
+        let specification = ProjectSpecification(
+            identity: ProjectIdentity(name: "   ", organizationIdentifier: "invalid"),
+            framework: .flutter,
+            targetPlatforms: [],
+            backend: .supabase,
+            flutterStateManagement: nil
+        )
+
+        let issues = ProjectSpecificationValidator().validate(specification)
+
+        XCTAssertTrue(issues.contains(.emptyProjectName))
+        XCTAssertTrue(issues.contains(.invalidOrganizationIdentifier("invalid")))
+        XCTAssertTrue(issues.contains(.unsupportedTargetConfiguration))
+        XCTAssertTrue(issues.contains(.flutterStateManagementRequired))
+    }
+
     func testOnlyAvailableRendererWithSupportedPlatformsIsValid() {
         let flutter = ProjectSpecification(
             identity: ProjectIdentity(name: "Field Service", organizationIdentifier: "de.example"),
