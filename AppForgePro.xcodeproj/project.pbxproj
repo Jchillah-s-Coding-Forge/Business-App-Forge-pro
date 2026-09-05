@@ -54,6 +54,7 @@
 		7C8DE2371B97E0C2541808A4 /* AppForgeProApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppForgeProApp.swift; sourceTree = "<group>"; };
 		842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppForgeProTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20F2750C50A2573A0D1C120 /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
+		BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PACKAGE_SYSTEM.md; sourceTree = "<group>"; };
 		CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModel.swift; sourceTree = "<group>"; };
 		D4EA82C86E425638AF62D8C1 /* WorkspaceHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceHomeView.swift; sourceTree = "<group>"; };
 		DB68F58E8883DA6504CD5D08 /* DEFINITION_OF_DONE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEFINITION_OF_DONE.md; sourceTree = "<group>"; };
@@ -117,6 +118,7 @@
 				5E6F91737C991DC763DE412C /* ADR-001-project-foundation.md */,
 				78D22617FD379D55533F7680 /* ADR-002-architecture-versus-state-management.md */,
 				1023AD02DD32D83DC5BA71B9 /* OVERVIEW.md */,
+				BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */,
 				254E43A26745EB0060206E87 /* PROJECT_SPECIFICATION.md */,
 			);
 			path = architecture;
