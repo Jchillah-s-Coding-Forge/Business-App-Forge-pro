@@ -209,9 +209,7 @@ enum NixFlutterMaterializerTestSupport {
         )
     }
 
-    private static func makeSpecification()
-        -> ProjectSpecification
-    {
+    private static func makeSpecification() -> ProjectSpecification {
         let asset = EntityDefinition(
             identity: DefinitionIdentity(
                 id: "entity.asset",
