@@ -19,109 +19,22 @@ final class FlutterProjectMaterializerTests: XCTestCase {
         let result = try MaterializeFlutterProjectUseCase(
             inspector: inspector,
             runner: runner
-        )(
-            specification: fixture.specification,
-            graph: fixture.graph,
-            lockfile: fixture.lockfile,
-            plan: fixture.plan,
-            flutterSDKPath: "/selected/flutter",
-            targetURL: targetURL
-        )
+        )(makeInput(fixture, targetURL: targetURL))
 
         XCTAssertEqual(
             result.projectPath,
             targetURL.standardizedFileURL.path
         )
-        XCTAssertEqual(inspector.sdkPaths, ["/selected/flutter"])
-        XCTAssertEqual(runner.requests.count, 4)
-        XCTAssertTrue(
-            runner.requests.allSatisfy {
-                $0.executablePath == "/validated/flutter/bin/flutter"
-            }
+        assertToolchainContract(
+            runner: runner,
+            inspector: inspector
         )
-        XCTAssertTrue(
-            runner.requests.allSatisfy {
-                !$0.executablePath.contains("/bin/sh")
-            }
+        try assertMaterializedProject(targetURL)
+        try assertReceipt(
+            result,
+            targetURL: targetURL,
+            parentURL: parentURL
         )
-
-        let createRequest = runner.requests[0]
-        XCTAssertEqual(
-            createRequest.arguments,
-            [
-                "--no-version-check",
-                "create",
-                "--empty",
-                "--no-pub",
-                "--project-name",
-                "inventory_app",
-                "--org",
-                "de.example",
-                "--platforms",
-                "android,ios",
-                "project"
-            ]
-        )
-        XCTAssertNil(createRequest.environment["GITHUB_TOKEN"])
-
-        XCTAssertTrue(
-            FileManager.default.fileExists(
-                atPath: targetURL.appendingPathComponent("ios").path
-            )
-        )
-        XCTAssertTrue(
-            FileManager.default.fileExists(
-                atPath: targetURL.appendingPathComponent("android").path
-            )
-        )
-        XCTAssertTrue(
-            FileManager.default.fileExists(
-                atPath: targetURL.appendingPathComponent(
-                    "test/app_smoke_test.dart"
-                ).path
-            )
-        )
-        XCTAssertFalse(
-            FileManager.default.fileExists(
-                atPath: targetURL.appendingPathComponent(
-                    "test/widget_test.dart"
-                ).path
-            )
-        )
-        XCTAssertFalse(
-            FileManager.default.fileExists(
-                atPath: targetURL.appendingPathComponent(
-                    "analysis_options.yaml"
-                ).path
-            )
-        )
-
-        let gitignore = try String(
-            contentsOf: targetURL.appendingPathComponent(".gitignore"),
-            encoding: .utf8
-        )
-        XCTAssertFalse(gitignore.contains("pubspec.lock"))
-
-        let receiptURL = targetURL.appendingPathComponent(
-            FlutterToolchainReceipt.defaultFileName
-        )
-        let receiptData = try Data(contentsOf: receiptURL)
-        let decodedReceipt = try FlutterToolchainReceiptCodec().decode(
-            receiptData
-        )
-
-        XCTAssertEqual(decodedReceipt, result.receipt)
-        XCTAssertEqual(decodedReceipt.flutter.flutterVersion, "3.47.2")
-        XCTAssertEqual(
-            decodedReceipt.targetPlatforms,
-            [.android, .iOS]
-        )
-        XCTAssertEqual(decodedReceipt.pubspecLockSHA256.count, 64)
-
-        let receiptText = String(decoding: receiptData, as: UTF8.self)
-        XCTAssertFalse(receiptText.contains(parentURL.path))
-        XCTAssertFalse(receiptText.contains("/validated/flutter"))
-        XCTAssertTrue(stagingDirectories(in: parentURL).isEmpty)
     }
 
     func testAnalyzeFailureDoesNotPublishOrLeaveStaging() throws {
@@ -141,14 +54,7 @@ final class FlutterProjectMaterializerTests: XCTestCase {
             try MaterializeFlutterProjectUseCase(
                 inspector: RecordingFlutterInspector(),
                 runner: runner
-            )(
-                specification: fixture.specification,
-                graph: fixture.graph,
-                lockfile: fixture.lockfile,
-                plan: fixture.plan,
-                flutterSDKPath: "/selected/flutter",
-                targetURL: targetURL
-            )
+            )(makeInput(fixture, targetURL: targetURL))
         ) { error in
             XCTAssertEqual(
                 error as? FlutterMaterializationError,
@@ -186,14 +92,7 @@ final class FlutterProjectMaterializerTests: XCTestCase {
             try MaterializeFlutterProjectUseCase(
                 inspector: inspector,
                 runner: runner
-            )(
-                specification: fixture.specification,
-                graph: fixture.graph,
-                lockfile: fixture.lockfile,
-                plan: fixture.plan,
-                flutterSDKPath: "/selected/flutter",
-                targetURL: targetURL
-            )
+            )(makeInput(fixture, targetURL: targetURL))
         ) { error in
             XCTAssertEqual(
                 error as? FlutterMaterializationError,
@@ -205,7 +104,133 @@ final class FlutterProjectMaterializerTests: XCTestCase {
         XCTAssertTrue(runner.requests.isEmpty)
     }
 
+    private func assertToolchainContract(
+        runner: MaterializationToolchainRunner,
+        inspector: RecordingFlutterInspector
+    ) {
+        XCTAssertEqual(inspector.sdkPaths, ["/selected/flutter"])
+        XCTAssertEqual(runner.requests.count, 4)
+        XCTAssertTrue(
+            runner.requests.allSatisfy {
+                $0.executablePath == "/validated/flutter/bin/flutter"
+            }
+        )
+        XCTAssertTrue(
+            runner.requests.allSatisfy {
+                !$0.executablePath.contains("/bin/sh")
+            }
+        )
+
+        let createRequest = runner.requests[0]
+        XCTAssertEqual(
+            createRequest.arguments,
+            [
+                "--no-version-check",
+                "create",
+                "--empty",
+                "--no-pub",
+                "--project-name",
+                "inventory_app",
+                "--org",
+                "de.example",
+                "--platforms",
+                "android,ios",
+                "project"
+            ]
+        )
+        XCTAssertNil(createRequest.environment["GITHUB_TOKEN"])
+    }
+
+    private func assertMaterializedProject(
+        _ targetURL: URL
+    ) throws {
+        for path in ["ios", "android", "test/app_smoke_test.dart"] {
+            XCTAssertTrue(
+                FileManager.default.fileExists(
+                    atPath: targetURL.appendingPathComponent(path).path
+                )
+            )
+        }
+
+        for path in ["test/widget_test.dart", "analysis_options.yaml"] {
+            XCTAssertFalse(
+                FileManager.default.fileExists(
+                    atPath: targetURL.appendingPathComponent(path).path
+                )
+            )
+        }
+
+        let gitignore = try String(
+            contentsOf: targetURL.appendingPathComponent(".gitignore"),
+            encoding: .utf8
+        )
+        XCTAssertFalse(gitignore.contains("pubspec.lock"))
+    }
+
+    private func assertReceipt(
+        _ result: FlutterMaterializationResult,
+        targetURL: URL,
+        parentURL: URL
+    ) throws {
+        let receiptURL = targetURL.appendingPathComponent(
+            FlutterToolchainReceipt.defaultFileName
+        )
+        let receiptData = try Data(contentsOf: receiptURL)
+        let decoded = try FlutterToolchainReceiptCodec().decode(
+            receiptData
+        )
+
+        XCTAssertEqual(decoded, result.receipt)
+        XCTAssertEqual(decoded.flutter.flutterVersion, "3.47.2")
+        XCTAssertEqual(decoded.targetPlatforms, [.android, .iOS])
+        XCTAssertEqual(decoded.pubspecLockSHA256.count, 64)
+
+        let receiptText = String(
+            bytes: receiptData,
+            encoding: .utf8
+        ) ?? ""
+        XCTAssertFalse(receiptText.contains(parentURL.path))
+        XCTAssertFalse(receiptText.contains("/validated/flutter"))
+        XCTAssertTrue(stagingDirectories(in: parentURL).isEmpty)
+    }
+
+    private func makeInput(
+        _ fixture: GenerationFixture,
+        targetURL: URL
+    ) -> FlutterMaterializationInput {
+        FlutterMaterializationInput(
+            specification: fixture.specification,
+            renderedProduct: FlutterRenderedProduct(
+                graph: fixture.graph,
+                lockfile: fixture.lockfile,
+                plan: fixture.plan
+            ),
+            flutterSDKPath: "/selected/flutter",
+            targetURL: targetURL
+        )
+    }
+
     private func makeGenerationFixture() throws -> GenerationFixture {
+        let specification = makeSpecification()
+        let graph = try makeGraph()
+        let lockfile = ForgeLockfileBuilder().build(
+            graph: graph,
+            specification: specification
+        )
+        let plan = try DeterministicFlutterProjectRenderer().makePlan(
+            specification: specification,
+            graph: graph,
+            lockfile: lockfile
+        )
+        return GenerationFixture(
+            specification: specification,
+            graph: graph,
+            lockfile: lockfile,
+            plan: plan
+        )
+    }
+
+    private func makeSpecification() -> ProjectSpecification {
         let asset = EntityDefinition(
             identity: DefinitionIdentity(
                 id: "entity.asset",
@@ -224,7 +249,8 @@ final class FlutterProjectMaterializerTests: XCTestCase {
                 )
             ]
         )
-        let specification = ProjectSpecification(
+
+        return ProjectSpecification(
             identity: ProjectIdentity(
                 name: "Inventory App",
                 organizationIdentifier: "de.example"
@@ -235,6 +261,9 @@ final class FlutterProjectMaterializerTests: XCTestCase {
             flutterStateManagement: .riverpod,
             entities: [asset]
         )
+    }
+
+    private func makeGraph() throws -> ResolvedProductGraph {
         let version = try XCTUnwrap(ForgeSemanticVersion("1.0.0"))
         let contract = ForgePackageContract(
             id: "foundation.core",
@@ -245,24 +274,9 @@ final class FlutterProjectMaterializerTests: XCTestCase {
             maturity: .stable,
             source: .bundled
         )
-        let graph = ResolvedProductGraph(
+        return ResolvedProductGraph(
             packages: [ResolvedPackage(contract: contract)],
             capabilities: []
-        )
-        let lockfile = ForgeLockfileBuilder().build(
-            graph: graph,
-            specification: specification
-        )
-        let plan = try DeterministicFlutterProjectRenderer().makePlan(
-            specification: specification,
-            graph: graph,
-            lockfile: lockfile
-        )
-        return GenerationFixture(
-            specification: specification,
-            graph: graph,
-            lockfile: lockfile,
-            plan: plan
         )
     }
 
@@ -334,9 +348,9 @@ private final class MaterializationToolchainRunner: ToolchainCommandRunning, @un
         _ request: ToolchainCommandRequest
     ) throws -> ToolchainCommandResult {
         requests.append(request)
-        let step = step(for: request.arguments)
+        let currentStep = step(for: request.arguments)
 
-        if step == .create {
+        if currentStep == .create {
             try createBootstrapProject(
                 in: URL(
                     fileURLWithPath: request.workingDirectoryPath,
@@ -345,23 +359,20 @@ private final class MaterializationToolchainRunner: ToolchainCommandRunning, @un
             )
         }
 
-        if failingStep == step {
+        if failingStep == currentStep {
             return ToolchainCommandResult(
                 exitCode: 2,
-                output: "simulated \(step.rawValue) failure",
+                output: "simulated \(currentStep.rawValue) failure",
                 timedOut: false
             )
         }
 
-        if step == .pubGet {
-            let lockURL = URL(
-                fileURLWithPath: request.workingDirectoryPath,
-                isDirectory: true
-            ).appendingPathComponent("pubspec.lock")
-            try "packages:\n  flutter: sdk\n".write(
-                to: lockURL,
-                atomically: true,
-                encoding: .utf8
+        if currentStep == .pubGet {
+            try writePubspecLock(
+                in: URL(
+                    fileURLWithPath: request.workingDirectoryPath,
+                    isDirectory: true
+                )
             )
         }
 
@@ -394,14 +405,19 @@ private final class MaterializationToolchainRunner: ToolchainCommandRunning, @un
             "project",
             isDirectory: true
         )
-        let paths = [
+        try createBootstrapDirectories(in: projectURL)
+        try writeBootstrapFiles(in: projectURL)
+    }
+
+    private func createBootstrapDirectories(
+        in projectURL: URL
+    ) throws {
+        for relativePath in [
             "ios/Runner.xcodeproj",
             "android/app",
             "lib",
             "test"
-        ]
-
-        for relativePath in paths {
+        ] {
             try FileManager.default.createDirectory(
                 at: projectURL.appendingPathComponent(
                     relativePath,
@@ -410,23 +426,34 @@ private final class MaterializationToolchainRunner: ToolchainCommandRunning, @un
                 withIntermediateDirectories: true
             )
         }
+    }
 
-        try "bootstrap".write(
-            to: projectURL.appendingPathComponent("lib/main.dart"),
-            atomically: true,
-            encoding: .utf8
-        )
-        try "bootstrap".write(
-            to: projectURL.appendingPathComponent("test/widget_test.dart"),
-            atomically: true,
-            encoding: .utf8
-        )
-        try "include: package:flutter_lints/flutter.yaml\n".write(
-            to: projectURL.appendingPathComponent("analysis_options.yaml"),
-            atomically: true,
-            encoding: .utf8
-        )
-        try "bootstrap lock".write(
+    private func writeBootstrapFiles(
+        in projectURL: URL
+    ) throws {
+        let files = [
+            ("lib/main.dart", "bootstrap"),
+            ("test/widget_test.dart", "bootstrap"),
+            (
+                "analysis_options.yaml",
+                "include: package:flutter_lints/flutter.yaml\n"
+            ),
+            ("pubspec.lock", "bootstrap lock")
+        ]
+
+        for (relativePath, contents) in files {
+            try contents.write(
+                to: projectURL.appendingPathComponent(relativePath),
+                atomically: true,
+                encoding: .utf8
+            )
+        }
+    }
+
+    private func writePubspecLock(
+        in projectURL: URL
+    ) throws {
+        try "packages:\n  flutter: sdk\n".write(
             to: projectURL.appendingPathComponent("pubspec.lock"),
             atomically: true,
             encoding: .utf8
