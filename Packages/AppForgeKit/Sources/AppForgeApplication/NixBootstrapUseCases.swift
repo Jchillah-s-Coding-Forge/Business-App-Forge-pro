@@ -87,8 +87,9 @@ public struct LaunchNixBootstrapUseCase: Sendable {
         let installerData = try Data(
             contentsOf: workspace.installerURL
         )
+        let download = try localDownload(installerData)
         let validation = try validator.validate(
-            try localDownload(installerData),
+            download,
             policy: policy
         )
         guard validation.sha256 == prepared.installerSHA256 else {
