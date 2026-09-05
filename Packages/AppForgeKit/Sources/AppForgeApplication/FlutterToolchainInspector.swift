@@ -117,17 +117,28 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
         guard let version = stringValue(
             in: dictionary,
             keys: ["flutterVersion", "frameworkVersion"]
-        ),
-        let channel = dictionary["channel"] as? String,
-        let frameworkRevision = dictionary["frameworkRevision"] as? String,
-        let engineRevision = dictionary["engineRevision"] as? String,
-        let dartSDKVersion = dictionary["dartSdkVersion"] as? String,
-        !version.isEmpty,
-        !channel.isEmpty,
-        frameworkRevision.isGitRevision,
-        engineRevision.isGitRevision,
-        !dartSDKVersion.isEmpty
-        else {
+        ) else {
+            throw FlutterMaterializationError.invalidFlutterToolchainMetadata
+        }
+        guard let channel = dictionary["channel"] as? String else {
+            throw FlutterMaterializationError.invalidFlutterToolchainMetadata
+        }
+        guard let frameworkRevision = dictionary["frameworkRevision"] as? String else {
+            throw FlutterMaterializationError.invalidFlutterToolchainMetadata
+        }
+        guard let engineRevision = dictionary["engineRevision"] as? String else {
+            throw FlutterMaterializationError.invalidFlutterToolchainMetadata
+        }
+        guard let dartSDKVersion = dictionary["dartSdkVersion"] as? String else {
+            throw FlutterMaterializationError.invalidFlutterToolchainMetadata
+        }
+
+        let metadataIsValid = !version.isEmpty
+            && !channel.isEmpty
+            && frameworkRevision.isGitRevision
+            && engineRevision.isGitRevision
+            && !dartSDKVersion.isEmpty
+        guard metadataIsValid else {
             throw FlutterMaterializationError.invalidFlutterToolchainMetadata
         }
 
