@@ -24,6 +24,9 @@ Die Roadmap ist fähigkeitsorientiert. Ein Meilenstein endet erst nach Nutzerabn
 - Dependency Resolver und Kompatibilitätsprüfung
 - `forge.lock` mit Integritätsinformationen
 - deterministischer Flutter-Renderer
+- toolchain-gepinnte Flutter-Materialisierung mit nativen iOS-/Android-Shells
+- `flutter pub get`, `flutter analyze` und `flutter test` als Materialisierungs-Gates
+- Toolchain-/Dependency-Provenienz über `appforge.toolchain.json`
 - Architektur- und Golden Tests
 
 ## M4 — Demo, Offline & Backends
