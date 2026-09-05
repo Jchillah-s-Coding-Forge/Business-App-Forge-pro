@@ -98,6 +98,48 @@ final class FlutterProjectRendererTests: XCTestCase {
         }
     }
 
+    func testRendererRejectsIdentifierThatCannotBeEmittedAsDart() throws {
+        let entity = EntityDefinition(
+            identity: DefinitionIdentity(
+                id: "entity.placeholder",
+                code: "_",
+                label: "Placeholder"
+            )
+        )
+        let specification = ProjectSpecification(
+            identity: ProjectIdentity(
+                name: "Identifier Test",
+                organizationIdentifier: "de.example"
+            ),
+            framework: .flutter,
+            targetPlatforms: [.iOS],
+            backend: .supabase,
+            flutterStateManagement: .riverpod,
+            entities: [entity]
+        )
+        let graph = try makeGraph()
+        let lockfile = ForgeLockfileBuilder().build(
+            graph: graph,
+            specification: specification
+        )
+
+        XCTAssertThrowsError(
+            try DeterministicFlutterProjectRenderer().makePlan(
+                specification: specification,
+                graph: graph,
+                lockfile: lockfile
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? FlutterRendererError,
+                .invalidGeneratedIdentifier(
+                    definitionID: entity.id,
+                    code: entity.identity.code
+                )
+            )
+        }
+    }
+
     func testBlocConfigurationProducesBlocDependencyAndCubitBootstrap() throws {
         let specification = makeSpecification(stateManagement: .blocCubit)
         let graph = try makeGraph()
