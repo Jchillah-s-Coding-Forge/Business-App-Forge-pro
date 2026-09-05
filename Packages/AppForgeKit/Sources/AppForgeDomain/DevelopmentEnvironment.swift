@@ -68,6 +68,7 @@ public struct NixEnvironmentReceipt: Codable, Equatable, Sendable {
     public let flakeLockSHA256: String
     public let systems: [NixEnvironmentSystem]
     public let packages: [NixEnvironmentPackage]
+    public let unmanagedRequirements: [ToolIdentifier]
     public let validationTool: String
     public let validationVersion: String
 
@@ -78,6 +79,7 @@ public struct NixEnvironmentReceipt: Codable, Equatable, Sendable {
         flakeLockSHA256: String,
         systems: [NixEnvironmentSystem],
         packages: [NixEnvironmentPackage],
+        unmanagedRequirements: [ToolIdentifier],
         validationTool: String,
         validationVersion: String
     ) {
@@ -87,6 +89,9 @@ public struct NixEnvironmentReceipt: Codable, Equatable, Sendable {
         self.flakeLockSHA256 = flakeLockSHA256
         self.systems = systems.sorted()
         self.packages = packages.sorted()
+        self.unmanagedRequirements = unmanagedRequirements.sorted {
+            $0.rawValue < $1.rawValue
+        }
         self.validationTool = validationTool
         self.validationVersion = validationVersion
     }
