@@ -50,13 +50,14 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
             isDirectory: true
         )
         let runner = NixProvisioningRunner(failingCommand: .lock)
+        let plan = try makePlan()
 
         XCTAssertThrowsError(
             try ProvisionNixEnvironmentUseCase(
                 runner: runner
             )(
                 NixEnvironmentProvisioningInput(
-                    plan: try makePlan(),
+                    plan: plan,
                     nixExecutablePath: "/nix/bin/nix",
                     targetURL: targetURL
                 )
@@ -89,6 +90,7 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
         let runner = NixProvisioningRunner(
             nixVersionOutput: "nix (Nix) 2.3.16"
         )
+        let plan = try makePlan()
 
         XCTAssertThrowsError(
             try ProvisionNixEnvironmentUseCase(
@@ -130,6 +132,7 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
             withIntermediateDirectories: false
         )
         let runner = NixProvisioningRunner()
+        let plan = try makePlan()
 
         XCTAssertThrowsError(
             try ProvisionNixEnvironmentUseCase(
@@ -155,12 +158,14 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
         let parentURL = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: parentURL) }
 
+        let plan = try makePlan()
+
         XCTAssertThrowsError(
             try ProvisionNixEnvironmentUseCase(
                 runner: NixProvisioningRunner()
             )(
                 NixEnvironmentProvisioningInput(
-                    plan: try makePlan(),
+                    plan: plan,
                     nixExecutablePath: "nix",
                     targetURL: parentURL.appendingPathComponent("invalid")
                 )
@@ -302,7 +307,7 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
     }
 }
 
-private enum NixProvisioningCommand {
+private enum NixProvisioningCommand: Equatable {
     case version
     case lock
     case validateFlutter
@@ -360,7 +365,8 @@ private final class NixProvisioningRunner: ToolchainCommandRunning, @unchecked S
             return .version
         }
         if arguments.contains("flake"),
-           arguments.contains("lock") {
+           arguments.contains("lock")
+        {
             return .lock
         }
         return .validateFlutter
