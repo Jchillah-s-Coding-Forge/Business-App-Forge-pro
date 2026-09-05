@@ -38,6 +38,33 @@ enum NixFlutterMaterializerTestSupport {
         let renderedProduct = try makeRenderedProduct(
             specification: specification
         )
+        let environment = try writeEnvironment(
+            at: environmentURL,
+            packages: packages,
+            receiptLockSHA256: receiptLockSHA256,
+            receiptRevision: receiptRevision
+        )
+
+        return NixFlutterMaterializationFixture(
+            rootURL: rootURL,
+            environmentURL: environmentURL,
+            targetURL: rootURL.appendingPathComponent(
+                "materialized-app",
+                isDirectory: true
+            ),
+            specification: specification,
+            renderedProduct: renderedProduct,
+            nixpkgsRevision: environment.revision,
+            flakeLockSHA256: environment.lockSHA256
+        )
+    }
+
+    private static func writeEnvironment(
+        at environmentURL: URL,
+        packages: [NixEnvironmentPackage],
+        receiptLockSHA256: String?,
+        receiptRevision: String?
+    ) throws -> EnvironmentProvenance {
         let plan = NixEnvironmentPlan(
             systems: NixEnvironmentSystem.allCases,
             packages: packages,
@@ -51,48 +78,66 @@ enum NixFlutterMaterializerTestSupport {
             encoding: .utf8
         )
 
+        let provenance = try writeLock(
+            at: environmentURL
+        )
+        try writeReceipt(
+            at: environmentURL,
+            plan: plan,
+            provenance: provenance,
+            receiptLockSHA256: receiptLockSHA256,
+            receiptRevision: receiptRevision
+        )
+        return provenance
+    }
+
+    private static func writeLock(
+        at environmentURL: URL
+    ) throws -> EnvironmentProvenance {
         let revision = String(repeating: "a", count: 40)
-        let lockData = Data(lockJSON(revision: revision).utf8)
+        let lockData = Data(
+            lockJSON(revision: revision).utf8
+        )
         try lockData.write(
             to: environmentURL.appendingPathComponent(
                 "flake.lock"
             ),
             options: .atomic
         )
-        let lockSHA = sha256(lockData)
 
+        return EnvironmentProvenance(
+            revision: revision,
+            lockSHA256: sha256(lockData)
+        )
+    }
+
+    private static func writeReceipt(
+        at environmentURL: URL,
+        plan: NixEnvironmentPlan,
+        provenance: EnvironmentProvenance,
+        receiptLockSHA256: String?,
+        receiptRevision: String?
+    ) throws {
         let receipt = NixEnvironmentReceipt(
             nixVersion: "2.35.2",
             nixpkgsLockedRevision:
-                receiptRevision ?? revision,
+                receiptRevision ?? provenance.revision,
             flakeLockSHA256:
-                receiptLockSHA256 ?? lockSHA,
+                receiptLockSHA256 ?? provenance.lockSHA256,
             systems: plan.systems,
             packages: plan.packages,
             unmanagedRequirements: plan.unmanagedRequirements,
             validationTool: "flutter",
             validationVersion: "3.47.2"
         )
-        let receiptData = try NixEnvironmentReceiptCodec()
-            .encode(receipt)
-        try receiptData.write(
+        let data = try NixEnvironmentReceiptCodec().encode(
+            receipt
+        )
+        try data.write(
             to: environmentURL.appendingPathComponent(
                 NixEnvironmentReceipt.defaultFileName
             ),
             options: .atomic
-        )
-
-        return NixFlutterMaterializationFixture(
-            rootURL: rootURL,
-            environmentURL: environmentURL,
-            targetURL: rootURL.appendingPathComponent(
-                "materialized-app",
-                isDirectory: true
-            ),
-            specification: specification,
-            renderedProduct: renderedProduct,
-            nixpkgsRevision: revision,
-            flakeLockSHA256: lockSHA
         )
     }
 
@@ -278,9 +323,9 @@ final class NixMaterializationToolchainRunner: ToolchainCommandRunning, @uncheck
             )
         }
 
-        if request.arguments.contains("pub"),
-           request.arguments.contains("get")
-        {
+        let isPubGet = request.arguments.contains("pub")
+            && request.arguments.contains("get")
+        if isPubGet {
             try writePubspecLock(
                 workingDirectoryPath:
                     request.workingDirectoryPath
@@ -382,4 +427,10 @@ final class NixMaterializationToolchainRunner: ToolchainCommandRunning, @uncheck
             encoding: .utf8
         )
     }
+}
+
+
+private struct EnvironmentProvenance {
+    let revision: String
+    let lockSHA256: String
 }
