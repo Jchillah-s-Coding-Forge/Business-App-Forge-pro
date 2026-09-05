@@ -46,8 +46,7 @@ struct EnvironmentDoctorView: View {
         }
         .alert(
             "Flutter SDK installieren?",
-            isPresented:
-                $viewModel.isPresentingFlutterInstallConfirmation
+            isPresented: $viewModel.isPresentingFlutterInstallConfirmation
         ) {
             Button("Abbrechen", role: .cancel) {}
             Button("Installieren") {
