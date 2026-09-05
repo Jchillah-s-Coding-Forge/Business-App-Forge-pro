@@ -15,6 +15,8 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
     case invalidProjectPackageName(String)
     case invalidGeneratedIdentifier(definitionID: String, code: String)
     case duplicateGeneratedIdentifier(entityID: String, identifier: String)
+    case reservedGeneratedStorageIdentifier(definitionID: String, identifier: String)
+    case duplicateGeneratedStorageIdentifier(entityID: String, identifier: String)
     case encodingFailed
 }
 
