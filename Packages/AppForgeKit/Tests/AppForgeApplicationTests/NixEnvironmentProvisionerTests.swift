@@ -190,6 +190,10 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
         }
 
         XCTAssertEqual(result.receipt.nixVersion, "2.32.1")
+        XCTAssertEqual(
+            result.receipt.unmanagedRequirements,
+            [.androidSDK, .xcode]
+        )
         XCTAssertEqual(result.receipt.validationTool, "flutter")
         XCTAssertEqual(result.receipt.validationVersion, "3.47.2")
         XCTAssertEqual(
