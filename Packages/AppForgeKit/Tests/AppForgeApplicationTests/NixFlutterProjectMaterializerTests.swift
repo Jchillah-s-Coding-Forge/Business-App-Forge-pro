@@ -268,10 +268,8 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
         XCTAssertEqual(
             receipt.nixEnvironment,
             FlutterNixEnvironmentProvenance(
-                nixpkgsLockedRevision:
-                    fixture.nixpkgsRevision,
-                flakeLockSHA256:
-                    fixture.flakeLockSHA256
+                nixpkgsLockedRevision: fixture.nixpkgsRevision,
+                flakeLockSHA256: fixture.flakeLockSHA256
             )
         )
         XCTAssertEqual(
