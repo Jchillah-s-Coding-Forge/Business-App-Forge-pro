@@ -80,6 +80,8 @@ enum SystemToolDetectionSupport {
             "Supabase CLI ist optional und wurde nicht gefunden."
         case .docker:
             "Keine Docker-kompatible CLI wurde gefunden. Sie wird nur für lokale Backend-Stacks benötigt."
+        case .nix:
+            "Nix wurde nicht gefunden. Der optionale reproduzierbare Environment-Modus benötigt Nix."
         }
     }
 }
