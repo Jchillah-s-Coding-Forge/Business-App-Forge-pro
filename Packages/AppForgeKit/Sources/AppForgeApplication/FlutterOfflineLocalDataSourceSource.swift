@@ -20,8 +20,24 @@ struct FlutterOfflineLocalDataSourceSource {
             typeName: typeName
         )
 
-        var lines = importLines
-        lines += [
+        var lines = importLines + classPreambleLines
+        lines += mutations.saveLines()
+        lines += [""]
+        lines += mutations.deleteLines()
+        lines += mappingLines(mapping)
+
+        let enqueue = mutations.enqueueLines()
+        if !enqueue.isEmpty {
+            lines += [""]
+            lines += enqueue
+        }
+
+        lines += ["}", ""]
+        return FlutterGeneratedText.lines(lines)
+    }
+
+    private var classPreambleLines: [String] {
+        [
             "",
             "class \(typeName)LocalDataSource {",
             "  const \(typeName)LocalDataSource(this._database);",
@@ -40,10 +56,12 @@ struct FlutterOfflineLocalDataSourceSource {
             "  }",
             ""
         ]
-        lines += mutations.saveLines()
-        lines += [""]
-        lines += mutations.deleteLines()
-        lines += [
+    }
+
+    private func mappingLines(
+        _ mapping: FlutterOfflineRowMappingSource
+    ) -> [String] {
+        var lines = [
             "",
             "  \(typeName) _fromRow(Map<String, Object?> row) {"
         ]
@@ -54,21 +72,8 @@ struct FlutterOfflineLocalDataSourceSource {
             "  Map<String, Object?> _toRow(\(typeName) value) {"
         ]
         lines += mapping.toRowLines()
-        lines += [
-            "  }"
-        ]
-
-        let enqueue = mutations.enqueueLines()
-        if !enqueue.isEmpty {
-            lines += [""]
-            lines += enqueue
-        }
-
-        lines += [
-            "}",
-            ""
-        ]
-        return FlutterGeneratedText.lines(lines)
+        lines += ["  }"]
+        return lines
     }
 
     private var importLines: [String] {
