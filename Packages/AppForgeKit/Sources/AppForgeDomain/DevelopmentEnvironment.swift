@@ -8,7 +8,7 @@ public enum DevelopmentEnvironmentMode: String, CaseIterable, Codable, Sendable 
 
 public enum NixEnvironmentSystem: String, CaseIterable, Codable, Comparable, Sendable {
     case aarch64Darwin = "aarch64-darwin"
-    case x86_64Darwin = "x86_64-darwin"
+    case x86Darwin = "x86_64-darwin"
 
     public static func < (
         lhs: NixEnvironmentSystem,
