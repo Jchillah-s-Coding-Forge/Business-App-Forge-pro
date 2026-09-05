@@ -15,13 +15,6 @@ struct FlutterSourceBuilder {
             lockfile: lockfile,
             packageName: packageName
         ).files()
-        try files.append(
-            contentsOf: FlutterOfflineCoreSources(
-                specification: specification,
-                packageName: packageName
-            ).files()
-        )
-
         for entity in specification.entities.sorted(by: Self.entitySort) {
             try files.append(contentsOf: FlutterFeatureSources(entity: entity).files())
             try files.append(
@@ -32,6 +25,12 @@ struct FlutterSourceBuilder {
             )
         }
 
+        try files.append(
+            contentsOf: FlutterOfflineCoreSources(
+                specification: specification,
+                packageName: packageName
+            ).files()
+        )
         try files.append(generationManifestFile(existingFiles: files))
         return files
     }
