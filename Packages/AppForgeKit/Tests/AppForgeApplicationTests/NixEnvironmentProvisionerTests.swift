@@ -97,7 +97,7 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
                 runner: runner
             )(
                 NixEnvironmentProvisioningInput(
-                    plan: try makePlan(),
+                    plan: plan,
                     nixExecutablePath: "/nix/bin/nix",
                     targetURL: targetURL
                 )
@@ -139,7 +139,7 @@ final class NixEnvironmentProvisionerTests: XCTestCase {
                 runner: runner
             )(
                 NixEnvironmentProvisioningInput(
-                    plan: try makePlan(),
+                    plan: plan,
                     nixExecutablePath: "/nix/bin/nix",
                     targetURL: targetURL
                 )
