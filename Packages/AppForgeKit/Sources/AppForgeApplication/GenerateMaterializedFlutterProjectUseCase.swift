@@ -37,7 +37,7 @@ public struct MaterializedFlutterGenerationResult: Equatable, Sendable {
     }
 }
 
-public struct GenerateMaterializedFlutterProjectUseCase: Sendable {
+public struct BuildFlutterProjectUseCase: Sendable {
     private let packageResolver: ResolveProductPackagesUseCase
     private let renderer: any FlutterProjectRendering
     private let materializer: any FlutterProjectMaterializing
