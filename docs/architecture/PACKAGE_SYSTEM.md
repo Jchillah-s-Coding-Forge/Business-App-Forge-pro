@@ -77,6 +77,53 @@ Resolution failures are typed `PackageResolutionError` values. There is no fallb
 
 Packages may restrict `OutputFramework` and `BackendProvider`. Empty compatibility lists mean that a package is renderer/backend agnostic. A package that declares compatibility must match the current specification before it can be selected.
 
+## Bundled production registry
+
+AppForge ships a minimal trusted `BundledPackageRegistry` as the production bootstrap registry for M3.
+
+The first bundled contract is:
+
+- `foundation.core@1.0.0`
+- kind: `foundation`
+- maturity: `stable`
+- source: `bundled`
+- renderer compatibility: Flutter
+- backend compatibility: unrestricted
+
+The default root request set contains `foundation.core`.
+
+The bundled registry is deliberately small. Business templates, vertical overlays, and future capability mapping expand the root request set; they do not bypass the resolver and they do not inject source files directly.
+
+All bundled contracts are constructed through the same `InMemoryPackageRegistry` validation boundary used by tests and other registries. Invalid bundled metadata therefore fails closed rather than being treated as trusted merely because it ships with AppForge.
+
+## End-to-end generation boundary
+
+`GenerateMaterializedFlutterProjectUseCase` composes the existing deterministic stages:
+
+```text
+validated ProjectSpecification
++ root package requirements
++ PackageRegistry
++ Flutter materialization toolchain
++ target URL
+        ↓
+ResolveProductPackagesUseCase
+        ↓
+ResolvedProductGraph + forge.lock
+        ↓
+FlutterProjectRendering
+        ↓
+GenerationPlan
+        ↓
+FlutterProjectMaterializing
+        ↓
+native Flutter project
+```
+
+The orchestrator contains no alternative resolver, renderer, or materializer logic.
+
+If package resolution or rendering fails, materialization is never invoked. Direct-SDK and Nix-backed toolchain selections are passed through unchanged to the M3.4 materializer.
+
 ## ResolvedProductGraph
 
 `ResolvedProductGraph` is the renderer-facing package result. It contains the exact resolved contracts in dependency-first order and the complete sorted capability set.
