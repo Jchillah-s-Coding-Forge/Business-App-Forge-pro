@@ -32,6 +32,14 @@ struct FlutterFeatureSources {
                 contents: useCaseDart(featureName: featureName, typeName: typeName)
             ),
             GeneratedFile(
+                relativePath: "lib/features/\(featureName)/domain/use_cases/save_\(featureName).dart",
+                contents: saveUseCaseDart(featureName: featureName, typeName: typeName)
+            ),
+            GeneratedFile(
+                relativePath: "lib/features/\(featureName)/domain/use_cases/delete_\(featureName).dart",
+                contents: deleteUseCaseDart(featureName: featureName, typeName: typeName)
+            ),
+            GeneratedFile(
                 relativePath: "lib/features/\(featureName)/presentation/view_models/\(featureName)_view_model.dart",
                 contents: viewModelDart(featureName: featureName, typeName: typeName)
             )
@@ -112,6 +120,11 @@ struct FlutterFeatureSources {
             "",
             "abstract interface class \(typeName)Repository {",
             "  Future<List<\(typeName)>> fetchAll();",
+            "  Future<void> save({",
+            "    required String recordId,",
+            "    required \(typeName) value,",
+            "  });",
+            "  Future<void> delete(String recordId);",
             "}",
             ""
         ])
