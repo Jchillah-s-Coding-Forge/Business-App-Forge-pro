@@ -98,7 +98,7 @@ All bundled contracts are constructed through the same `InMemoryPackageRegistry`
 
 ## End-to-end generation boundary
 
-`GenerateMaterializedFlutterProjectUseCase` composes the existing deterministic stages:
+`BuildFlutterProjectUseCase` composes the existing deterministic stages:
 
 ```text
 validated ProjectSpecification
