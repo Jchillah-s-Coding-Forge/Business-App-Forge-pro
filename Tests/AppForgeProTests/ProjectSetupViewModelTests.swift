@@ -307,9 +307,7 @@ final class ProjectSetupViewModelTests: XCTestCase {
     }
 }
 
-private final class ProjectSetupPreferenceStore:
-    ToolchainPreferenceStore
-{
+private final class ProjectSetupPreferenceStore: ToolchainPreferenceStore {
     private(set) var saved: ToolchainPreferences
 
     init(
@@ -330,14 +328,10 @@ private final class ProjectSetupPreferenceStore:
     }
 }
 
-private final class RecordingFlutterProjectBuilder:
-    FlutterProjectBuilding,
-    @unchecked Sendable
-{
+private final class RecordingFlutterProjectBuilder: FlutterProjectBuilding, @unchecked Sendable {
     private let lock = NSLock()
     private let shouldFail: Bool
-    private var storedToolchain:
-        FlutterMaterializationToolchain?
+    private var storedToolchain: FlutterMaterializationToolchain?
     private var storedTargetURL: URL?
     private var storedCallCount = 0
     private var storedWasMainThread: Bool?
@@ -420,8 +414,7 @@ private final class RecordingFlutterProjectBuilder:
                 dartSDKVersion: "3.11.0"
             ),
             projectPackageName: "werkstatt_operations",
-            organizationIdentifier:
-                specification.identity.organizationIdentifier,
+            organizationIdentifier: specification.identity.organizationIdentifier,
             targetPlatforms: [.android, .iOS],
             pubspecLockSHA256: String(
                 repeating: "c",
@@ -460,9 +453,7 @@ private final class RecordingFlutterProjectBuilder:
     }
 }
 
-private final class RecordingGeneratedProjectOpener:
-    GeneratedProjectOpening
-{
+private final class RecordingGeneratedProjectOpener: GeneratedProjectOpening {
     private(set) var projectURL: URL?
     private(set) var preferredIDE: PreferredIDE?
 
