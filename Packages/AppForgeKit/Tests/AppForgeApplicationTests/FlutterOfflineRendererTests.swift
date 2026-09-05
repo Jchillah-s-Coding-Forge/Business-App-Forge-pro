@@ -41,17 +41,17 @@ final class FlutterOfflineRendererTests: XCTestCase {
             in: plan
         )
         XCTAssertTrue(
-            migration.contains("CREATE TABLE IF NOT EXISTS \\\"_sync_outbox\\\"")
+            migration.contains("CREATE TABLE IF NOT EXISTS \"_sync_outbox\"")
         )
         XCTAssertTrue(
-            migration.contains("CREATE TABLE IF NOT EXISTS \\\"customer\\\"")
+            migration.contains("CREATE TABLE IF NOT EXISTS \"customer\"")
         )
-        XCTAssertTrue(migration.contains("\\\"_record_id\\\" TEXT PRIMARY KEY"))
-        XCTAssertTrue(migration.contains("\\\"_sync_revision\\\" INTEGER"))
-        XCTAssertTrue(migration.contains("\\\"_sync_status\\\" TEXT NOT NULL"))
-        XCTAssertTrue(migration.contains("\\\"price\\\" REAL"))
-        XCTAssertTrue(migration.contains("\\\"active\\\" INTEGER"))
-        XCTAssertTrue(migration.contains("\\\"scheduled_at\\\" TEXT"))
+        XCTAssertTrue(migration.contains("\"_record_id\" TEXT PRIMARY KEY"))
+        XCTAssertTrue(migration.contains("\"_sync_revision\" INTEGER"))
+        XCTAssertTrue(migration.contains("\"_sync_status\" TEXT NOT NULL"))
+        XCTAssertTrue(migration.contains("\"price\" REAL"))
+        XCTAssertTrue(migration.contains("\"active\" INTEGER"))
+        XCTAssertTrue(migration.contains("\"scheduled_at\" TEXT"))
     }
 
     private func assertAtomicMutationSource(
