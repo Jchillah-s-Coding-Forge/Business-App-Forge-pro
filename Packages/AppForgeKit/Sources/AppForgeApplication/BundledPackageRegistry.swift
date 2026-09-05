@@ -32,9 +32,8 @@ public struct BundledPackageRegistry: PackageRegistry, Sendable {
     }
 
     private static func contracts() throws -> [ForgePackageContract] {
-        [
-            try foundationCore()
-        ]
+        let foundation = try foundationCore()
+        return [foundation]
     }
 
     private static func foundationCore() throws -> ForgePackageContract {
