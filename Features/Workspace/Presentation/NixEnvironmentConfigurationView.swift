@@ -200,6 +200,22 @@ struct NixEnvironmentConfigurationView: View {
             alignment: .leading,
             spacing: AppForgeSpacing.medium
         ) {
+            preparedInstallerMetadata(prepared)
+            bootstrapApprovalControls
+
+            if viewModel.hasLaunchedNixBootstrap {
+                postLaunchStatus
+            }
+        }
+    }
+
+    private func preparedInstallerMetadata(
+        _ prepared: NixBootstrapPreparedInstaller
+    ) -> some View {
+        VStack(
+            alignment: .leading,
+            spacing: AppForgeSpacing.small
+        ) {
             Label(
                 "Installer verifiziert",
                 systemImage: "checkmark.shield.fill"
@@ -219,7 +235,14 @@ struct NixEnvironmentConfigurationView: View {
                         "Verifizierter Installer SHA-256"
                     )
             }
+        }
+    }
 
+    private var bootstrapApprovalControls: some View {
+        VStack(
+            alignment: .leading,
+            spacing: AppForgeSpacing.medium
+        ) {
             Toggle(
                 "Ich bestätige die Installation dieses exakt geprüften Installers.",
                 isOn: $viewModel.isNixBootstrapConfirmed
@@ -245,28 +268,33 @@ struct NixEnvironmentConfigurationView: View {
                 }
                 .buttonStyle(.bordered)
             }
+        }
+    }
 
-            if viewModel.hasLaunchedNixBootstrap {
-                Divider()
+    private var postLaunchStatus: some View {
+        VStack(
+            alignment: .leading,
+            spacing: AppForgeSpacing.medium
+        ) {
+            Divider()
 
-                Label(
-                    "Terminal wurde geöffnet. Schließen Sie dort die Nix-Installation ab.",
-                    systemImage: "terminal"
-                )
-                .font(.caption)
+            Label(
+                "Terminal wurde geöffnet. Schließen Sie dort die Nix-Installation ab.",
+                systemImage: "terminal"
+            )
+            .font(.caption)
 
-                Button {
-                    Task {
-                        await viewModel.scan()
-                    }
-                } label: {
-                    Label(
-                        "Erneut prüfen",
-                        systemImage: "arrow.clockwise"
-                    )
+            Button {
+                Task {
+                    await viewModel.scan()
                 }
-                .buttonStyle(.bordered)
+            } label: {
+                Label(
+                    "Erneut prüfen",
+                    systemImage: "arrow.clockwise"
+                )
             }
+            .buttonStyle(.bordered)
         }
     }
 
