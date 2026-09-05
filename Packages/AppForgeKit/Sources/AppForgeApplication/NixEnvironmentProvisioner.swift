@@ -110,6 +110,7 @@ public struct ProvisionNixEnvironmentUseCase: Sendable {
             flakeLockSHA256: lock.sha256,
             systems: input.plan.systems,
             packages: input.plan.packages,
+            unmanagedRequirements: input.plan.unmanagedRequirements,
             validationTool: "flutter",
             validationVersion: flutterVersion.description
         )
