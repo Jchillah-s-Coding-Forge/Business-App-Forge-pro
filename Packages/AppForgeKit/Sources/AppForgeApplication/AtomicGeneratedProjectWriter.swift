@@ -39,9 +39,9 @@ public struct AtomicGeneratedProjectWriter: GeneratedProjectWriting {
             if let appForgeError = error as? AppForgeError {
                 throw appForgeError
             }
-            throw AppForgeError.fileSystem(
-                message: "Der generierte Projektbaum konnte nicht atomar gespeichert werden: \(error.localizedDescription)"
-            )
+            let message = "Der generierte Projektbaum konnte nicht atomar gespeichert werden: "
+                + error.localizedDescription
+            throw AppForgeError.fileSystem(message: message)
         }
     }
 
