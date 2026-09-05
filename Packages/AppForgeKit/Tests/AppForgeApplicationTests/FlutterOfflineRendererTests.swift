@@ -9,6 +9,16 @@ final class FlutterOfflineRendererTests: XCTestCase {
         )
         let plan = try FlutterOfflineTestFixture.render(specification)
 
+        try assertOfflineDependencies(plan)
+        try assertSchema(plan)
+        try assertAtomicMutationSource(plan)
+        try assertRepositoryContract(plan)
+        try assertDefaultPolicy(plan)
+    }
+
+    private func assertOfflineDependencies(
+        _ plan: GenerationPlan
+    ) throws {
         let pubspec = try FlutterOfflineTestFixture.contents(
             "pubspec.yaml",
             in: plan
@@ -21,7 +31,11 @@ final class FlutterOfflineRendererTests: XCTestCase {
         XCTAssertNotNil(
             plan.file(at: "lib/core/sync/sync_outbox_repository.dart")
         )
+    }
 
+    private func assertSchema(
+        _ plan: GenerationPlan
+    ) throws {
         let migration = try FlutterOfflineTestFixture.contents(
             "lib/core/storage/database_migrations.dart",
             in: plan
@@ -38,7 +52,11 @@ final class FlutterOfflineRendererTests: XCTestCase {
         XCTAssertTrue(migration.contains("\\\"price\\\" REAL"))
         XCTAssertTrue(migration.contains("\\\"active\\\" INTEGER"))
         XCTAssertTrue(migration.contains("\\\"scheduled_at\\\" TEXT"))
+    }
 
+    private func assertAtomicMutationSource(
+        _ plan: GenerationPlan
+    ) throws {
         let local = try FlutterOfflineTestFixture.contents(
             "lib/features/customer/data/local/customer_local_data_source.dart",
             in: plan
@@ -57,7 +75,11 @@ final class FlutterOfflineRendererTests: XCTestCase {
             )
         )
         XCTAssertFalse(local.contains("await db.delete("))
+    }
 
+    private func assertRepositoryContract(
+        _ plan: GenerationPlan
+    ) throws {
         let repository = try FlutterOfflineTestFixture.contents(
             "lib/features/customer/data/repositories/customer_repository_impl.dart",
             in: plan
@@ -87,7 +109,11 @@ final class FlutterOfflineRendererTests: XCTestCase {
                 at: "lib/features/customer/domain/use_cases/delete_customer.dart"
             )
         )
+    }
 
+    private func assertDefaultPolicy(
+        _ plan: GenerationPlan
+    ) throws {
         let policy = try FlutterOfflineTestFixture.contents(
             "lib/core/sync/sync_policy.dart",
             in: plan
