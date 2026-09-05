@@ -143,8 +143,10 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
     func testReadyNixCanProvisionEnvironment() async {
         let detector = MutableNixToolDetector(nixReady: true)
         let provisioner = RecordingNixEnvironmentProvisioner()
+        let preferences = NixTestPreferenceStore()
         let viewModel = makeViewModel(
             detector: detector,
+            preferences: preferences,
             provisioner: provisioner
         )
 
@@ -174,6 +176,14 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
         XCTAssertEqual(
             provisioner.lastInput?.plan.packages,
             [.flutter, .git, .jdk17]
+        )
+        XCTAssertEqual(
+            preferences.saved.nixEnvironmentPath,
+            target.path
+        )
+        XCTAssertEqual(
+            preferences.saved.nixExecutablePath,
+            "/nix/var/nix/profiles/default/bin/nix"
         )
     }
 
