@@ -354,8 +354,7 @@ private final class RecordingNixEnvironmentProvisioner: NixEnvironmentProvisioni
                 ),
                 systems: input.plan.systems,
                 packages: input.plan.packages,
-                unmanagedRequirements:
-                    input.plan.unmanagedRequirements,
+                unmanagedRequirements: input.plan.unmanagedRequirements,
                 validationTool: "flutter",
                 validationVersion: "3.47.2"
             )
