@@ -53,7 +53,8 @@ struct NixInstallerValidator: Sendable {
     func sha256(
         fileURL: URL
     ) throws -> String {
-        sha256(try Data(contentsOf: fileURL))
+        let data = try Data(contentsOf: fileURL)
+        return sha256(data)
     }
 
     private func validateStructure(
