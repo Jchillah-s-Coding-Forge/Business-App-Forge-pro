@@ -4,27 +4,27 @@ public struct NixBootstrapReleasePolicy: Codable, Equatable, Sendable {
     public static let current = NixBootstrapReleasePolicy(
         version: "2.35.2",
         installerURLString: "https://releases.nixos.org/nix/nix-2.35.2/install",
-        x86_64DarwinTarballSHA256: "d725518d89f3b0b8d4af702a9d38d519814014cbe125afb3ed0545c9d755f6a5",
+        x86DarwinTarballSHA256: "d725518d89f3b0b8d4af702a9d38d519814014cbe125afb3ed0545c9d755f6a5",
         aarch64DarwinTarballSHA256: "1695c13aba5afa7c2ecd6dc4a9393f602e7bbc440ed45e81602c831546580ec3",
         maximumInstallerBytes: 524_288
     )
 
     public let version: String
     public let installerURLString: String
-    public let x86_64DarwinTarballSHA256: String
+    public let x86DarwinTarballSHA256: String
     public let aarch64DarwinTarballSHA256: String
     public let maximumInstallerBytes: Int
 
     public init(
         version: String,
         installerURLString: String,
-        x86_64DarwinTarballSHA256: String,
+        x86DarwinTarballSHA256: String,
         aarch64DarwinTarballSHA256: String,
         maximumInstallerBytes: Int
     ) {
         self.version = version
         self.installerURLString = installerURLString
-        self.x86_64DarwinTarballSHA256 = x86_64DarwinTarballSHA256
+        self.x86DarwinTarballSHA256 = x86DarwinTarballSHA256
         self.aarch64DarwinTarballSHA256 = aarch64DarwinTarballSHA256
         self.maximumInstallerBytes = maximumInstallerBytes
     }
