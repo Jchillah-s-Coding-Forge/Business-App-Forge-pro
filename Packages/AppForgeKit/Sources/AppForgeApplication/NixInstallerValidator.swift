@@ -64,7 +64,7 @@ struct NixInstallerValidator: Sendable {
             "#!/bin/sh",
             "nix-\(policy.version)-x86_64-darwin.tar.xz",
             "nix-\(policy.version)-aarch64-darwin.tar.xz",
-            policy.x86_64DarwinTarballSHA256,
+            policy.x86DarwinTarballSHA256,
             policy.aarch64DarwinTarballSHA256,
             "https://releases.nixos.org/nix/nix-\(policy.version)/"
         ]
