@@ -112,10 +112,9 @@ struct NixFlutterEnvironmentVerifier: Sendable {
             throw FlutterMaterializationError.invalidNixEnvironment
         }
 
-        guard lock.sha256 == receipt.flakeLockSHA256,
-              lock.nixpkgsRevision
-                  == receipt.nixpkgsLockedRevision.lowercased()
-        else {
+        let provenanceMatches = lock.sha256 == receipt.flakeLockSHA256
+            && lock.nixpkgsRevision == receipt.nixpkgsLockedRevision.lowercased()
+        guard provenanceMatches else {
             throw FlutterMaterializationError.nixEnvironmentReceiptMismatch
         }
 
