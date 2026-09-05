@@ -2,18 +2,20 @@
 
 ## Purpose
 
-M3.2 owns deterministic AppForge source rendering. M3.3 turns that source tree into a complete Flutter application with native platform shells by making the selected Flutter SDK an explicit, validated toolchain input.
+M3.2 owns deterministic AppForge source rendering. M3.3 turns that source tree into a complete Flutter application with native platform shells. M3.4 makes the external Flutter execution strategy explicit: AppForge can use either a selected Flutter SDK or a previously verified Nix reproducible environment.
 
 ```text
 ProjectSpecification
 + ResolvedProductGraph
 + forge.lock
 + GenerationPlan
-+ selected Flutter SDK
++ Flutter materialization toolchain
+  - direct selected SDK
+  - verified Nix environment
         ↓
 target + plan validation
         ↓
-Flutter SDK inspection
+toolchain preflight + Flutter identity inspection
         ↓
 private staging root
         ↓
@@ -36,6 +38,52 @@ atomic final move
 ```
 
 The final target is never used as a working directory. It appears only after all validation gates succeed.
+
+## Toolchain strategies
+
+### Direct SDK
+
+The direct strategy preserves the M3.3 contract. AppForge validates the user-selected SDK directory and executes its exact `bin/flutter` binary. It never silently replaces that selection with a different Flutter binary found on `PATH`.
+
+### Nix environment
+
+The Nix strategy accepts:
+
+- a previously provisioned AppForge Nix environment path;
+- an absolute Nix executable path.
+
+Before any materialization staging directory is created, AppForge verifies the environment:
+
+1. the environment directory exists;
+2. `appforge.nix-environment.json` is present and decodable;
+3. the receipt declares Flutter as a Nix-managed package;
+4. `flake.nix` is byte-identical to the deterministic plan reconstructed from the receipt;
+5. `flake.lock` is present and structurally valid;
+6. SHA-256 of `flake.lock` equals the receipt;
+7. the locked nixpkgs Git revision equals the receipt;
+8. the Nix CLI satisfies the supported minimum;
+9. Flutter machine-readable identity inside `nix develop` matches the version validated when the environment was provisioned.
+
+A mismatch fails closed before Flutter processes or materialization staging begin.
+
+The current M2.4 environment contract uses AppForge's default nixpkgs input. Therefore deterministic `flake.nix` reconstruction in M3.4 assumes that same versioned product contract. A future custom-input feature must persist the input itself in the environment receipt before arbitrary nixpkgs inputs are accepted.
+
+### Nix command execution
+
+Materialization still uses `ToolchainCommandRunning` and never invokes a shell.
+
+For Nix-backed Flutter execution the request is equivalent to:
+
+```text
+<nix-executable>
+  --extra-experimental-features "nix-command flakes"
+  develop <verified-environment-path>
+  --command
+  flutter
+  <flutter arguments>
+```
+
+The process working directory remains the materializer staging/project directory. The Nix environment path is an execution-time input only and is never written into the generated project receipt.
 
 ## Toolchain identity
 
@@ -164,7 +212,7 @@ This makes the exact dependency resolution auditable even when package registrie
 
 ## Toolchain receipt
 
-`appforge.toolchain.json` is deterministic for the materialized toolchain/dependency state and contains:
+`appforge.toolchain.json` schema version 2 is deterministic for the materialized toolchain/dependency state and contains:
 
 - receipt schema version
 - Flutter toolchain identity
@@ -173,12 +221,16 @@ This makes the exact dependency resolution auditable even when package registrie
 - deterministically ordered target platforms
 - SHA-256 of `pubspec.lock`
 - successfully completed validation steps
+- execution mode: `directSDK` or `nixEnvironment`
+- for Nix execution only: locked nixpkgs revision and SHA-256 of `flake.lock`
 
 It contains no:
 
 - timestamps
 - UUIDs
-- local absolute paths
+- local absolute Flutter SDK paths
+- local absolute Nix executable paths
+- local absolute Nix environment paths
 - environment dumps
 - secrets
 - command output
@@ -218,3 +270,20 @@ The slice is complete only when tests cover:
 - receipt round-trip without local paths
 - existing-target no-overwrite
 - failure cleanup with no published partial project
+
+
+## M3.4 additional quality contract
+
+M3.4 additionally requires tests for:
+
+- unchanged direct-SDK materialization behavior;
+- shell-free Nix command construction;
+- exact verified environment path passed to `nix develop`;
+- Flutter machine identity inspection inside Nix;
+- `flake.nix` tamper rejection before process execution;
+- `flake.lock` tamper rejection before process execution;
+- receipt/lock revision and digest mismatch rejection;
+- missing Flutter package rejection;
+- Nix provenance in schema-2 Flutter receipts;
+- absence of local Nix paths from generated receipts;
+- schema-1 Flutter receipt decoding compatibility.
