@@ -37,6 +37,14 @@ public struct MaterializedFlutterGenerationResult: Equatable, Sendable {
     }
 }
 
+public protocol FlutterProjectBuilding: Sendable {
+    func build(
+        specification: ProjectSpecification,
+        toolchain: FlutterMaterializationToolchain,
+        targetURL: URL
+    ) throws -> MaterializedFlutterGenerationResult
+}
+
 public struct BuildFlutterProjectUseCase: Sendable {
     private let packageResolver: ResolveProductPackagesUseCase
     private let renderer: any FlutterProjectRendering
@@ -107,6 +115,21 @@ public struct BuildFlutterProjectUseCase: Sendable {
             lockfile: resolution.lockfile,
             plan: plan,
             toolchainReceipt: materialization.receipt
+        )
+    }
+}
+
+
+extension BuildFlutterProjectUseCase: FlutterProjectBuilding {
+    public func build(
+        specification: ProjectSpecification,
+        toolchain: FlutterMaterializationToolchain,
+        targetURL: URL
+    ) throws -> MaterializedFlutterGenerationResult {
+        try self(
+            specification: specification,
+            toolchain: toolchain,
+            targetURL: targetURL
         )
     }
 }
