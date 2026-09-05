@@ -216,8 +216,7 @@ private final class RecordingProjectMaterializer:
                 dartSDKVersion: "3.11.0"
             ),
             projectPackageName: "inventory_app",
-            organizationIdentifier:
-                specification.identity.organizationIdentifier,
+            organizationIdentifier: specification.identity.organizationIdentifier,
             targetPlatforms: specification.targetPlatforms.sorted {
                 $0.rawValue < $1.rawValue
             },
