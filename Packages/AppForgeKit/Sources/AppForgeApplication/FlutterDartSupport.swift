@@ -79,18 +79,17 @@ enum FlutterDartNaming {
     }
 
     static func dartType(for field: FieldDefinition) -> String {
-        let baseType: String
-        switch field.dataType {
+        let baseType = switch field.dataType {
         case .integer:
-            baseType = "int"
+            "int"
         case .decimal, .currency, .percentage:
-            baseType = "double"
+            "double"
         case .boolean:
-            baseType = "bool"
+            "bool"
         case .date, .dateTime, .time:
-            baseType = "DateTime"
+            "DateTime"
         case .string, .email, .phone, .url, .enumeration, .file, .image, .color, .location:
-            baseType = "String"
+            "String"
         }
 
         return field.isRequired ? baseType : "\(baseType)?"
@@ -110,10 +109,10 @@ enum FlutterDartEscaping {
     static func yamlQuoted(_ value: String) -> String {
         let escaped = value
             .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: """, with: "\\"")
+            .replacingOccurrences(of: "\"", with: "\\\"")
             .replacingOccurrences(of: "\r", with: "\\r")
             .replacingOccurrences(of: "\n", with: "\\n")
-        return ""\(escaped)""
+        return "\"\(escaped)\""
     }
 
     static func singleLine(_ value: String) -> String {
