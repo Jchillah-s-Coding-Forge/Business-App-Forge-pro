@@ -6,14 +6,20 @@ protocol MacOSOpenCommandRunning: Sendable {
 }
 
 struct SystemMacOSOpenCommandRunner: MacOSOpenCommandRunning {
-    private static let executablePath = "/usr/bin/open"
+    private let executablePath: String
+
+    init(
+        executablePath: String = "/usr/bin/open"
+    ) {
+        self.executablePath = executablePath
+    }
 
     func run(
         arguments: [String]
     ) throws {
         let process = Process()
         process.executableURL = URL(
-            fileURLWithPath: Self.executablePath
+            fileURLWithPath: executablePath
         )
         process.arguments = arguments
 
