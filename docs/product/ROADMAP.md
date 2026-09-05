@@ -19,6 +19,7 @@ Die Roadmap ist fähigkeitsorientiert. Ein Meilenstein endet erst nach Nutzerabn
 - Validierung und Preview-Zusammenfassung
 - Environment Doctor mit optionalem Nix-Reproducible-Modus
 - deterministische `flake.nix`-/`flake.lock`-Provisionierung und Toolchain-Provenienz
+- verifizierter, digest-gebundener und sichtbar bestätigter Nix-Bootstrap auf macOS
 
 ## M3 — Package System & Flutter Renderer
 
