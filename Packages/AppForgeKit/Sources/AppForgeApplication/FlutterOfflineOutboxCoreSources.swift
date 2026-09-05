@@ -1,3 +1,5 @@
+import AppForgeDomain
+
 struct FlutterOfflineOutboxCoreSources {
     func files() -> [GeneratedFile] {
         [
