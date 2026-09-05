@@ -33,6 +33,21 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
     public func inspect(
         sdkRootPath: String
     ) throws -> FlutterToolchainInspection {
+        let paths = try validatedSDKPaths(sdkRootPath)
+        let result = try runVersionCommand(paths)
+        let identity = try parseIdentity(result.output)
+        try validateMinimumVersion(identity.flutterVersion)
+
+        return FlutterToolchainInspection(
+            sdkRootPath: paths.root.path,
+            flutterExecutablePath: paths.executable.path,
+            identity: identity
+        )
+    }
+
+    private func validatedSDKPaths(
+        _ sdkRootPath: String
+    ) throws -> FlutterSDKPaths {
         let rootURL = URL(
             fileURLWithPath: NSString(string: sdkRootPath).expandingTildeInPath,
             isDirectory: true
@@ -41,13 +56,11 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
         .resolvingSymlinksInPath()
 
         var isDirectory: ObjCBool = false
-        guard !sdkRootPath.isEmpty,
-              FileManager.default.fileExists(
-                  atPath: rootURL.path,
-                  isDirectory: &isDirectory
-              ),
-              isDirectory.boolValue
-        else {
+        let rootExists = FileManager.default.fileExists(
+            atPath: rootURL.path,
+            isDirectory: &isDirectory
+        )
+        guard !sdkRootPath.isEmpty, rootExists, isDirectory.boolValue else {
             throw FlutterMaterializationError.invalidFlutterSDKPath
         }
 
@@ -57,23 +70,32 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
             .standardizedFileURL
             .resolvingSymlinksInPath()
         let rootPrefix = rootURL.path + "/"
-
         guard executableURL.path.hasPrefix(rootPrefix),
               FileManager.default.isExecutableFile(atPath: executableURL.path)
         else {
             throw FlutterMaterializationError.invalidFlutterSDKPath
         }
 
-        let request = ToolchainCommandRequest(
-            executablePath: executableURL.path,
-            arguments: ["--no-version-check", "--version", "--machine"],
-            workingDirectoryPath: rootURL.path,
-            environment: FlutterToolchainProcessEnvironment.make(
-                sdkRootPath: rootURL.path
-            ),
-            timeoutSeconds: 30
+        return FlutterSDKPaths(
+            root: rootURL,
+            executable: executableURL
         )
-        let result = try runner.run(request)
+    }
+
+    private func runVersionCommand(
+        _ paths: FlutterSDKPaths
+    ) throws -> ToolchainCommandResult {
+        let result = try runner.run(
+            ToolchainCommandRequest(
+                executablePath: paths.executable.path,
+                arguments: ["--no-version-check", "--version", "--machine"],
+                workingDirectoryPath: paths.root.path,
+                environment: FlutterToolchainProcessEnvironment.make(
+                    sdkRootPath: paths.root.path
+                ),
+                timeoutSeconds: 30
+            )
+        )
 
         guard !result.timedOut else {
             throw FlutterMaterializationError.commandTimedOut(.inspectToolchain)
@@ -85,15 +107,7 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
                 output: result.output
             )
         }
-
-        let identity = try parseIdentity(result.output)
-        try validateMinimumVersion(identity.flutterVersion)
-
-        return FlutterToolchainInspection(
-            sdkRootPath: rootURL.path,
-            flutterExecutablePath: executableURL.path,
-            identity: identity
-        )
+        return result
     }
 
     private func parseIdentity(
@@ -216,4 +230,9 @@ private extension String {
             options: .regularExpression
         ) != nil
     }
+}
+
+private struct FlutterSDKPaths {
+    let root: URL
+    let executable: URL
 }
