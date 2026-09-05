@@ -67,12 +67,11 @@ public struct SystemToolchainCommandRunner: ToolchainCommandRunning {
         }
 
         var isDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(
+        let exists = FileManager.default.fileExists(
             atPath: workingDirectoryURL.path,
             isDirectory: &isDirectory
-        ),
-              isDirectory.boolValue
-        else {
+        )
+        guard exists, isDirectory.boolValue else {
             throw AppForgeError.fileSystem(
                 message: "Das Arbeitsverzeichnis für den Toolchain-Prozess existiert nicht."
             )
