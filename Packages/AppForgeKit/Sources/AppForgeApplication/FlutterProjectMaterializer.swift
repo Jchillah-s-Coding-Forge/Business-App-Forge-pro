@@ -220,12 +220,11 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         _ parent: URL
     ) throws {
         var isDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(
+        let exists = FileManager.default.fileExists(
             atPath: parent.path,
             isDirectory: &isDirectory
-        ),
-              isDirectory.boolValue
-        else {
+        )
+        guard exists, isDirectory.boolValue else {
             throw AppForgeError.fileSystem(
                 message: "Der Zielordner für die Flutter-Materialisierung existiert nicht."
             )
@@ -249,12 +248,11 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         _ projectURL: URL
     ) throws {
         var isDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(
+        let exists = FileManager.default.fileExists(
             atPath: projectURL.path,
             isDirectory: &isDirectory
-        ),
-              isDirectory.boolValue
-        else {
+        )
+        guard exists, isDirectory.boolValue else {
             throw AppForgeError.generation(
                 message: "Flutter hat keinen vollständigen Projektordner erzeugt."
             )
