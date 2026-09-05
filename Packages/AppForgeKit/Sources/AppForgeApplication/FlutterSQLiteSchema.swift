@@ -4,10 +4,13 @@ struct FlutterSQLiteSchema {
     let specification: ProjectSpecification
 
     func createStatements() throws -> [String] {
-        var statements = [
-            outboxTableStatement(),
-            outboxCreatedAtIndexStatement()
-        ]
+        var statements: [String] = []
+        if specification.offline.usesSyncOutbox {
+            statements += [
+                outboxTableStatement(),
+                outboxCreatedAtIndexStatement()
+            ]
+        }
 
         for entity in specification.entities.sorted(by: Self.entitySort) {
             statements.append(try entityTableStatement(entity))
