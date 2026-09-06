@@ -130,10 +130,16 @@ public struct SystemMacOSApplicationLocator: MacOSApplicationLocating {
     private func isApplicationPath(
         _ path: String
     ) -> Bool {
-        path.hasSuffix(".app")
-            && FileManager.default.fileExists(
-                atPath: path
-            )
+        guard path.hasSuffix(".app") else {
+            return false
+        }
+
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(
+            atPath: path,
+            isDirectory: &isDirectory
+        )
+        return exists && isDirectory.boolValue
     }
 }
 
