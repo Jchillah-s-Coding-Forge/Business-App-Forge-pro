@@ -1,4 +1,4 @@
-import AppForgeApplication
+@testable import AppForgeApplication
 import AppForgeDomain
 import Foundation
 import XCTest
@@ -49,6 +49,40 @@ final class IDEHandoffTests: XCTestCase {
                 "com.apple.dt.Xcode",
                 "com.apple.Terminal"
             ]
+        )
+    }
+
+    func testExecutableToolDetectorUsesBundleAwareApplicationLocator() {
+        let locator = StubMacOSApplicationLocator(
+            paths: [
+                "com.microsoft.VSCode":
+                    "/Users/test/Applications/Visual Studio Code.app"
+            ]
+        )
+        let detector = ExecutableToolDetector(
+            applicationLocator: locator
+        )
+        let requirement = ToolRequirement(
+            id: .vsCode,
+            displayName: "VS Code",
+            purpose: "IDE Handoff",
+            isRequired: false,
+            installStrategy: .externalApplication
+        )
+
+        let result = detector.detect(
+            requirement: requirement,
+            flutterSDKPath: nil
+        )
+
+        XCTAssertEqual(result.availability, .ready)
+        XCTAssertEqual(
+            result.path,
+            "/Users/test/Applications/Visual Studio Code.app"
+        )
+        XCTAssertEqual(
+            locator.requestedBundleIdentifiers,
+            ["com.microsoft.VSCode"]
         )
     }
 
