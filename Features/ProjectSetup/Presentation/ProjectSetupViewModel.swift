@@ -78,9 +78,13 @@ final class ProjectSetupViewModel {
             )
     }
 
+    var isGenerationToolchainReady: Bool {
+        resolvedGenerationToolchain != nil
+    }
+
     var canGenerateProject: Bool {
         canPrepareProject
-            && resolvedGenerationToolchain != nil
+            && isGenerationToolchainReady
             && !isGenerating
     }
 
