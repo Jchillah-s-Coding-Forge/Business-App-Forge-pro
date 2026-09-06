@@ -24,13 +24,17 @@ final class ToolchainPreferencesMigrationTests: XCTestCase {
         )
         XCTAssertEqual(preferences.preferredIDE, .vsCode)
         XCTAssertNil(preferences.developmentEnvironmentMode)
+        XCTAssertNil(preferences.nixEnvironmentPath)
+        XCTAssertNil(preferences.nixExecutablePath)
     }
 
     func testEnvironmentModeRoundTripsWhenPresent() throws {
         let original = ToolchainPreferences(
             flutterSDKPath: nil,
             preferredIDE: .terminal,
-            developmentEnvironmentMode: .nixReproducible
+            developmentEnvironmentMode: .nixReproducible,
+            nixEnvironmentPath: "/tmp/appforge-nix",
+            nixExecutablePath: "/nix/bin/nix"
         )
 
         let data = try JSONEncoder().encode(original)

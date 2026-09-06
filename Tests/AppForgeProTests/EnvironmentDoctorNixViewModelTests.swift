@@ -143,8 +143,10 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
     func testReadyNixCanProvisionEnvironment() async {
         let detector = MutableNixToolDetector(nixReady: true)
         let provisioner = RecordingNixEnvironmentProvisioner()
+        let preferences = NixTestPreferenceStore()
         let viewModel = makeViewModel(
             detector: detector,
+            preferences: preferences,
             provisioner: provisioner
         )
 
@@ -156,6 +158,14 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isNixReady)
         XCTAssertFalse(viewModel.shouldOfferNixBootstrap)
         XCTAssertTrue(viewModel.canProvisionNixEnvironment)
+        XCTAssertEqual(
+            viewModel.nixExecutablePath,
+            "/nix/var/nix/profiles/default/bin/nix"
+        )
+        XCTAssertEqual(
+            preferences.saved.nixExecutablePath,
+            "/nix/var/nix/profiles/default/bin/nix"
+        )
 
         let target = URL(
             fileURLWithPath: "/tmp/appforge-nix-ui-test",
@@ -163,6 +173,22 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
         )
         await viewModel.provisionNixEnvironment(to: target)
 
+        assertProvisionedNixEnvironment(
+            viewModel: viewModel,
+            provisioner: provisioner,
+            target: target
+        )
+        assertPersistedNixGenerationPaths(
+            preferences: preferences,
+            target: target
+        )
+    }
+
+    private func assertProvisionedNixEnvironment(
+        viewModel: EnvironmentDoctorViewModel,
+        provisioner: RecordingNixEnvironmentProvisioner,
+        target: URL
+    ) {
         XCTAssertEqual(
             viewModel.nixProvisioningResult?.environmentPath,
             target.path
@@ -174,6 +200,28 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
         XCTAssertEqual(
             provisioner.lastInput?.plan.packages,
             [.flutter, .git, .jdk17]
+        )
+        XCTAssertEqual(
+            viewModel.nixEnvironmentPath,
+            target.path
+        )
+        XCTAssertEqual(
+            viewModel.nixExecutablePath,
+            "/nix/var/nix/profiles/default/bin/nix"
+        )
+    }
+
+    private func assertPersistedNixGenerationPaths(
+        preferences: NixTestPreferenceStore,
+        target: URL
+    ) {
+        XCTAssertEqual(
+            preferences.saved.nixEnvironmentPath,
+            target.path
+        )
+        XCTAssertEqual(
+            preferences.saved.nixExecutablePath,
+            "/nix/var/nix/profiles/default/bin/nix"
         )
     }
 
