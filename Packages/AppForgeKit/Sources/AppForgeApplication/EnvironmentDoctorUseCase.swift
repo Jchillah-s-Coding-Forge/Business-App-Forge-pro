@@ -212,30 +212,32 @@ public protocol GeneratedProjectOpening {
 
 public struct SystemGeneratedProjectOpener: GeneratedProjectOpening {
     private let runner: any MacOSOpenCommandRunning
+    private let commandBuilder: IDEHandoffCommandBuilder
 
     public init() {
         runner = SystemMacOSOpenCommandRunner()
+        commandBuilder = IDEHandoffCommandBuilder()
     }
 
-    init(runner: any MacOSOpenCommandRunning) {
+    init(
+        runner: any MacOSOpenCommandRunning,
+        commandBuilder: IDEHandoffCommandBuilder =
+            IDEHandoffCommandBuilder()
+    ) {
         self.runner = runner
+        self.commandBuilder = commandBuilder
     }
 
-    public func open(projectURL: URL, preferredIDE: PreferredIDE) throws {
-        let arguments: [String] = switch preferredIDE {
-        case .vsCode:
-            ["-a", "Visual Studio Code", projectURL.path]
-        case .androidStudio:
-            ["-a", "Android Studio", projectURL.path]
-        case .xcode:
-            ["-a", "Xcode", projectURL.path]
-        case .finder:
-            ["-R", projectURL.path]
-        case .terminal:
-            ["-a", "Terminal", projectURL.path]
-        }
-
-        try runner.run(arguments: arguments)
+    public func open(
+        projectURL: URL,
+        preferredIDE: PreferredIDE
+    ) throws {
+        try runner.run(
+            arguments: commandBuilder.arguments(
+                for: preferredIDE,
+                projectURL: projectURL
+            )
+        )
     }
 }
 
