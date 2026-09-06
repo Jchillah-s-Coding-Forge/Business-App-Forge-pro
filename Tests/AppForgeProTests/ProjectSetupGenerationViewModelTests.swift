@@ -153,6 +153,55 @@ final class ProjectSetupGenerationViewModelTests: XCTestCase {
         )
     }
 
+    func testUnavailablePreferredIDEDoesNotSilentlyFallback() async {
+        let opener = RecordingStudioProjectOpener()
+        let viewModel = makeViewModel(
+            preferences: ToolchainPreferences(
+                flutterSDKPath: "/opt/flutter",
+                preferredIDE: .androidStudio,
+                developmentEnvironmentMode: .existingToolchain
+            ),
+            opener: opener,
+            ideDetector: StudioIDEHandoffDetector(
+                available: [.finder, .systemDefault]
+            )
+        )
+        makeProjectValid(viewModel)
+        let target = URL(
+            fileURLWithPath: "/tmp/no-ide-fallback",
+            isDirectory: true
+        )
+
+        await viewModel.generateProject(to: target)
+        viewModel.openGeneratedProject()
+
+        XCTAssertNil(opener.lastPreferredIDE)
+        XCTAssertNotNil(viewModel.generationErrorMessage)
+
+        viewModel.openGeneratedProject(in: .finder)
+
+        XCTAssertEqual(opener.lastPreferredIDE, .finder)
+        XCTAssertEqual(opener.lastProjectURL?.path, target.path)
+    }
+
+    func testAvailableHandoffsIncludeDetectedIDEAndSafeFallbacks() {
+        let viewModel = makeViewModel(
+            preferences: readyManagedPreferences,
+            ideDetector: StudioIDEHandoffDetector(
+                available: [
+                    .vsCode,
+                    .finder,
+                    .systemDefault
+                ]
+            )
+        )
+
+        XCTAssertEqual(
+            Set(viewModel.availableIDEHandoffs.map(\.ide)),
+            [.vsCode, .finder, .systemDefault]
+        )
+    }
+
     private var readyManagedPreferences: ToolchainPreferences {
         ToolchainPreferences(
             flutterSDKPath: "/opt/flutter",
@@ -166,7 +215,9 @@ final class ProjectSetupGenerationViewModelTests: XCTestCase {
         builder: RecordingStudioProjectBuilder =
             RecordingStudioProjectBuilder(),
         opener: RecordingStudioProjectOpener =
-            RecordingStudioProjectOpener()
+            RecordingStudioProjectOpener(),
+        ideDetector: any IDEHandoffDetecting =
+            StudioIDEHandoffDetector()
     ) -> ProjectSetupViewModel {
         ProjectSetupViewModel(
             createProjectDraft: CreateProjectDraftUseCase(),
@@ -174,7 +225,8 @@ final class ProjectSetupGenerationViewModelTests: XCTestCase {
                 preferences
             ),
             projectBuilder: builder,
-            projectOpener: opener
+            projectOpener: opener,
+            ideHandoffDetector: ideDetector
         )
     }
 
@@ -345,4 +397,43 @@ private final class RecordingStudioProjectOpener: GeneratedProjectOpening {
 
 private enum StudioGenerationTestError: Error {
     case failed
+}
+
+
+private struct StudioIDEHandoffDetector: IDEHandoffDetecting {
+    let available: Set<PreferredIDE>
+
+    init(
+        available: Set<PreferredIDE> = Set(
+            PreferredIDE.allCases
+        )
+    ) {
+        self.available = available
+    }
+
+    func detect() -> [IDEHandoffAvailability] {
+        PreferredIDE.allCases.map { ide in
+            IDEHandoffAvailability(
+                ide: ide,
+                applicationPath: applicationPath(
+                    for: ide
+                )
+            )
+        }
+    }
+
+    private func applicationPath(
+        for ide: PreferredIDE
+    ) -> String? {
+        guard available.contains(ide) else {
+            return nil
+        }
+
+        switch ide {
+        case .finder, .systemDefault:
+            nil
+        default:
+            "/Applications/\(ide.rawValue).app"
+        }
+    }
 }
