@@ -14,6 +14,7 @@
 		2E811100BE1BD6369AE5223C /* FlutterEnvironmentConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4A191183618E33CBD50ABC /* FlutterEnvironmentConfigurationView.swift */; };
 		3858948FEC791AEC22589123 /* AppForgeCore in Frameworks */ = {isa = PBXBuildFile; productRef = D34DA3ECCB06C78E6DEE8454 /* AppForgeCore */; };
 		596BD00CC054EDCD76539F79 /* WorkspaceHomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D0E40A9FDE62F73F320375 /* WorkspaceHomeViewModel.swift */; };
+		6911A70003FE555C69E28898 /* ProjectGenerationSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD9CE6EBBAA36154923BA982 /* ProjectGenerationSection.swift */; };
 		6A0CB127FC4A25A1285BFECF /* ProjectSetupViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */; };
 		7C2FDF42A1DD4471BD388831 /* AppForgeDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 2270788993E9C3F3FA63F409 /* AppForgeDomain */; };
 		B34B7CF78B39E9C39A45B552 /* ProjectSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550C17458B1B176817565B39 /* ProjectSetupView.swift */; };
@@ -22,6 +23,7 @@
 		CC32843ECE2CA002EDE36252 /* AppForgeDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 82C6A92B978155B2FB3B0BE2 /* AppForgeDesignSystem */; };
 		D289F72DC0BAA3C49A33EB61 /* AppForgeProApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8DE2371B97E0C2541808A4 /* AppForgeProApp.swift */; };
 		E3A44F1A679F3E0EA0186CEB /* NixEnvironmentConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA61A7FDDEAC943F0021B4B /* NixEnvironmentConfigurationView.swift */; };
+		E6AE806C63163E9D361470E2 /* ProjectSetupGenerationViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CED38A7709D4BD63E256697 /* ProjectSetupGenerationViewModelTests.swift */; };
 		E7CA53A5E09B03131DDDB0B6 /* WorkspaceHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EA82C86E425638AF62D8C1 /* WorkspaceHomeView.swift */; };
 		E81A2CBC55DCEFEAEEB36543 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */; };
 		ECACDDE4D27313E5B12F2F62 /* EnvironmentModeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18336B7B6B5724FA5C9E4844 /* EnvironmentModeCard.swift */; };
@@ -45,6 +47,7 @@
 		177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModelTests.swift; sourceTree = "<group>"; };
 		18336B7B6B5724FA5C9E4844 /* EnvironmentModeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentModeCard.swift; sourceTree = "<group>"; };
 		1AB8F0DBFA1F7FAEC8CAAA17 /* MONETIZATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MONETIZATION.md; sourceTree = "<group>"; };
+		1CED38A7709D4BD63E256697 /* ProjectSetupGenerationViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupGenerationViewModelTests.swift; sourceTree = "<group>"; };
 		254E43A26745EB0060206E87 /* PROJECT_SPECIFICATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PROJECT_SPECIFICATION.md; sourceTree = "<group>"; };
 		320CA5D5F9E2B1E0182EBC58 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		35E41EDA1844AD5B74B10C55 /* NIX_BOOTSTRAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIX_BOOTSTRAP.md; sourceTree = "<group>"; };
@@ -67,6 +70,7 @@
 		7D4A191183618E33CBD50ABC /* FlutterEnvironmentConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlutterEnvironmentConfigurationView.swift; sourceTree = "<group>"; };
 		842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppForgeProTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8841645D83E2B35759B9C582 /* DEVELOPMENT_ENVIRONMENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEVELOPMENT_ENVIRONMENTS.md; sourceTree = "<group>"; };
+		AD9CE6EBBAA36154923BA982 /* ProjectGenerationSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectGenerationSection.swift; sourceTree = "<group>"; };
 		B20F2750C50A2573A0D1C120 /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
 		B84827D31F4C28182F780362 /* MEMORY_DIAGNOSTICS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MEMORY_DIAGNOSTICS.md; sourceTree = "<group>"; };
 		BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PACKAGE_SYSTEM.md; sourceTree = "<group>"; };
@@ -203,6 +207,7 @@
 		9C9FF4C4BDDC4992FF93859D /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
+				AD9CE6EBBAA36154923BA982 /* ProjectGenerationSection.swift */,
 				550C17458B1B176817565B39 /* ProjectSetupView.swift */,
 				CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */,
 			);
@@ -213,6 +218,7 @@
 			isa = PBXGroup;
 			children = (
 				67CF355CFEBA4420067ED1F4 /* EnvironmentDoctorNixViewModelTests.swift */,
+				1CED38A7709D4BD63E256697 /* ProjectSetupGenerationViewModelTests.swift */,
 				177B60E85B57C25E8DDE389E /* ProjectSetupViewModelTests.swift */,
 				14B8FA96DC5068AB9C6BFD19 /* WorkspaceHomeViewModelTests.swift */,
 			);
@@ -338,6 +344,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				043D6926BF2D64DB324941BB /* EnvironmentDoctorNixViewModelTests.swift in Sources */,
+				E6AE806C63163E9D361470E2 /* ProjectSetupGenerationViewModelTests.swift in Sources */,
 				6A0CB127FC4A25A1285BFECF /* ProjectSetupViewModelTests.swift in Sources */,
 				2169237E5BBB11DDCF2946E8 /* WorkspaceHomeViewModelTests.swift in Sources */,
 			);
@@ -355,6 +362,7 @@
 				ECBFCDCDC800A896E0D558CB /* EnvironmentToolchainReportView.swift in Sources */,
 				2E811100BE1BD6369AE5223C /* FlutterEnvironmentConfigurationView.swift in Sources */,
 				E3A44F1A679F3E0EA0186CEB /* NixEnvironmentConfigurationView.swift in Sources */,
+				6911A70003FE555C69E28898 /* ProjectGenerationSection.swift in Sources */,
 				B34B7CF78B39E9C39A45B552 /* ProjectSetupView.swift in Sources */,
 				C4E78B6A5FD6DEC76ABC1221 /* ProjectSetupViewModel.swift in Sources */,
 				E7CA53A5E09B03131DDDB0B6 /* WorkspaceHomeView.swift in Sources */,
