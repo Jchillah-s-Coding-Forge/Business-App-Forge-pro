@@ -202,10 +202,7 @@ private final class StudioPreferenceStore: ToolchainPreferenceStore {
     }
 }
 
-private final class RecordingStudioProjectBuilder:
-    MaterializedFlutterProjectBuilding,
-    @unchecked Sendable
-{
+private final class RecordingStudioProjectBuilder: MaterializedFlutterProjectBuilding, @unchecked Sendable {
     private let lock = NSLock()
     private let shouldFail: Bool
     private var storedToolchain: FlutterMaterializationToolchain?
@@ -333,9 +330,7 @@ private final class RecordingStudioProjectBuilder:
     }
 }
 
-private final class RecordingStudioProjectOpener:
-    GeneratedProjectOpening
-{
+private final class RecordingStudioProjectOpener: GeneratedProjectOpening {
     private(set) var lastProjectURL: URL?
     private(set) var lastPreferredIDE: PreferredIDE?
 
