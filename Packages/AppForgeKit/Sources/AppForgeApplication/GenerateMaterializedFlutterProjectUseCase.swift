@@ -15,6 +15,14 @@ extension MaterializeFlutterProjectUseCase: FlutterProjectMaterializing {
     }
 }
 
+public protocol MaterializedFlutterProjectBuilding: Sendable {
+    func build(
+        specification: ProjectSpecification,
+        toolchain: FlutterMaterializationToolchain,
+        targetURL: URL
+    ) throws -> MaterializedFlutterGenerationResult
+}
+
 public struct MaterializedFlutterGenerationResult: Equatable, Sendable {
     public let projectPath: String
     public let graph: ResolvedProductGraph
@@ -107,6 +115,21 @@ public struct BuildFlutterProjectUseCase: Sendable {
             lockfile: resolution.lockfile,
             plan: plan,
             toolchainReceipt: materialization.receipt
+        )
+    }
+}
+
+
+extension BuildFlutterProjectUseCase: MaterializedFlutterProjectBuilding {
+    public func build(
+        specification: ProjectSpecification,
+        toolchain: FlutterMaterializationToolchain,
+        targetURL: URL
+    ) throws -> MaterializedFlutterGenerationResult {
+        try self(
+            specification: specification,
+            toolchain: toolchain,
+            targetURL: targetURL
         )
     }
 }
