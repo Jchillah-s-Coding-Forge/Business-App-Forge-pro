@@ -45,6 +45,8 @@ final class EnvironmentDoctorViewModel {
     private(set) var isProvisioningNixEnvironment = false
     private(set) var nixProvisioningResult: NixEnvironmentProvisioningResult?
     private(set) var nixProvisionTargetPath = ""
+    private(set) var nixEnvironmentPath: String?
+    private(set) var nixExecutablePath: String?
 
     let availablePlatforms: [TargetPlatform] = [.iOS, .android]
     let nixBootstrapReleaseVersion = NixBootstrapReleasePolicy.current.version
@@ -83,6 +85,8 @@ final class EnvironmentDoctorViewModel {
         preferredIDE = preferences.preferredIDE
         developmentEnvironmentMode = preferences.developmentEnvironmentMode
             ?? .appForgeManaged
+        nixEnvironmentPath = preferences.nixEnvironmentPath
+        nixExecutablePath = preferences.nixExecutablePath
     }
 
     var canScan: Bool {
@@ -186,6 +190,7 @@ final class EnvironmentDoctorViewModel {
 
         report = newReport
         isScanning = false
+        persistDetectedNixIfReady()
         handleNixReadinessAfterScan()
     }
 
@@ -278,7 +283,9 @@ final class EnvironmentDoctorViewModel {
                     ? nil
                     : flutterSDKPath,
                 preferredIDE: preferredIDE,
-                developmentEnvironmentMode: developmentEnvironmentMode
+                developmentEnvironmentMode: developmentEnvironmentMode,
+                nixEnvironmentPath: nixEnvironmentPath,
+                nixExecutablePath: nixExecutablePath
             )
         )
     }
@@ -425,6 +432,21 @@ extension EnvironmentDoctorViewModel {
         }.value
 
         nixProvisioningResult = result
+        nixEnvironmentPath = result.environmentPath
+        nixExecutablePath = input.nixExecutablePath
+        persistPreferences()
+    }
+
+    private func persistDetectedNixIfReady() {
+        guard isNixReady,
+              let path = nixResult?.path,
+              path.hasPrefix("/")
+        else {
+            return
+        }
+
+        nixExecutablePath = path
+        persistPreferences()
     }
 
     private func handleNixReadinessAfterScan() {
