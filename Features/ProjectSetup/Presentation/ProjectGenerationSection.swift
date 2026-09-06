@@ -55,12 +55,12 @@ struct ProjectGenerationSection: View {
     private var readinessStatus: some View {
         Label(
             viewModel.toolchainReadinessMessage,
-            systemImage: viewModel.canGenerateProject
+            systemImage: viewModel.isGenerationToolchainReady
                 ? "checkmark.seal.fill"
                 : "exclamationmark.triangle.fill"
         )
         .foregroundStyle(
-            viewModel.canGenerateProject
+            viewModel.isGenerationToolchainReady
                 ? .green
                 : .orange
         )
