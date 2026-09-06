@@ -114,6 +114,13 @@ final class ProjectSetupViewModel {
         )?.isAvailable == true
     }
 
+
+    var alternateIDEHandoffs: [IDEHandoffAvailability] {
+        availableIDEHandoffs.filter {
+            $0.ide != preferredIDE
+        }
+    }
+
     var preferredIDEReadinessMessage: String {
         if isPreferredIDEAvailable {
             return "\(preferredIDE.rawValue) ist für den Projekt-Handoff verfügbar."
