@@ -399,7 +399,6 @@ private enum StudioGenerationTestError: Error {
     case failed
 }
 
-
 private struct StudioIDEHandoffDetector: IDEHandoffDetecting {
     let available: Set<PreferredIDE>
 
