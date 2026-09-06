@@ -156,7 +156,7 @@ public struct ToolchainReport: Codable, Equatable, Sendable {
     }
 }
 
-public enum PreferredIDE: String, CaseIterable, Codable, Identifiable, Sendable {
+public enum PreferredIDE: String, CaseIterable, Codable, Hashable, Identifiable, Sendable {
     case vsCode = "VS Code"
     case androidStudio = "Android Studio"
     case xcode = "Xcode"
