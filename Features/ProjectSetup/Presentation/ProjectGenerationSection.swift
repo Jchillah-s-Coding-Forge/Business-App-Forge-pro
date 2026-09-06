@@ -150,8 +150,8 @@ struct ProjectGenerationSection: View {
             .disabled(!viewModel.isPreferredIDEAvailable)
 
             Menu("Anders öffnen …") {
-                ForEach(viewModel.availableIDEHandoffs) { destination in
-                    Button(destination.ide.rawValue) {
+                ForEach(viewModel.alternateIDEHandoffs) { destination in
+                    Button(handoffActionTitle(for: destination.ide)) {
                         viewModel.openGeneratedProject(
                             in: destination.ide
                         )
@@ -171,6 +171,21 @@ struct ProjectGenerationSection: View {
                 )
             }
             .buttonStyle(.borderless)
+        }
+    }
+
+    private func handoffActionTitle(
+        for ide: PreferredIDE
+    ) -> String {
+        switch ide {
+        case .finder:
+            "Im Finder anzeigen"
+        case .terminal:
+            "Terminal im Projekt öffnen"
+        case .systemDefault:
+            "Mit Systemstandard öffnen"
+        case .vsCode, .androidStudio, .xcode:
+            "In \(ide.rawValue) öffnen"
         }
     }
 
