@@ -173,6 +173,22 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
         )
         await viewModel.provisionNixEnvironment(to: target)
 
+        assertProvisionedNixEnvironment(
+            viewModel: viewModel,
+            provisioner: provisioner,
+            target: target
+        )
+        assertPersistedNixGenerationPaths(
+            preferences: preferences,
+            target: target
+        )
+    }
+
+    private func assertProvisionedNixEnvironment(
+        viewModel: EnvironmentDoctorViewModel,
+        provisioner: RecordingNixEnvironmentProvisioner,
+        target: URL
+    ) {
         XCTAssertEqual(
             viewModel.nixProvisioningResult?.environmentPath,
             target.path
@@ -193,6 +209,12 @@ final class EnvironmentDoctorNixViewModelTests: XCTestCase {
             viewModel.nixExecutablePath,
             "/nix/var/nix/profiles/default/bin/nix"
         )
+    }
+
+    private func assertPersistedNixGenerationPaths(
+        preferences: NixTestPreferenceStore,
+        target: URL
+    ) {
         XCTAssertEqual(
             preferences.saved.nixEnvironmentPath,
             target.path
