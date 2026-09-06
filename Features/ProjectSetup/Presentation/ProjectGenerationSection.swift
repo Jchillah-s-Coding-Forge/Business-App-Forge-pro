@@ -88,46 +88,47 @@ struct ProjectGenerationSection: View {
 
     @ViewBuilder
     private var generatedProjectStatus: some View {
-        if let path = viewModel.generatedProjectPath,
-           let receipt = viewModel.generatedToolchainReceipt {
-            Divider()
+        if let path = viewModel.generatedProjectPath {
+            if let receipt = viewModel.generatedToolchainReceipt {
+                Divider()
 
-            Label(
-                "Projekt vollständig erzeugt und validiert",
-                systemImage: "checkmark.seal.fill"
-            )
-            .foregroundStyle(.green)
-
-            LabeledContent("Projektpfad") {
-                Text(path)
-                    .font(.caption.monospaced())
-                    .textSelection(.enabled)
-            }
-
-            LabeledContent("Flutter") {
-                Text(receipt.flutter.flutterVersion)
-                    .font(.caption.monospaced())
-            }
-
-            LabeledContent("Execution Mode") {
-                Text(
-                    receipt.executionMode?.rawValue
-                        ?? "legacy"
-                )
-                .font(.caption.monospaced())
-            }
-
-            nixProvenance(receipt)
-
-            Button {
-                viewModel.openGeneratedProject()
-            } label: {
                 Label(
-                    "In \(viewModel.preferredIDE.rawValue) öffnen",
-                    systemImage: "arrow.up.forward.app"
+                    "Projekt vollständig erzeugt und validiert",
+                    systemImage: "checkmark.seal.fill"
                 )
+                .foregroundStyle(.green)
+
+                LabeledContent("Projektpfad") {
+                    Text(path)
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                }
+
+                LabeledContent("Flutter") {
+                    Text(receipt.flutter.flutterVersion)
+                        .font(.caption.monospaced())
+                }
+
+                LabeledContent("Execution Mode") {
+                    Text(
+                        receipt.executionMode?.rawValue
+                            ?? "legacy"
+                    )
+                    .font(.caption.monospaced())
+                }
+
+                nixProvenance(receipt)
+
+                Button {
+                    viewModel.openGeneratedProject()
+                } label: {
+                    Label(
+                        "In \(viewModel.preferredIDE.rawValue) öffnen",
+                        systemImage: "arrow.up.forward.app"
+                    )
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
         }
     }
 
