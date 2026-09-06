@@ -172,14 +172,20 @@ public struct ToolchainPreferences: Codable, Equatable, Sendable {
     public var flutterSDKPath: String?
     public var preferredIDE: PreferredIDE
     public var developmentEnvironmentMode: DevelopmentEnvironmentMode?
+    public var nixEnvironmentPath: String?
+    public var nixExecutablePath: String?
 
     public init(
         flutterSDKPath: String? = nil,
         preferredIDE: PreferredIDE = .vsCode,
-        developmentEnvironmentMode: DevelopmentEnvironmentMode? = nil
+        developmentEnvironmentMode: DevelopmentEnvironmentMode? = nil,
+        nixEnvironmentPath: String? = nil,
+        nixExecutablePath: String? = nil
     ) {
         self.flutterSDKPath = flutterSDKPath
         self.preferredIDE = preferredIDE
         self.developmentEnvironmentMode = developmentEnvironmentMode
+        self.nixEnvironmentPath = nixEnvironmentPath
+        self.nixExecutablePath = nixExecutablePath
     }
 }
