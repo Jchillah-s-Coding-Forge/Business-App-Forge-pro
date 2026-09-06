@@ -119,7 +119,6 @@ public struct BuildFlutterProjectUseCase: Sendable {
     }
 }
 
-
 extension BuildFlutterProjectUseCase: MaterializedFlutterProjectBuilding {
     public func build(
         specification: ProjectSpecification,
