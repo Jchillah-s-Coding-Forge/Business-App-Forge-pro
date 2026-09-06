@@ -81,6 +81,10 @@ struct ProjectSetupView: View {
                     }
                 }
 
+                ProjectGenerationSection(
+                    viewModel: viewModel
+                )
+
                 Section("Fester Qualitätsvertrag") {
                     LabeledContent("Presentation", value: viewModel.architecture.presentationPattern)
                     LabeledContent("Struktur", value: viewModel.architecture.projectStructure)
@@ -120,22 +124,28 @@ struct ProjectSetupView: View {
 
             Button("Schließen", action: onClose)
                 .keyboardShortcut(.cancelAction)
+                .disabled(viewModel.isGenerating)
         }
         .padding(AppForgeSpacing.large)
     }
 
     private var footer: some View {
         HStack {
-            Text("Schritt 1 von 8 · Projektbasis")
+            Text("Projektbasis · Produktionsgenerierung")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
             Spacer()
 
-            Button("Projektentwurf prüfen", action: viewModel.prepareProject)
-                .buttonStyle(.borderedProminent)
-                .tint(.appForgeAccent)
-                .disabled(!viewModel.canPrepareProject)
+            Button(
+                "Projektentwurf prüfen",
+                action: viewModel.prepareProject
+            )
+            .buttonStyle(.bordered)
+            .disabled(
+                !viewModel.canPrepareProject
+                    || viewModel.isGenerating
+            )
         }
         .padding(AppForgeSpacing.large)
     }
