@@ -121,59 +121,53 @@ final class IDEHandoffTests: XCTestCase {
             fileURLWithPath: "/tmp/appforge-project",
             isDirectory: true
         )
+        let expectations = expectedCommands(
+            projectURL: projectURL
+        )
 
-        let expectations: [(PreferredIDE, [String])] = [
-            (
-                .vsCode,
-                [
-                    "-b",
-                    "com.microsoft.VSCode",
-                    projectURL.path
-                ]
-            ),
-            (
-                .androidStudio,
-                [
-                    "-b",
-                    "com.google.android.studio",
-                    projectURL.path
-                ]
-            ),
-            (
-                .xcode,
-                [
-                    "-b",
-                    "com.apple.dt.Xcode",
-                    projectURL.path
-                ]
-            ),
-            (
-                .finder,
-                ["-R", projectURL.path]
-            ),
-            (
-                .terminal,
-                [
-                    "-b",
-                    "com.apple.Terminal",
-                    projectURL.path
-                ]
-            ),
-            (
-                .systemDefault,
-                [projectURL.path]
-            )
-        ]
-
-        for (ide, expected) in expectations {
+        for ide in PreferredIDE.allCases {
             XCTAssertEqual(
                 builder.arguments(
                     for: ide,
                     projectURL: projectURL
                 ),
-                expected
+                expectations[ide]
             )
         }
+    }
+
+    private func expectedCommands(
+        projectURL: URL
+    ) -> [PreferredIDE: [String]] {
+        [
+            .vsCode: [
+                "-b",
+                "com.microsoft.VSCode",
+                projectURL.path
+            ],
+            .androidStudio: [
+                "-b",
+                "com.google.android.studio",
+                projectURL.path
+            ],
+            .xcode: [
+                "-b",
+                "com.apple.dt.Xcode",
+                projectURL.path
+            ],
+            .finder: [
+                "-R",
+                projectURL.path
+            ],
+            .terminal: [
+                "-b",
+                "com.apple.Terminal",
+                projectURL.path
+            ],
+            .systemDefault: [
+                projectURL.path
+            ]
+        ]
     }
 
     private func availability(
@@ -184,10 +178,7 @@ final class IDEHandoffTests: XCTestCase {
     }
 }
 
-private final class StubMacOSApplicationLocator:
-    MacOSApplicationLocating,
-    @unchecked Sendable
-{
+private final class StubMacOSApplicationLocator: MacOSApplicationLocating, @unchecked Sendable {
     private let lock = NSLock()
     private let paths: [String: String]
     private var storedBundleIdentifiers: [String] = []
