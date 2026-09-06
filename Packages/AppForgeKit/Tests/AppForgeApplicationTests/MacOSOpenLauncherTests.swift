@@ -164,10 +164,7 @@ private enum TestOpenError: Error {
     case failed
 }
 
-private final class RecordingMacOSOpenCommandRunner:
-    MacOSOpenCommandRunning,
-    @unchecked Sendable
-{
+private final class RecordingMacOSOpenCommandRunner: MacOSOpenCommandRunning, @unchecked Sendable {
     private let lock = NSLock()
     private let error: Error?
     private var storedInvocations: [[String]] = []
