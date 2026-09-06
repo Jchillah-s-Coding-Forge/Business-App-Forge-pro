@@ -11,6 +11,7 @@ final class ProjectSetupViewModel {
     private let toolchainResolver: ResolveProjectGenerationToolchainUseCase
     private let projectBuilder: any MaterializedFlutterProjectBuilding
     private let projectOpener: any GeneratedProjectOpening
+    private let ideHandoffDetector: any IDEHandoffDetecting
     private let generationPreferences: ToolchainPreferences
 
     var projectName: String
@@ -25,6 +26,7 @@ final class ProjectSetupViewModel {
     private(set) var generatedProjectPath: String?
     private(set) var generatedToolchainReceipt: FlutterToolchainReceipt?
     private(set) var generationErrorMessage: String?
+    private(set) var ideHandoffs: [IDEHandoffAvailability]
 
     let architecture = ArchitectureContract.standard
 
@@ -37,13 +39,17 @@ final class ProjectSetupViewModel {
         projectBuilder: any MaterializedFlutterProjectBuilding =
             BuildFlutterProjectUseCase(),
         projectOpener: any GeneratedProjectOpening =
-            SystemGeneratedProjectOpener()
+            SystemGeneratedProjectOpener(),
+        ideHandoffDetector: any IDEHandoffDetecting =
+            SystemIDEHandoffDetector()
     ) {
         self.createProjectDraft = createProjectDraft
         self.preferencesStore = preferencesStore
         self.toolchainResolver = toolchainResolver
         self.projectBuilder = projectBuilder
         self.projectOpener = projectOpener
+        self.ideHandoffDetector = ideHandoffDetector
+        ideHandoffs = ideHandoffDetector.detect()
 
         let draft = createProjectDraft()
         let preferences = preferencesStore.load()
@@ -95,6 +101,24 @@ final class ProjectSetupViewModel {
 
     var preferredIDE: PreferredIDE {
         generationPreferences.preferredIDE
+    }
+
+
+    var availableIDEHandoffs: [IDEHandoffAvailability] {
+        ideHandoffs.filter(\.isAvailable)
+    }
+
+    var isPreferredIDEAvailable: Bool {
+        handoffAvailability(
+            for: preferredIDE
+        )?.isAvailable == true
+    }
+
+    var preferredIDEReadinessMessage: String {
+        if isPreferredIDEAvailable {
+            return "\(preferredIDE.rawValue) ist für den Projekt-Handoff verfügbar."
+        }
+        return "\(preferredIDE.rawValue) wurde nicht gefunden. Wählen Sie eine verfügbare Alternative."
     }
 
     var toolchainReadinessMessage: String {
@@ -282,9 +306,20 @@ extension ProjectSetupViewModel {
     }
 
     func openGeneratedProject() {
+        openGeneratedProject(in: preferredIDE)
+    }
+
+    func openGeneratedProject(
+        in ide: PreferredIDE
+    ) {
         guard let generatedProjectPath else {
             generationErrorMessage =
                 "Es wurde noch kein Projekt erzeugt."
+            return
+        }
+        guard handoffAvailability(for: ide)?.isAvailable == true else {
+            generationErrorMessage =
+                "(ide.rawValue) wurde auf diesem Mac nicht gefunden."
             return
         }
 
@@ -294,12 +329,22 @@ extension ProjectSetupViewModel {
                     fileURLWithPath: generatedProjectPath,
                     isDirectory: true
                 ),
-                preferredIDE: preferredIDE
+                preferredIDE: ide
             )
             generationErrorMessage = nil
         } catch {
             generationErrorMessage = error.localizedDescription
         }
+    }
+
+    func refreshIDEHandoffs() {
+        ideHandoffs = ideHandoffDetector.detect()
+    }
+
+    private func handoffAvailability(
+        for ide: PreferredIDE
+    ) -> IDEHandoffAvailability? {
+        ideHandoffs.first { $0.ide == ide }
     }
 
     private func beginGeneration() {
