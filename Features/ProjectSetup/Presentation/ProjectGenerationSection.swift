@@ -19,6 +19,18 @@ struct ProjectGenerationSection: View {
                 "Bevorzugte IDE",
                 value: viewModel.preferredIDE.rawValue
             )
+            Label(
+                viewModel.preferredIDEReadinessMessage,
+                systemImage: viewModel.isPreferredIDEAvailable
+                    ? "checkmark.circle.fill"
+                    : "exclamationmark.triangle.fill"
+            )
+            .font(.caption)
+            .foregroundStyle(
+                viewModel.isPreferredIDEAvailable
+                    ? .green
+                    : .orange
+            )
 
             readinessStatus
 
@@ -119,16 +131,61 @@ struct ProjectGenerationSection: View {
 
                 nixProvenance(receipt)
 
-                Button {
-                    viewModel.openGeneratedProject()
-                } label: {
-                    Label(
-                        "In \(viewModel.preferredIDE.rawValue) öffnen",
-                        systemImage: "arrow.up.forward.app"
-                    )
-                }
-                .buttonStyle(.bordered)
+                handoffActions
             }
+        }
+    }
+
+    private var handoffActions: some View {
+        HStack {
+            Button {
+                viewModel.openGeneratedProject()
+            } label: {
+                Label(
+                    "In \(viewModel.preferredIDE.rawValue) öffnen",
+                    systemImage: "arrow.up.forward.app"
+                )
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(!viewModel.isPreferredIDEAvailable)
+
+            Menu("Anders öffnen …") {
+                ForEach(viewModel.alternateIDEHandoffs) { destination in
+                    Button(handoffActionTitle(for: destination.ide)) {
+                        viewModel.openGeneratedProject(
+                            in: destination.ide
+                        )
+                    }
+                }
+            }
+            .accessibilityLabel(
+                "Projekt in anderer Entwicklungsumgebung öffnen"
+            )
+
+            Button {
+                viewModel.refreshIDEHandoffs()
+            } label: {
+                Label(
+                    "IDEs erneut erkennen",
+                    systemImage: "arrow.clockwise"
+                )
+            }
+            .buttonStyle(.borderless)
+        }
+    }
+
+    private func handoffActionTitle(
+        for ide: PreferredIDE
+    ) -> String {
+        switch ide {
+        case .finder:
+            "Im Finder anzeigen"
+        case .terminal:
+            "Terminal im Projekt öffnen"
+        case .systemDefault:
+            "Mit Systemstandard öffnen"
+        case .vsCode, .androidStudio, .xcode:
+            "In \(ide.rawValue) öffnen"
         }
     }
 

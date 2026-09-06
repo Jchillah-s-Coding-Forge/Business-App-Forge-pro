@@ -36,15 +36,15 @@ final class MacOSOpenLauncherTests: XCTestCase {
         let expectations: [(PreferredIDE, [String])] = [
             (
                 .vsCode,
-                ["-a", "Visual Studio Code", projectURL.path]
+                ["-b", "com.microsoft.VSCode", projectURL.path]
             ),
             (
                 .androidStudio,
-                ["-a", "Android Studio", projectURL.path]
+                ["-b", "com.google.android.studio", projectURL.path]
             ),
             (
                 .xcode,
-                ["-a", "Xcode", projectURL.path]
+                ["-b", "com.apple.dt.Xcode", projectURL.path]
             ),
             (
                 .finder,
@@ -52,7 +52,11 @@ final class MacOSOpenLauncherTests: XCTestCase {
             ),
             (
                 .terminal,
-                ["-a", "Terminal", projectURL.path]
+                ["-b", "com.apple.Terminal", projectURL.path]
+            ),
+            (
+                .systemDefault,
+                [projectURL.path]
             )
         ]
 
