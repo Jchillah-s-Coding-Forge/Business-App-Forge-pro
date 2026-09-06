@@ -287,3 +287,75 @@ M3.4 additionally requires tests for:
 - Nix provenance in schema-2 Flutter receipts;
 - absence of local Nix paths from generated receipts;
 - schema-1 Flutter receipt decoding compatibility.
+
+
+## Studio Project Setup handoff
+
+M3.6 connects the macOS Project Setup wizard to the production materialization pipeline.
+
+The presentation flow is:
+
+```text
+Project Setup
+  ↓
+validated ProjectSpecification
+  ↓
+shared ToolchainPreferences
+  ↓
+ResolveProjectGenerationToolchainUseCase
+  ├── AppForge Managed → explicit stored Flutter SDK
+  ├── Existing Toolchain → explicit stored Flutter SDK
+  └── Nix Reproducible → stored environment + absolute Nix executable
+  ↓
+user-selected final target URL
+  ↓
+BuildFlutterProjectUseCase
+  ↓
+MaterializeFlutterProjectUseCase
+  ↓
+validated native Flutter project
+  ↓
+toolchain provenance + project path
+  ↓
+optional preferred-IDE handoff
+```
+
+### No implicit toolchain fallback
+
+Project Setup never searches `PATH` and never switches execution modes.
+
+- Managed and Existing Toolchain require an explicit Flutter SDK path saved by the Environment Doctor.
+- Nix Reproducible requires both a saved Nix environment path and an absolute Nix executable path.
+- Missing data blocks generation and directs the user back to the Environment Doctor.
+- The materializer remains authoritative and revalidates the selected SDK or Nix environment before generation.
+
+### Shared preferences
+
+The Environment Doctor and Project Setup receive the same `ToolchainPreferenceStore` from the application composition root.
+
+The optional Nix fields are persisted only after successful detection/provisioning:
+
+- `nixEnvironmentPath`
+- `nixExecutablePath`
+
+Legacy preference payloads remain decodable because both fields are optional.
+
+### MainActor boundary
+
+The Project Setup ViewModel remains `@MainActor` for presentation state, but invokes the synchronous production builder through `Task.detached`.
+
+Package resolution, rendering, Flutter process execution and materialization therefore do not block the macOS UI actor.
+
+The result is transferred back to the ViewModel and exposes:
+
+- final project path;
+- Flutter toolchain receipt;
+- execution mode;
+- Nix provenance when applicable;
+- user-visible error state.
+
+### IDE handoff
+
+After successful generation the UI exposes a single primary action for the saved preferred IDE.
+
+The handoff uses the existing `GeneratedProjectOpening` boundary and never mutates the generated source tree.
