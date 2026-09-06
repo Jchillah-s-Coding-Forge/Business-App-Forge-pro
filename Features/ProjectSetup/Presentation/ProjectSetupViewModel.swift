@@ -168,9 +168,7 @@ final class ProjectSetupViewModel {
             "Projektentwurf und Toolchain sind bereit für die Generierung."
     }
 
-    private var resolvedGenerationToolchain:
-        FlutterMaterializationToolchain?
-    {
+    private var resolvedGenerationToolchain: FlutterMaterializationToolchain? {
         try? toolchainResolver(
             preferences: generationPreferences
         )
