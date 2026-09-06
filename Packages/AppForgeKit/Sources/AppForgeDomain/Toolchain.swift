@@ -162,6 +162,7 @@ public enum PreferredIDE: String, CaseIterable, Codable, Identifiable, Sendable 
     case xcode = "Xcode"
     case finder = "Finder"
     case terminal = "Terminal"
+    case systemDefault = "Systemstandard"
 
     public var id: String {
         rawValue
