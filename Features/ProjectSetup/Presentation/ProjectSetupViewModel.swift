@@ -103,7 +103,6 @@ final class ProjectSetupViewModel {
         generationPreferences.preferredIDE
     }
 
-
     var availableIDEHandoffs: [IDEHandoffAvailability] {
         ideHandoffs.filter(\.isAvailable)
     }
@@ -113,7 +112,6 @@ final class ProjectSetupViewModel {
             for: preferredIDE
         )?.isAvailable == true
     }
-
 
     var alternateIDEHandoffs: [IDEHandoffAvailability] {
         availableIDEHandoffs.filter {
