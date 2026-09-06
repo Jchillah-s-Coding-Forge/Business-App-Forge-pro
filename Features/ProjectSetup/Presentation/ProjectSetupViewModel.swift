@@ -125,8 +125,7 @@ final class ProjectSetupViewModel {
         ProjectSpecification(
             identity: ProjectIdentity(
                 name: normalizedProjectName,
-                organizationIdentifier:
-                    normalizedOrganizationIdentifier
+                organizationIdentifier: normalizedOrganizationIdentifier
             ),
             framework: framework,
             targetPlatforms: targetPlatforms,
