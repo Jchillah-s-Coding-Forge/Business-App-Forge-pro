@@ -28,6 +28,25 @@ final class ToolchainPreferencesMigrationTests: XCTestCase {
         XCTAssertNil(preferences.nixExecutablePath)
     }
 
+    func testSystemDefaultPreferredIDERoundTrips() throws {
+        let original = ToolchainPreferences(
+            flutterSDKPath: "/opt/flutter",
+            preferredIDE: .systemDefault,
+            developmentEnvironmentMode: .existingToolchain
+        )
+
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(
+            ToolchainPreferences.self,
+            from: data
+        )
+
+        XCTAssertEqual(
+            decoded.preferredIDE,
+            .systemDefault
+        )
+    }
+
     func testEnvironmentModeRoundTripsWhenPresent() throws {
         let original = ToolchainPreferences(
             flutterSDKPath: nil,
