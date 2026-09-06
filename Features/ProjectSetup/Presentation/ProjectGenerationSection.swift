@@ -89,8 +89,7 @@ struct ProjectGenerationSection: View {
     @ViewBuilder
     private var generatedProjectStatus: some View {
         if let path = viewModel.generatedProjectPath,
-           let receipt = viewModel.generatedToolchainReceipt
-        {
+           let receipt = viewModel.generatedToolchainReceipt {
             Divider()
 
             Label(
