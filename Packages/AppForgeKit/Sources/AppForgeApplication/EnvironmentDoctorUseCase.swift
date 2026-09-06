@@ -211,7 +211,15 @@ public protocol GeneratedProjectOpening {
 }
 
 public struct SystemGeneratedProjectOpener: GeneratedProjectOpening {
-    public init() {}
+    private let runner: any MacOSOpenCommandRunning
+
+    public init() {
+        runner = SystemMacOSOpenCommandRunner()
+    }
+
+    init(runner: any MacOSOpenCommandRunning) {
+        self.runner = runner
+    }
 
     public func open(projectURL: URL, preferredIDE: PreferredIDE) throws {
         let arguments: [String] = switch preferredIDE {
@@ -227,10 +235,7 @@ public struct SystemGeneratedProjectOpener: GeneratedProjectOpening {
             ["-a", "Terminal", projectURL.path]
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-        process.arguments = arguments
-        try process.run()
+        try runner.run(arguments: arguments)
     }
 }
 

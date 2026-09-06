@@ -130,19 +130,25 @@ public protocol ExternalURLLaunching {
 }
 
 public struct SystemExternalURLLauncher: ExternalURLLaunching {
-    public init() {}
+    private let runner: any MacOSOpenCommandRunning
+
+    public init() {
+        runner = SystemMacOSOpenCommandRunner()
+    }
+
+    init(runner: any MacOSOpenCommandRunning) {
+        self.runner = runner
+    }
 
     public func open(urlString: String) throws {
         guard let url = URL(string: urlString), url.scheme == "https" else {
             throw AppForgeError.configuration(message: "Die Setup-Adresse ist ungültig.")
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-        process.arguments = [url.absoluteString]
-
         do {
-            try process.run()
+            try runner.run(
+                arguments: [url.absoluteString]
+            )
         } catch {
             throw AppForgeError.configuration(
                 message: "Die Setup-Seite konnte nicht geöffnet werden: \(error.localizedDescription)"

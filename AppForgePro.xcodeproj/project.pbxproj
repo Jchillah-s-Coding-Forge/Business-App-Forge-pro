@@ -68,6 +68,7 @@
 		842E6009E12DDDEBC656AAFE /* AppForgeProTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppForgeProTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8841645D83E2B35759B9C582 /* DEVELOPMENT_ENVIRONMENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEVELOPMENT_ENVIRONMENTS.md; sourceTree = "<group>"; };
 		B20F2750C50A2573A0D1C120 /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
+		B84827D31F4C28182F780362 /* MEMORY_DIAGNOSTICS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MEMORY_DIAGNOSTICS.md; sourceTree = "<group>"; };
 		BB2001BC37346CFE11CE561A /* PACKAGE_SYSTEM.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PACKAGE_SYSTEM.md; sourceTree = "<group>"; };
 		BBA61A7FDDEAC943F0021B4B /* NixEnvironmentConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NixEnvironmentConfigurationView.swift; sourceTree = "<group>"; };
 		CCD1D04B43EDA418897C6D36 /* ProjectSetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupViewModel.swift; sourceTree = "<group>"; };
@@ -100,6 +101,7 @@
 				DB68F58E8883DA6504CD5D08 /* DEFINITION_OF_DONE.md */,
 				B20F2750C50A2573A0D1C120 /* GETTING_STARTED.md */,
 				4D55E9AEE487CE52EA349CC5 /* GIT_WORKFLOW.md */,
+				B84827D31F4C28182F780362 /* MEMORY_DIAGNOSTICS.md */,
 			);
 			path = development;
 			sourceTree = "<group>";

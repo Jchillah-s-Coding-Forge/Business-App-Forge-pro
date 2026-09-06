@@ -6,23 +6,27 @@ public protocol NixBootstrapTerminalLaunching: Sendable {
 }
 
 public struct SystemNixBootstrapTerminalLauncher: NixBootstrapTerminalLaunching {
-    public init() {}
+    private let runner: any MacOSOpenCommandRunning
+
+    public init() {
+        runner = SystemMacOSOpenCommandRunner()
+    }
+
+    init(runner: any MacOSOpenCommandRunning) {
+        self.runner = runner
+    }
 
     public func launch(
         commandURL: URL
     ) throws {
-        let process = Process()
-        process.executableURL = URL(
-            fileURLWithPath: "/usr/bin/open"
-        )
-        process.arguments = [
-            "-a",
-            "Terminal",
-            commandURL.standardizedFileURL.path
-        ]
-
         do {
-            try process.run()
+            try runner.run(
+                arguments: [
+                    "-a",
+                    "Terminal",
+                    commandURL.standardizedFileURL.path
+                ]
+            )
         } catch {
             throw NixBootstrapError.terminalLaunchFailed
         }
