@@ -138,14 +138,14 @@ private extension FlutterGeneratedContractValidator {
                     typeName: generatedType
                 )
             }
-            if let firstDefinitionID = generatedTypes[generatedType],
-               firstDefinitionID != screen.id
-            {
-                throw FlutterRendererError.generatedTypeNameCollision(
-                    firstDefinitionID: firstDefinitionID,
-                    secondDefinitionID: screen.id,
-                    typeName: generatedType
-                )
+            if let firstDefinitionID = generatedTypes[generatedType] {
+                if firstDefinitionID != screen.id {
+                    throw FlutterRendererError.generatedTypeNameCollision(
+                        firstDefinitionID: firstDefinitionID,
+                        secondDefinitionID: screen.id,
+                        typeName: generatedType
+                    )
+                }
             }
             generatedTypes[generatedType] = screen.id
         }
