@@ -98,8 +98,7 @@ struct FlutterOfflineLocalDataSourceSource {
         ]
 
         if entity.fields.contains(where: FlutterDartNaming.usesDomainValueObject)
-            || !relations.isEmpty
-        {
+            || !relations.isEmpty {
             imports.append(
                 "import '../../../../core/domain/domain_values.dart';"
             )
