@@ -152,65 +152,101 @@ final class FlutterDomainContractRendererTests: XCTestCase {
     }
 
     private func makeSpecification() -> ProjectSpecification {
-        let asset = EntityDefinition(
+        let asset = makeAsset()
+        let user = makeUser()
+        let relations = makeRelations(asset: asset, user: user)
+        let presentations = makePresentations(
+            owner: relations.owner,
+            members: relations.members
+        )
+        return baseSpecification(
+            entities: [asset, user],
+            relations: [relations.owner, relations.members],
+            fieldPresentations: presentations
+        )
+    }
+
+    private func makeAsset() -> EntityDefinition {
+        EntityDefinition(
             identity: DefinitionIdentity(
                 id: "entity.asset",
                 code: "asset",
                 label: "Asset"
             ),
-            fields: [
-                FieldDefinition(
-                    identity: DefinitionIdentity(
-                        id: "field.asset.attachment",
-                        code: "attachment",
-                        label: "Attachment"
-                    ),
-                    dataType: .file
-                ),
-                FieldDefinition(
-                    identity: DefinitionIdentity(
-                        id: "field.asset.brandColor",
-                        code: "brandColor",
-                        label: "Brand Color"
-                    ),
-                    dataType: .color,
-                    isRequired: true
-                ),
-                FieldDefinition(
-                    identity: DefinitionIdentity(
-                        id: "field.asset.image",
-                        code: "image",
-                        label: "Image"
-                    ),
-                    dataType: .image,
-                    isRequired: true
-                ),
-                FieldDefinition(
-                    identity: DefinitionIdentity(
-                        id: "field.asset.position",
-                        code: "position",
-                        label: "Position"
-                    ),
-                    dataType: .location,
-                    isRequired: true
-                ),
-                FieldDefinition(
-                    identity: DefinitionIdentity(
-                        id: "field.asset.quantity",
-                        code: "quantity",
-                        label: "Quantity"
-                    ),
-                    dataType: .integer
-                )
-            ]
+            fields: assetFields
         )
-        let user = EntityDefinition(
+    }
+
+    private var assetFields: [FieldDefinition] {
+        [
+            makeField(
+                id: "field.asset.attachment",
+                code: "attachment",
+                label: "Attachment",
+                dataType: .file
+            ),
+            makeField(
+                id: "field.asset.brandColor",
+                code: "brandColor",
+                label: "Brand Color",
+                dataType: .color,
+                isRequired: true
+            ),
+            makeField(
+                id: "field.asset.image",
+                code: "image",
+                label: "Image",
+                dataType: .image,
+                isRequired: true
+            ),
+            makeField(
+                id: "field.asset.position",
+                code: "position",
+                label: "Position",
+                dataType: .location,
+                isRequired: true
+            ),
+            makeField(
+                id: "field.asset.quantity",
+                code: "quantity",
+                label: "Quantity",
+                dataType: .integer
+            )
+        ]
+    }
+
+    private func makeField(
+        id: String,
+        code: String,
+        label: String,
+        dataType: FieldDataType,
+        isRequired: Bool = false
+    ) -> FieldDefinition {
+        FieldDefinition(
+            identity: DefinitionIdentity(
+                id: id,
+                code: code,
+                label: label
+            ),
+            dataType: dataType,
+            isRequired: isRequired
+        )
+    }
+
+    private func makeUser() -> EntityDefinition {
+        EntityDefinition(
             identity: DefinitionIdentity(
                 id: "entity.user",
                 code: "user",
                 label: "User"
             )
         )
+    }
+
+    private func makeRelations(
+        asset: EntityDefinition,
+        user: EntityDefinition
+    ) -> (owner: RelationDefinition, members: RelationDefinition) {
         let owner = RelationDefinition(
             identity: DefinitionIdentity(
                 id: "relation.asset.owner",
@@ -237,8 +273,14 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             ownership: .source,
             deleteRule: .restrict
         )
+        return (owner, members)
+    }
 
-        let presentations = [
+    private func makePresentations(
+        owner: RelationDefinition,
+        members: RelationDefinition
+    ) -> [FieldPresentationDefinition] {
+        [
             FieldPresentationDefinition(
                 id: "presentation.asset.brandColor",
                 target: .field("field.asset.brandColor"),
@@ -264,12 +306,6 @@ final class FlutterDomainContractRendererTests: XCTestCase {
                 )
             )
         ]
-
-        return baseSpecification(
-            entities: [asset, user],
-            relations: [owner, members],
-            fieldPresentations: presentations
-        )
     }
 
     private func baseSpecification(
