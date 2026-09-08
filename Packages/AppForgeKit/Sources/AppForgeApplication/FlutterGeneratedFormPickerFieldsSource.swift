@@ -1,4 +1,5 @@
 import AppForgeDomain
+
 struct FlutterGeneratedFormPickerFieldsSource {
     func file() -> GeneratedFile {
         GeneratedFile(
@@ -7,6 +8,7 @@ struct FlutterGeneratedFormPickerFieldsSource {
         )
     }
 
+    // swiftformat:disable indent trailingSpace
     private var content: String {
         """
         import 'package:flutter/material.dart';
@@ -281,4 +283,5 @@ struct FlutterGeneratedFormPickerFieldsSource {
         """
             + "\n"
     }
+    // swiftformat:enable indent trailingSpace
 }
