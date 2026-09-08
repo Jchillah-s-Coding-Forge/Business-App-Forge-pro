@@ -324,7 +324,7 @@ extension ProjectSetupViewModel {
         }
         guard handoffAvailability(for: ide)?.isAvailable == true else {
             generationErrorMessage =
-                "(ide.rawValue) wurde auf diesem Mac nicht gefunden."
+                "\(ide.rawValue) wurde auf diesem Mac nicht gefunden."
             return
         }
 
