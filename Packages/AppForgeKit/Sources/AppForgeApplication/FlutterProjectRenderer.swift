@@ -40,6 +40,11 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
         firstPresentationID: String,
         secondPresentationID: String
     )
+    case unsupportedFormControl(
+        screenID: String,
+        fieldID: String,
+        control: FieldControl
+    )
     case reservedGeneratedStorageIdentifier(definitionID: String, identifier: String)
     case duplicateGeneratedStorageIdentifier(entityID: String, identifier: String)
     case encodingFailed
