@@ -142,13 +142,13 @@ private extension FlutterGeneratedFormScreenSource {
         for field: FieldDefinition,
         control: FieldControl
     ) -> [(value: String, label: String)] {
-        if field.dataType == .boolean
-            && (control == .radioGroup || control == .segmented)
-        {
-            return [
-                (value: "false", label: "No"),
-                (value: "true", label: "Yes")
-            ]
+        if field.dataType == .boolean {
+            if control == .radioGroup || control == .segmented {
+                return [
+                    (value: "false", label: "No"),
+                    (value: "true", label: "Yes")
+                ]
+            }
         }
         return field.options.map { ($0.value, $0.label) }
     }
