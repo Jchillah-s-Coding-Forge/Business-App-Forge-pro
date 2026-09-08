@@ -20,8 +20,6 @@ struct FlutterFeatureSources {
         let relations = specification.relations
             .filter { $0.sourceEntityID == entity.id }
             .sorted(by: Self.relationSort)
-        try validateMemberIdentifiers(fields: fields, relations: relations)
-
         return generatedFiles(
             featureName: featureName,
             typeName: typeName,
@@ -85,47 +83,7 @@ private extension FlutterFeatureSources {
         ]
     }
 
-    func validateMemberIdentifiers(
-        fields: [FieldDefinition],
-        relations: [RelationDefinition]
-    ) throws {
-        var generatedNames = Set<String>()
 
-        for field in fields {
-            try insertGeneratedMember(
-                definitionID: field.id,
-                code: field.identity.code,
-                into: &generatedNames
-            )
-        }
-        for relation in relations {
-            try insertGeneratedMember(
-                definitionID: relation.id,
-                code: relation.identity.code,
-                into: &generatedNames
-            )
-        }
-    }
-
-    func insertGeneratedMember(
-        definitionID: String,
-        code: String,
-        into generatedNames: inout Set<String>
-    ) throws {
-        let identifier = FlutterDartNaming.memberName(code)
-        guard FlutterDartNaming.isUsableIdentifier(identifier) else {
-            throw FlutterRendererError.invalidGeneratedIdentifier(
-                definitionID: definitionID,
-                code: code
-            )
-        }
-        guard generatedNames.insert(identifier).inserted else {
-            throw FlutterRendererError.duplicateGeneratedIdentifier(
-                entityID: entity.id,
-                identifier: identifier
-            )
-        }
-    }
 }
 
 private extension FlutterFeatureSources {
