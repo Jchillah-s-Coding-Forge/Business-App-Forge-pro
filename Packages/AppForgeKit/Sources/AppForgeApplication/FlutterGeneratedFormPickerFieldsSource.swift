@@ -129,9 +129,10 @@ struct FlutterGeneratedFormPickerFieldsSource {
               firstDate: DateTime(1900),
               lastDate: DateTime(2200),
             );
-            if (selected != null) {
-              onChanged(selected);
+            if (!context.mounted || selected == null) {
+              return;
             }
+            onChanged(selected);
           }
 
           Future<void> _pickTime(BuildContext context) async {
@@ -140,17 +141,18 @@ struct FlutterGeneratedFormPickerFieldsSource {
               context: context,
               initialTime: TimeOfDay.fromDateTime(current),
             );
-            if (selected != null) {
-              onChanged(
-                DateTime(
-                  current.year,
-                  current.month,
-                  current.day,
-                  selected.hour,
-                  selected.minute,
-                ),
-              );
+            if (!context.mounted || selected == null) {
+              return;
             }
+            onChanged(
+              DateTime(
+                current.year,
+                current.month,
+                current.day,
+                selected.hour,
+                selected.minute,
+              ),
+            );
           }
 
           Future<void> _pickDateTime(BuildContext context) async {
@@ -168,7 +170,7 @@ struct FlutterGeneratedFormPickerFieldsSource {
               context: context,
               initialTime: TimeOfDay.fromDateTime(current),
             );
-            if (time == null) {
+            if (!context.mounted || time == null) {
               return;
             }
             onChanged(
@@ -234,7 +236,7 @@ struct FlutterGeneratedFormPickerFieldsSource {
                     ),
                   ),
                   TextButton(
-                    onPressed: picker == null ? null : _pick,
+                    onPressed: picker == null ? null : () => _pick(context),
                     child: const Text('Choose'),
                   ),
                   if (!spec.isRequired && value != null)
@@ -248,16 +250,17 @@ struct FlutterGeneratedFormPickerFieldsSource {
             );
           }
 
-          Future<void> _pick() async {
+          Future<void> _pick(BuildContext context) async {
             final selected = await picker!(
               screenId: screenId,
               fieldId: spec.id,
               valueKind: spec.valueKind,
               currentValue: value,
             );
-            if (selected != null) {
-              onChanged(selected);
+            if (!context.mounted || selected == null) {
+              return;
             }
+            onChanged(selected);
           }
 
           String _displayValue() {

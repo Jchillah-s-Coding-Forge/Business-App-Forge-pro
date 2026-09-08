@@ -107,7 +107,7 @@ struct FlutterGeneratedFormChoiceFieldsSource {
                 border: const OutlineInputBorder(),
               ),
               child: SegmentedButton<String>(
-                emptySelectionAllowed: !spec.isRequired,
+                emptySelectionAllowed: current == null || !spec.isRequired,
                 segments: spec.options
                     .map(
                       (option) => ButtonSegment<String>(

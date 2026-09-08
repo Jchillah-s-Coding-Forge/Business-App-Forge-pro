@@ -103,6 +103,11 @@ final class FlutterFormRendererTests: XCTestCase {
                 at: "lib/core/presentation/generated_form_choice_fields.dart"
             )?.contents
         )
+        let pickers = try XCTUnwrap(
+            plan.file(
+                at: "lib/core/presentation/generated_form_picker_fields.dart"
+            )?.contents
+        )
 
         XCTAssertTrue(contract.contains("import '../domain/domain_values.dart';"))
         XCTAssertTrue(contract.contains("final typeError = _validateType(value);"))
@@ -117,6 +122,13 @@ final class FlutterFormRendererTests: XCTestCase {
                 "spec.options.any((option) => option.value == candidate)"
             )
         )
+        XCTAssertTrue(
+            choices.contains(
+                "emptySelectionAllowed: current == null || !spec.isRequired"
+            )
+        )
+        XCTAssertTrue(pickers.contains("if (!context.mounted || selected == null)"))
+        XCTAssertTrue(pickers.contains("if (!context.mounted || time == null)"))
     }
 
     func testMissingPresentationUsesDocumentedDeterministicDefaults() throws {
