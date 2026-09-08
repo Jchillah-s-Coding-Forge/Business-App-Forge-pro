@@ -12,13 +12,7 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             in: plan
         )
         assertDomainRecordContract(values)
-        XCTAssertTrue(values.contains("class DomainFileValue"))
-        XCTAssertTrue(values.contains("class DomainImageValue"))
-        XCTAssertTrue(values.contains("class DomainColorValue"))
-        XCTAssertTrue(values.contains("class DomainLocationValue"))
-        XCTAssertTrue(values.contains("lat < -90 || lat > 90"))
-        XCTAssertTrue(values.contains("lon < -180 || lon > 180"))
-        XCTAssertFalse(values.contains("package:appforge"))
+        assertRichDomainValueContract(values)
 
         let asset = try contents(
             "lib/features/asset/domain/entities/asset.dart",
@@ -162,6 +156,16 @@ final class FlutterDomainContractRendererTests: XCTestCase {
 }
 
 private extension FlutterDomainContractRendererTests {
+    func assertRichDomainValueContract(_ values: String) {
+        XCTAssertTrue(values.contains("class DomainFileValue"))
+        XCTAssertTrue(values.contains("class DomainImageValue"))
+        XCTAssertTrue(values.contains("class DomainColorValue"))
+        XCTAssertTrue(values.contains("class DomainLocationValue"))
+        XCTAssertTrue(values.contains("lat < -90 || lat > 90"))
+        XCTAssertTrue(values.contains("lon < -180 || lon > 180"))
+        XCTAssertFalse(values.contains("package:appforge"))
+    }
+
     func assertDomainRecordContract(_ values: String) {
         XCTAssertTrue(values.contains("class DomainRecord<T>"))
         XCTAssertTrue(values.contains("final String recordId;"))
