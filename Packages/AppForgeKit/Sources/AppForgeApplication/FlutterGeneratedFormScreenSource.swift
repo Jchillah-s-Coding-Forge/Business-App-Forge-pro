@@ -24,7 +24,27 @@ private extension FlutterGeneratedFormScreenSource {
         let escapedScreenID = FlutterDartEscaping.singleQuoted(screen.id)
         let escapedTitle = FlutterDartEscaping.singleQuoted(screen.identity.label)
 
-        return FlutterGeneratedText.lines([
+        return FlutterGeneratedText.lines(
+            wrapperDeclarationLines(
+                typeName: typeName,
+                featureName: featureName,
+                entityType: entityType
+            )
+                + buildMethodLines(
+                    screenID: escapedScreenID,
+                    title: escapedTitle
+                )
+                + initialValuesMethodLines(entityType: entityType)
+                + fieldSpecDeclarationLines()
+        )
+    }
+
+    func wrapperDeclarationLines(
+        typeName: String,
+        featureName: String,
+        entityType: String
+    ) -> [String] {
+        [
             "import 'package:flutter/material.dart';",
             "",
             "import '../../../../core/domain/domain_values.dart';",
@@ -49,7 +69,15 @@ private extension FlutterGeneratedFormScreenSource {
             "  final String submitLabel;",
             "  final GeneratedExternalValuePicker? externalValuePicker;",
             "  final GeneratedFormErrorMessageBuilder? errorMessageBuilder;",
-            "",
+            ""
+        ]
+    }
+
+    func buildMethodLines(
+        screenID: String,
+        title: String
+    ) -> [String] {
+        [
             "  @override",
             "  Widget build(BuildContext context) {",
             "    final recordValues = record == null",
@@ -63,8 +91,8 @@ private extension FlutterGeneratedFormScreenSource {
             "    );",
             "",
             "    return GeneratedEntityFormScreen(",
-            "      screenId: '\(escapedScreenID)',",
-            "      title: '\(escapedTitle)',",
+            "      screenId: '\(screenID)',",
+            "      title: '\(title)',",
             "      fields: _fields,",
             "      initialValues: effectiveInitialValues,",
             "      submitLabel: submitLabel,",
@@ -76,7 +104,14 @@ private extension FlutterGeneratedFormScreenSource {
             "      ),",
             "    );",
             "  }",
-            "",
+            ""
+        ]
+    }
+
+    func initialValuesMethodLines(
+        entityType: String
+    ) -> [String] {
+        [
             "  static Map<String, Object?> _initialValuesFor(",
             "    \(entityType) value,",
             "  ) {",
@@ -84,13 +119,18 @@ private extension FlutterGeneratedFormScreenSource {
         ] + initialValueLines() + [
             "    };",
             "  }",
-            "",
+            ""
+        ]
+    }
+
+    func fieldSpecDeclarationLines() -> [String] {
+        [
             "  static const List<GeneratedFormFieldSpec> _fields =",
             "      <GeneratedFormFieldSpec>["
         ] + fieldSpecLines() + [
             "    ];",
             "}"
-        ])
+        ]
     }
 
     func initialValueLines() -> [String] {
