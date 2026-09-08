@@ -6,12 +6,12 @@ struct FlutterGeneratedFormScreenSource {
     let entity: EntityDefinition
 
     func file() throws -> GeneratedFile {
-        GeneratedFile(
-            relativePath: try FlutterFormRenderingSupport.outputPath(
+        try GeneratedFile(
+            relativePath: FlutterFormRenderingSupport.outputPath(
                 for: screen,
                 entity: entity
             ),
-            contents: try content()
+            contents: content()
         )
     }
 }
@@ -62,7 +62,7 @@ private extension FlutterGeneratedFormScreenSource {
             "      <GeneratedFormFieldSpec>["
         ] + fieldSpecLines() + [
             "    ];",
-            "}",
+            "}"
         ])
     }
 
@@ -192,7 +192,11 @@ private extension FlutterGeneratedFormScreenSource {
         )
     }
 
-    func optional<T>(_ value: T?) -> String {
-        value.map(String.init(describing:)) ?? "null"
+    func optional(_ value: Int?) -> String {
+        value.map(String.init) ?? "null"
+    }
+
+    func optional(_ value: Double?) -> String {
+        value.map(String.init) ?? "null"
     }
 }
