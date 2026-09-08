@@ -4,6 +4,7 @@ public enum FlutterMaterializationStep: String, Codable, Equatable, Sendable {
     case inspectToolchain
     case create
     case pubGet
+    case format
     case analyze
     case test
 }
@@ -57,7 +58,7 @@ public struct FlutterToolchainIdentity: Codable, Equatable, Sendable {
 }
 
 public struct FlutterToolchainReceipt: Codable, Equatable, Sendable {
-    public static let currentSchemaVersion = 2
+    public static let currentSchemaVersion = 3
     public static let defaultFileName = "appforge.toolchain.json"
 
     public let schemaVersion: Int

@@ -27,6 +27,8 @@ overlay AppForge GenerationPlan
         ↓
 flutter pub get
         ↓
+dart format lib test
+        ↓
 flutter analyze
         ↓
 flutter test
@@ -43,7 +45,7 @@ The final target is never used as a working directory. It appears only after all
 
 ### Direct SDK
 
-The direct strategy preserves the M3.3 contract. AppForge validates the user-selected SDK directory and executes its exact `bin/flutter` binary. It never silently replaces that selection with a different Flutter binary found on `PATH`.
+The direct strategy preserves the M3.3 contract. AppForge validates the user-selected SDK directory and executes its exact `bin/flutter` and `bin/dart` binaries. It never silently replaces that selection with a different binary found on `PATH`.
 
 ### Nix environment
 
@@ -79,15 +81,15 @@ For Nix-backed Flutter execution the request is equivalent to:
   --extra-experimental-features "nix-command flakes"
   develop <verified-environment-path>
   --command
-  flutter
-  <flutter arguments>
+  <flutter-or-dart>
+  <tool arguments>
 ```
 
 The process working directory remains the materializer staging/project directory. The Nix environment path is an execution-time input only and is never written into the generated project receipt.
 
 ## Toolchain identity
 
-The selected SDK path is validated as a directory containing an executable `bin/flutter`. AppForge never replaces that selection with a different `flutter` found on `PATH`.
+The selected SDK path is validated as a directory containing executable `bin/flutter` and `bin/dart` tools. AppForge never replaces that selection with a different Flutter or Dart executable found on `PATH`.
 
 The inspector executes the selected binary with machine-readable version output and records:
 
@@ -192,11 +194,12 @@ The supplied `GenerationPlan` must be exactly equal to that expected plan. A sta
 
 ## Validation gates
 
-After overlay, AppForge runs the selected SDK binary directly for:
+After overlay, AppForge runs the selected SDK tools directly for:
 
 1. `flutter pub get`
-2. `flutter analyze`
-3. `flutter test`
+2. `dart format lib test`
+3. `flutter analyze`
+4. `flutter test`
 
 Any non-zero exit code or timeout aborts the materialization.
 
@@ -212,7 +215,7 @@ This makes the exact dependency resolution auditable even when package registrie
 
 ## Toolchain receipt
 
-`appforge.toolchain.json` schema version 2 is deterministic for the materialized toolchain/dependency state and contains:
+`appforge.toolchain.json` schema version 3 is deterministic for the materialized toolchain/dependency state and contains:
 
 - receipt schema version
 - Flutter toolchain identity
@@ -265,7 +268,7 @@ The slice is complete only when tests cover:
 - preservation of native shells
 - removal of conflicting bootstrap app code
 - GenerationPlan mismatch rejection
-- `pub get` / `analyze` / `test` gating
+- `pub get` / Dart formatting / `analyze` / `test` gating
 - dependency-lock hashing
 - receipt round-trip without local paths
 - existing-target no-overwrite
@@ -287,6 +290,17 @@ M3.4 additionally requires tests for:
 - Nix provenance in schema-2 Flutter receipts;
 - absence of local Nix paths from generated receipts;
 - schema-1 Flutter receipt decoding compatibility.
+
+## M3.10 additional quality contract
+
+M3.10 additionally requires:
+
+- exact selected-SDK `bin/dart` execution without PATH fallback;
+- shell-free `dart format lib test` execution inside verified Nix environments;
+- formatting after dependency resolution and before analysis;
+- fail-closed cleanup when formatting fails;
+- schema-1 and schema-2 Flutter receipt decoding compatibility;
+- schema-3 receipts recording the completed format gate.
 
 
 ## Studio Project Setup handoff

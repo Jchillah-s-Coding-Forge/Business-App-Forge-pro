@@ -318,14 +318,26 @@ public struct SystemFlutterSDKValidator: FlutterSDKValidating {
     public init() {}
 
     public func validate(sdkURL: URL) throws {
-        let executable = sdkURL.appendingPathComponent("bin/flutter").path
-        guard FileManager.default.isExecutableFile(atPath: executable) else {
+        let flutterExecutable = sdkURL
+            .appendingPathComponent("bin/flutter")
+            .path
+        let dartExecutable = sdkURL
+            .appendingPathComponent("bin/dart")
+            .path
+        guard FileManager.default.isExecutableFile(
+            atPath: flutterExecutable
+        ), FileManager.default.isExecutableFile(
+            atPath: dartExecutable
+        ) else {
             throw AppForgeError.fileSystem(
-                message: "Die Installation enthält keine ausführbare Datei bin/flutter."
+                message: "Die Installation enthält keine ausführbaren Dateien bin/flutter und bin/dart."
             )
         }
 
-        let execution = try SystemCommand.run(executablePath: executable, arguments: ["--version"])
+        let execution = try SystemCommand.run(
+            executablePath: flutterExecutable,
+            arguments: ["--version"]
+        )
         guard execution.exitCode == 0 else {
             throw AppForgeError.configuration(
                 message: "Das installierte Flutter SDK konnte nicht validiert werden: \(execution.output)"

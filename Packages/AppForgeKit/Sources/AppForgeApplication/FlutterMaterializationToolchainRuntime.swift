@@ -1,9 +1,15 @@
 import AppForgeDomain
 import Foundation
 
+enum FlutterToolchainExecutable: String, Sendable {
+    case flutter
+    case dart
+}
+
 protocol FlutterCommandRequestBuilding: Sendable {
     func request(
-        flutterArguments: [String],
+        executable: FlutterToolchainExecutable,
+        arguments: [String],
         workingDirectory: URL,
         timeoutSeconds: TimeInterval
     ) -> ToolchainCommandRequest
@@ -30,13 +36,21 @@ struct DirectFlutterCommandRequestBuilder: FlutterCommandRequestBuilding {
     }
 
     func request(
-        flutterArguments: [String],
+        executable: FlutterToolchainExecutable,
+        arguments: [String],
         workingDirectory: URL,
         timeoutSeconds: TimeInterval
     ) -> ToolchainCommandRequest {
-        ToolchainCommandRequest(
-            executablePath: inspection.flutterExecutablePath,
-            arguments: flutterArguments,
+        let executablePath = switch executable {
+        case .flutter:
+            inspection.flutterExecutablePath
+        case .dart:
+            inspection.dartExecutablePath
+        }
+
+        return ToolchainCommandRequest(
+            executablePath: executablePath,
+            arguments: arguments,
             workingDirectoryPath: workingDirectory.path,
             environment: environment,
             timeoutSeconds: timeoutSeconds
@@ -56,7 +70,8 @@ struct NixFlutterCommandRequestBuilder: FlutterCommandRequestBuilding {
     }
 
     func request(
-        flutterArguments: [String],
+        executable: FlutterToolchainExecutable,
+        arguments: [String],
         workingDirectory: URL,
         timeoutSeconds: TimeInterval
     ) -> ToolchainCommandRequest {
@@ -64,7 +79,8 @@ struct NixFlutterCommandRequestBuilder: FlutterCommandRequestBuilding {
             executablePath: inspection.nixExecutablePath,
             arguments: nixDevelopArguments(
                 environmentPath: inspection.environmentPath,
-                flutterArguments: flutterArguments
+                executable: executable,
+                arguments: arguments
             ),
             workingDirectoryPath: workingDirectory.path,
             environment: environment,

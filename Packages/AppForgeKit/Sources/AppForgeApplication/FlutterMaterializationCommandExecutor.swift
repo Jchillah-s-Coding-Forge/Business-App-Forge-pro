@@ -14,6 +14,7 @@ struct FlutterMaterializationCommandExecutor {
         try execute(
             FlutterMaterializationInvocation(
                 step: .create,
+                executable: .flutter,
                 arguments: [
                     "--no-version-check",
                     "create",
@@ -39,7 +40,22 @@ struct FlutterMaterializationCommandExecutor {
         try execute(
             FlutterMaterializationInvocation(
                 step: .pubGet,
+                executable: .flutter,
                 arguments: ["--no-version-check", "pub", "get"],
+                workingDirectory: projectURL,
+                timeoutSeconds: 300
+            )
+        )
+    }
+
+    func format(
+        projectURL: URL
+    ) throws {
+        try execute(
+            FlutterMaterializationInvocation(
+                step: .format,
+                executable: .dart,
+                arguments: ["format", "lib", "test"],
                 workingDirectory: projectURL,
                 timeoutSeconds: 300
             )
@@ -52,6 +68,7 @@ struct FlutterMaterializationCommandExecutor {
         try execute(
             FlutterMaterializationInvocation(
                 step: .analyze,
+                executable: .flutter,
                 arguments: ["--no-version-check", "analyze"],
                 workingDirectory: projectURL,
                 timeoutSeconds: 300
@@ -65,6 +82,7 @@ struct FlutterMaterializationCommandExecutor {
         try execute(
             FlutterMaterializationInvocation(
                 step: .test,
+                executable: .flutter,
                 arguments: ["--no-version-check", "test"],
                 workingDirectory: projectURL,
                 timeoutSeconds: 600
@@ -77,7 +95,8 @@ struct FlutterMaterializationCommandExecutor {
     ) throws {
         let result = try runner.run(
             commandBuilder.request(
-                flutterArguments: invocation.arguments,
+                executable: invocation.executable,
+                arguments: invocation.arguments,
                 workingDirectory: invocation.workingDirectory,
                 timeoutSeconds: invocation.timeoutSeconds
             )
@@ -100,6 +119,7 @@ struct FlutterMaterializationCommandExecutor {
 
 private struct FlutterMaterializationInvocation {
     let step: FlutterMaterializationStep
+    let executable: FlutterToolchainExecutable
     let arguments: [String]
     let workingDirectory: URL
     let timeoutSeconds: TimeInterval

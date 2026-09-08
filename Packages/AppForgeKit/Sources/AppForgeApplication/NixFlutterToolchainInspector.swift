@@ -56,7 +56,8 @@ struct SystemNixFlutterToolchainInspector: NixFlutterToolchainInspecting {
             executablePath: nixExecutablePath,
             arguments: nixDevelopArguments(
                 environmentPath: verified.environmentPath,
-                flutterArguments: [
+                executable: .flutter,
+                arguments: [
                     "--no-version-check",
                     "--version",
                     "--machine"
@@ -147,7 +148,8 @@ struct SystemNixFlutterToolchainInspector: NixFlutterToolchainInspecting {
 
 func nixDevelopArguments(
     environmentPath: String,
-    flutterArguments: [String]
+    executable: FlutterToolchainExecutable,
+    arguments: [String]
 ) -> [String] {
     [
         "--extra-experimental-features",
@@ -155,6 +157,6 @@ func nixDevelopArguments(
         "develop",
         environmentPath,
         "--command",
-        "flutter"
-    ] + flutterArguments
+        executable.rawValue
+    ] + arguments
 }
