@@ -26,6 +26,7 @@ private extension FlutterGeneratedListScreenSource {
             "import 'package:flutter/material.dart';",
             "",
             "import '../../../../core/presentation/generated_entity_list_screen.dart';",
+            "import '../../../../core/presentation/generated_record_display.dart';",
             "import '../../domain/entities/\(featureName).dart';",
             "",
             "class \(typeName) extends StatelessWidget {",
@@ -54,10 +55,10 @@ private extension FlutterGeneratedListScreenSource {
             "    );",
             "  }",
             "",
-            "  static List<GeneratedListFieldValue> _fieldsFor(",
+            "  static List<GeneratedRecordFieldValue> _fieldsFor(",
             "    \(entityType) value,",
             "  ) {",
-            "    return <GeneratedListFieldValue>["
+            "    return <GeneratedRecordFieldValue>["
         ] + fieldLines() + [
             "    ];",
             "  }",
@@ -81,9 +82,9 @@ private extension FlutterGeneratedListScreenSource {
                 field.identity.code
             )
             return [
-                "      GeneratedListFieldValue(",
+                "      GeneratedRecordFieldValue(",
                 "        label: '\(label)',",
-                "        valueKind: GeneratedListValueKind.\(field.dataType.rawValue),",
+                "        valueKind: GeneratedRecordValueKind.\(field.dataType.rawValue),",
                 "        value: value.\(member),",
                 "      ),"
             ]
