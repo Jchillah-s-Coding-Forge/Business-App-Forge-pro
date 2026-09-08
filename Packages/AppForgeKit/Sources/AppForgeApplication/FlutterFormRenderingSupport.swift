@@ -111,16 +111,26 @@ enum FlutterFormRenderingSupport {
             .timePicker
         case .enumeration:
             .select
-        case .file:
-            .filePicker
-        case .image:
-            .imagePicker
-        case .color:
-            .colorPicker
-        case .location:
-            .locationPicker
+        case .file, .image, .color, .location:
+            externalValueControl(for: dataType)
         }
     }
+
+    private static func externalValueControl(
+        for dataType: FieldDataType
+    ) -> FieldControl {
+        guard let control = externalValueControls[dataType] else {
+            preconditionFailure("Unsupported external form value: \(dataType)")
+        }
+        return control
+    }
+
+    private static let externalValueControls: [FieldDataType: FieldControl] = [
+        .file: .filePicker,
+        .image: .imagePicker,
+        .color: .colorPicker,
+        .location: .locationPicker
+    ]
 
     private static func screenSort(
         _ lhs: ScreenDefinition,
