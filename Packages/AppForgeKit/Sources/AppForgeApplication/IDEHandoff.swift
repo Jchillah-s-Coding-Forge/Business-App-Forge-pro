@@ -238,7 +238,7 @@ public struct IDEHandoffCommandBuilder: Sendable {
     ) -> [String] {
         let path = projectURL.standardizedFileURL.path
 
-        switch ide {
+        return switch ide {
         case .vsCode:
             ["-b", "com.microsoft.VSCode", path]
         case .androidStudio:
