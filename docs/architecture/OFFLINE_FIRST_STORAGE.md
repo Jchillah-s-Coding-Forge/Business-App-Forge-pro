@@ -87,15 +87,17 @@ Unique and indexed field metadata from `ProjectSpecification` is reflected in ge
 
 Generated domain repositories expose:
 
-- `fetchAll()`
+- `fetchAll() -> List<DomainRecord<Entity>>`
 - `save(recordId, value)`
 - `delete(recordId)`
 
-Generated Save/Delete Use Cases depend only on the domain repository contract.
+`DomainRecord<T>` is provider-neutral and carries the stable technical record ID beside the domain value. SQLite reconstructs it from the AppForge-owned `_record_id` column. The ID is not injected into the entity itself, so domain entities remain framework- and storage-free.
+
+Generated Get-List, Save and Delete Use Cases depend only on the domain repository contract. Get-List and the generated ViewModel preserve `DomainRecord<T>` rather than dropping identity.
 
 For offline projects the data-layer implementation delegates exclusively to the local data source.
 
-DTO/SQLite row mapping remains in the Data layer. Domain entities stay framework-free.
+DTO/SQLite row mapping remains in the Data layer. This slice does not invent a create-ID policy; callers still provide `recordId` for saves.
 
 ## Local mutation transaction
 
