@@ -20,11 +20,11 @@ final class FlutterListRendererTests: XCTestCase {
             )
         )
         XCTAssertTrue(source.contains("GeneratedEntityListScreen<Asset>"))
-        XCTAssertTrue(source.contains("GeneratedListValueKind.location"))
-        XCTAssertTrue(source.contains("GeneratedListValueKind.string"))
-        XCTAssertTrue(source.contains("GeneratedListValueKind.boolean"))
-        XCTAssertTrue(source.contains("GeneratedListValueKind.integer"))
-        XCTAssertTrue(source.contains("GeneratedListValueKind.file"))
+        XCTAssertTrue(source.contains("GeneratedRecordValueKind.location"))
+        XCTAssertTrue(source.contains("GeneratedRecordValueKind.string"))
+        XCTAssertTrue(source.contains("GeneratedRecordValueKind.boolean"))
+        XCTAssertTrue(source.contains("GeneratedRecordValueKind.integer"))
+        XCTAssertTrue(source.contains("GeneratedRecordValueKind.file"))
 
         let markers = fixture.visibleMembers.map {
             "value: value.\($0)"
@@ -67,20 +67,20 @@ final class FlutterListRendererTests: XCTestCase {
 
     func testGeneratedListRuntimeFormatsRichValuesDeterministically() throws {
         let plan = try render(makeFixture().specification)
-        let core = try XCTUnwrap(
+        let display = try XCTUnwrap(
             plan.file(
-                at: "lib/core/presentation/generated_entity_list_screen.dart"
+                at: "lib/core/presentation/generated_record_display.dart"
             )?.contents
         )
 
-        XCTAssertTrue(core.contains("value as DomainFileValue"))
-        XCTAssertTrue(core.contains("value as DomainImageValue"))
-        XCTAssertTrue(core.contains("value as DomainColorValue"))
-        XCTAssertTrue(core.contains("value as DomainLocationValue"))
-        XCTAssertTrue(core.contains(".toUtc()"))
-        XCTAssertTrue(core.contains(".toIso8601String()"))
+        XCTAssertTrue(display.contains("value as DomainFileValue"))
+        XCTAssertTrue(display.contains("value as DomainImageValue"))
+        XCTAssertTrue(display.contains("value as DomainColorValue"))
+        XCTAssertTrue(display.contains("value as DomainLocationValue"))
+        XCTAssertTrue(display.contains(".toUtc()"))
+        XCTAssertTrue(display.contains(".toIso8601String()"))
         XCTAssertTrue(
-            core.contains(
+            display.contains(
                 "'${location.latitude}, ${location.longitude}'"
             )
         )
@@ -90,6 +90,7 @@ final class FlutterListRendererTests: XCTestCase {
         let plan = try render(makeFixture().specification)
         let listFiles = plan.files.filter {
             $0.relativePath.contains("generated_entity_list_screen")
+                || $0.relativePath.contains("generated_record_display")
                 || $0.relativePath.hasSuffix("_list_screen.dart")
         }
 
