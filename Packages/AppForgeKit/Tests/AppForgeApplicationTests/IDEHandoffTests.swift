@@ -99,9 +99,9 @@ final class IDEHandoffTests: XCTestCase {
         defer {
             try? FileManager.default.removeItem(at: root)
         }
-        try FileManager.default.createDirectory(
+        try writeApplicationBundle(
             at: applicationURL,
-            withIntermediateDirectories: true
+            bundleIdentifier: "com.example.not-indexed"
         )
 
         let path = SystemMacOSApplicationLocator().locate(
@@ -113,6 +113,32 @@ final class IDEHandoffTests: XCTestCase {
             path,
             applicationURL.standardizedFileURL.path
         )
+    }
+
+    func testSystemLocatorRejectsKnownPathWithWrongBundleIdentifier() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "appforge-ide-locator-mismatch-\(UUID().uuidString)",
+                isDirectory: true
+            )
+        let applicationURL = root.appendingPathComponent(
+            "Test IDE.app",
+            isDirectory: true
+        )
+        defer {
+            try? FileManager.default.removeItem(at: root)
+        }
+        try writeApplicationBundle(
+            at: applicationURL,
+            bundleIdentifier: "com.example.other"
+        )
+
+        let path = SystemMacOSApplicationLocator().locate(
+            bundleIdentifier: "com.example.expected",
+            knownPaths: [applicationURL.path]
+        )
+
+        XCTAssertNil(path)
     }
 
     func testCommandBuilderUsesBundleIDsAndProjectRoot() {
@@ -134,6 +160,32 @@ final class IDEHandoffTests: XCTestCase {
                 expectations[ide]
             )
         }
+    }
+
+    private func writeApplicationBundle(
+        at applicationURL: URL,
+        bundleIdentifier: String
+    ) throws {
+        let contentsURL = applicationURL.appendingPathComponent(
+            "Contents",
+            isDirectory: true
+        )
+        try FileManager.default.createDirectory(
+            at: contentsURL,
+            withIntermediateDirectories: true
+        )
+        let plist = [
+            "CFBundleIdentifier": bundleIdentifier,
+            "CFBundlePackageType": "APPL"
+        ]
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: plist,
+            format: .xml,
+            options: 0
+        )
+        try data.write(
+            to: contentsURL.appendingPathComponent("Info.plist")
+        )
     }
 
     private func expectedCommands(
