@@ -31,6 +31,13 @@ final class FlutterOfflineRendererTests: XCTestCase {
         XCTAssertNotNil(
             plan.file(at: "lib/core/sync/sync_outbox_repository.dart")
         )
+        let outboxRepository = try FlutterOfflineTestFixture.contents(
+            "lib/core/sync/sync_outbox_repository.dart",
+            in: plan
+        )
+        XCTAssertFalse(
+            outboxRepository.contains("package:sqflite/sqflite.dart")
+        )
     }
 
     private func assertSchema(

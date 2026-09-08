@@ -33,13 +33,25 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
         secondDefinitionID: String,
         typeName: String
     )
+    case formScreenRequiresEntity(screenID: String)
+    case ambiguousFieldPresentation(
+        screenID: String,
+        fieldID: String,
+        firstPresentationID: String,
+        secondPresentationID: String
+    )
+    case unsupportedFormControl(
+        screenID: String,
+        fieldID: String,
+        control: FieldControl
+    )
     case reservedGeneratedStorageIdentifier(definitionID: String, identifier: String)
     case duplicateGeneratedStorageIdentifier(entityID: String, identifier: String)
     case encodingFailed
 }
 
 public struct DeterministicFlutterProjectRenderer: FlutterProjectRendering {
-    public static let rendererVersion = 2
+    public static let rendererVersion = 3
 
     private let specificationValidator: ProjectSpecificationValidator
     private let lockfileBuilder: ForgeLockfileBuilder
