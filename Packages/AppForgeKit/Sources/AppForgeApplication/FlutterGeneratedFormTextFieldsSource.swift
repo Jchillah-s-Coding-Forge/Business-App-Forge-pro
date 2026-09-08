@@ -1,0 +1,137 @@
+struct FlutterGeneratedFormTextFieldsSource {
+    func file() -> GeneratedFile {
+        GeneratedFile(
+            relativePath: "lib/core/presentation/generated_form_text_fields.dart",
+            contents: content
+        )
+    }
+
+    private var content: String {
+        """
+        import 'package:flutter/material.dart';
+
+        import 'generated_form_contract.dart';
+
+        class GeneratedTextField extends StatelessWidget {
+          const GeneratedTextField({
+            super.key,
+            required this.spec,
+            required this.value,
+            required this.onChanged,
+          });
+
+          final GeneratedFormFieldSpec spec;
+          final Object? value;
+          final ValueChanged<Object?> onChanged;
+
+          @override
+          Widget build(BuildContext context) {
+            final isNumeric =
+                spec.valueKind == 'integer' || spec.valueKind == 'double';
+            return TextFormField(
+              key: ValueKey<String>('generated-form-${spec.id}'),
+              initialValue: value?.toString() ?? '',
+              maxLines: spec.control == 'textArea' ? 4 : 1,
+              keyboardType: isNumeric
+                  ? const TextInputType.numberWithOptions(decimal: true)
+                  : _keyboardType(),
+              decoration: InputDecoration(
+                labelText: spec.label,
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: onChanged,
+            );
+          }
+
+          TextInputType _keyboardType() {
+            switch (spec.valueKind) {
+              case 'email':
+                return TextInputType.emailAddress;
+              case 'phone':
+                return TextInputType.phone;
+              case 'url':
+                return TextInputType.url;
+              default:
+                return TextInputType.text;
+            }
+          }
+        }
+
+        class GeneratedStepperField extends StatelessWidget {
+          const GeneratedStepperField({
+            super.key,
+            required this.spec,
+            required this.value,
+            required this.onChanged,
+          });
+
+          final GeneratedFormFieldSpec spec;
+          final Object? value;
+          final ValueChanged<Object?> onChanged;
+
+          @override
+          Widget build(BuildContext context) {
+            final current = _currentValue();
+            return InputDecorator(
+              decoration: InputDecoration(
+                labelText: spec.label,
+                border: const OutlineInputBorder(),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Decrease ${spec.label}',
+                    onPressed: () => onChanged(_nextValue(current, -1)),
+                    icon: const Icon(Icons.remove),
+                  ),
+                  Expanded(
+                    child: Text(
+                      _displayValue(current),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Increase ${spec.label}',
+                    onPressed: () => onChanged(_nextValue(current, 1)),
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          double _currentValue() {
+            final raw = value;
+            if (raw is num) {
+              return raw.toDouble();
+            }
+            return double.tryParse(raw?.toString() ?? '') ??
+                spec.minimumValue ??
+                0;
+          }
+
+          Object _nextValue(double current, int direction) {
+            var next = current + direction;
+            if (spec.minimumValue != null && next < spec.minimumValue!) {
+              next = spec.minimumValue!;
+            }
+            if (spec.maximumValue != null && next > spec.maximumValue!) {
+              next = spec.maximumValue!;
+            }
+            if (spec.valueKind == 'integer') {
+              return next.round();
+            }
+            return next;
+          }
+
+          String _displayValue(double value) {
+            if (spec.valueKind == 'integer') {
+              return value.round().toString();
+            }
+            return value.toString();
+          }
+        }
+        """
+            + "\n"
+    }
+}
