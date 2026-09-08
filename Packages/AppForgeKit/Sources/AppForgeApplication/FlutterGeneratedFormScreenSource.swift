@@ -142,8 +142,8 @@ private extension FlutterGeneratedFormScreenSource {
         for field: FieldDefinition,
         control: FieldControl
     ) -> [(value: String, label: String)] {
-        if field.dataType == .boolean,
-           control == .radioGroup || control == .segmented
+        if field.dataType == .boolean
+            && (control == .radioGroup || control == .segmented)
         {
             return [
                 (value: "false", label: "No"),
@@ -155,13 +155,7 @@ private extension FlutterGeneratedFormScreenSource {
 
     func validationBounds(
         _ rules: [FieldValidationRule]
-    ) -> (
-        minimumLength: Int?,
-        maximumLength: Int?,
-        minimumValue: Double?,
-        maximumValue: Double?,
-        patterns: [String]
-    ) {
+    ) -> FormValidationBounds {
         var minimumLengths: [Int] = []
         var maximumLengths: [Int] = []
         var minimumValues: [Double] = []
@@ -183,7 +177,7 @@ private extension FlutterGeneratedFormScreenSource {
             }
         }
 
-        return (
+        return FormValidationBounds(
             minimumLength: minimumLengths.max(),
             maximumLength: maximumLengths.min(),
             minimumValue: minimumValues.max(),
@@ -199,4 +193,12 @@ private extension FlutterGeneratedFormScreenSource {
     func optional(_ value: Double?) -> String {
         value.map(String.init) ?? "null"
     }
+}
+
+private struct FormValidationBounds {
+    let minimumLength: Int?
+    let maximumLength: Int?
+    let minimumValue: Double?
+    let maximumValue: Double?
+    let patterns: [String]
 }
