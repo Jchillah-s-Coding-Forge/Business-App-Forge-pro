@@ -127,7 +127,6 @@ private extension FlutterDetailRendererTests {
             screen(
                 id: "screen.asset.overview",
                 code: "asset_overview",
-                label: "Asset details",
                 kind: .detail,
                 entityID: asset.id,
                 fields: visibleIDs
@@ -138,7 +137,6 @@ private extension FlutterDetailRendererTests {
                 screen(
                     id: "screen.asset.list",
                     code: "asset_list",
-                    label: "Assets",
                     kind: .list,
                     entityID: asset.id,
                     fields: visibleIDs
@@ -238,7 +236,6 @@ private extension FlutterDetailRendererTests {
     func screen(
         id: String,
         code: String,
-        label: String,
         kind: ScreenKind,
         entityID: String,
         fields: [String]
@@ -247,7 +244,7 @@ private extension FlutterDetailRendererTests {
             identity: DefinitionIdentity(
                 id: id,
                 code: code,
-                label: label
+                label: code
             ),
             kind: kind,
             entityID: entityID,
