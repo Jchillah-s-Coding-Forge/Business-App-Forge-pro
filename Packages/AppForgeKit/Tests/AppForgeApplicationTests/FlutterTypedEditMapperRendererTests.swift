@@ -141,66 +141,70 @@ private extension FlutterTypedEditMapperRendererTests {
                 code: "asset",
                 label: "Asset"
             ),
-            fields: [
-                field(
-                    id: "field.asset.active",
-                    code: "active",
-                    type: .boolean,
-                    isRequired: true
-                ),
-                field(
-                    id: "field.asset.attachment",
-                    code: "attachment",
-                    type: .file
-                ),
-                field(
-                    id: "field.asset.brand_color",
-                    code: "brand_color",
-                    type: .color,
-                    isRequired: true
-                ),
-                field(
-                    id: "field.asset.image",
-                    code: "image",
-                    type: .image,
-                    isRequired: true
-                ),
-                field(
-                    id: "field.asset.internal_note",
-                    code: "internal_note",
-                    type: .string
-                ),
-                field(
-                    id: "field.asset.location",
-                    code: "location",
-                    type: .location,
-                    isRequired: true
-                ),
-                field(
-                    id: "field.asset.name",
-                    code: "name",
-                    type: .string,
-                    isRequired: true
-                ),
-                field(
-                    id: "field.asset.price",
-                    code: "price",
-                    type: .decimal,
-                    isRequired: true
-                ),
-                field(
-                    id: "field.asset.quantity",
-                    code: "quantity",
-                    type: .integer
-                ),
-                field(
-                    id: "field.asset.scheduled_at",
-                    code: "scheduled_at",
-                    type: .dateTime,
-                    isRequired: true
-                )
-            ]
+            fields: assetFields
         )
+    }
+
+    var assetFields: [FieldDefinition] {
+        [
+            field(
+                id: "field.asset.active",
+                code: "active",
+                type: .boolean,
+                isRequired: true
+            ),
+            field(
+                id: "field.asset.attachment",
+                code: "attachment",
+                type: .file
+            ),
+            field(
+                id: "field.asset.brand_color",
+                code: "brand_color",
+                type: .color,
+                isRequired: true
+            ),
+            field(
+                id: "field.asset.image",
+                code: "image",
+                type: .image,
+                isRequired: true
+            ),
+            field(
+                id: "field.asset.internal_note",
+                code: "internal_note",
+                type: .string
+            ),
+            field(
+                id: "field.asset.location",
+                code: "location",
+                type: .location,
+                isRequired: true
+            ),
+            field(
+                id: "field.asset.name",
+                code: "name",
+                type: .string,
+                isRequired: true
+            ),
+            field(
+                id: "field.asset.price",
+                code: "price",
+                type: .decimal,
+                isRequired: true
+            ),
+            field(
+                id: "field.asset.quantity",
+                code: "quantity",
+                type: .integer
+            ),
+            field(
+                id: "field.asset.scheduled_at",
+                code: "scheduled_at",
+                type: .dateTime,
+                isRequired: true
+            )
+        ]
     }
 
     func field(

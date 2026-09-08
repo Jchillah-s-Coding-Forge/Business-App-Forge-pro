@@ -110,7 +110,7 @@ private extension FlutterGeneratedFormScreenSource {
     }
 
     func editMapperLines(entityType: String) -> [String] {
-        [
+        let mapperLines = [
             "  static \(entityType) applyEditValues({",
             "    required DomainRecord<\(entityType)> record,",
             "    required Map<String, Object?> values,",
@@ -120,7 +120,16 @@ private extension FlutterGeneratedFormScreenSource {
         ] + editEntityArgumentLines() + [
             "    );",
             "  }",
-            "",
+            ""
+        ]
+
+        return mapperLines
+            + requiredEditValueHelperLines()
+            + optionalEditValueHelperLines()
+    }
+
+    func requiredEditValueHelperLines() -> [String] {
+        [
             "  static T _requiredEditValue<T>(",
             "    Map<String, Object?> values,",
             "    String fieldId,",
@@ -138,7 +147,12 @@ private extension FlutterGeneratedFormScreenSource {
             "      'Invalid normalized edit value for $fieldId.',",
             "    );",
             "  }",
-            "",
+            ""
+        ]
+    }
+
+    func optionalEditValueHelperLines() -> [String] {
+        [
             "  static T? _optionalEditValue<T>(",
             "    Map<String, Object?> values,",
             "    String fieldId,",
