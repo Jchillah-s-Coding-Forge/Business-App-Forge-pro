@@ -25,7 +25,6 @@ private extension FlutterGeneratedListScreenSource {
         return FlutterGeneratedText.lines([
             "import 'package:flutter/material.dart';",
             "",
-            "import '../../../../core/domain/domain_values.dart';",
             "import '../../../../core/presentation/generated_entity_list_screen.dart';",
             "import '../../domain/entities/\(featureName).dart';",
             "",
