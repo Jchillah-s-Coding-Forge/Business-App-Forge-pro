@@ -18,7 +18,7 @@ public struct IDEHandoffAvailability: Equatable, Identifiable, Sendable {
     }
 
     public var isAvailable: Bool {
-        return switch ide {
+        switch ide {
         case .finder, .systemDefault:
             true
         default:
