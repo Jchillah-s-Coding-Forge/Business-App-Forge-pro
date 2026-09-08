@@ -1,4 +1,5 @@
 import AppForgeDomain
+
 struct FlutterGeneratedEntityFormScreenSource {
     func file() -> GeneratedFile {
         GeneratedFile(
@@ -7,6 +8,7 @@ struct FlutterGeneratedEntityFormScreenSource {
         )
     }
 
+    // swiftformat:disable indent trailingSpace
     private var content: String {
         """
         import 'package:flutter/material.dart';
@@ -200,4 +202,5 @@ struct FlutterGeneratedEntityFormScreenSource {
         """
             + "\n"
     }
+    // swiftformat:enable indent trailingSpace
 }
