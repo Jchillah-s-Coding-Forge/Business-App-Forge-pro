@@ -6,7 +6,7 @@ struct FlutterOfflineRepositorySource {
         FlutterGeneratedText.lines([
             "import '../../../../core/domain/domain_values.dart';",
             "",
-            "import '../../domain/entities/\(featureName).dart';"
+            "import '../../domain/entities/\(featureName).dart';",
             "import '../../domain/repositories/\(featureName)_repository.dart';",
             "import '../local/\(featureName)_local_data_source.dart';",
             "",
