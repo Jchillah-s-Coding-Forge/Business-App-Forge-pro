@@ -16,7 +16,10 @@ struct FlutterDomainContractSources {
         ]
     }
 
-    private func domainValuesDart() -> String {
+}
+
+private extension FlutterDomainContractSources {
+    func domainValuesDart() -> String {
         FlutterGeneratedText.lines(
             domainReferenceLines
                 + domainFileValueLines
@@ -168,7 +171,10 @@ struct FlutterDomainContractSources {
         ]
     }
 
-    private func domainSchemaDart() -> String {
+}
+
+private extension FlutterDomainContractSources {
+    func domainSchemaDart() -> String {
         FlutterGeneratedText.lines(
             relationSchemaTypeLines
                 + relationSchemaValueLines()
@@ -211,7 +217,7 @@ struct FlutterDomainContractSources {
         for relation in specification.relations.sorted(by: Self.relationSort) {
             lines += relationSchemaLines(relation)
         }
-        lines += ["];",""]
+        lines += ["];", ""]
         return lines
     }
 
@@ -266,7 +272,7 @@ struct FlutterDomainContractSources {
         ) {
             lines += presentationSchemaLines(presentation)
         }
-        lines += ["];",""]
+        lines += ["];", ""]
         return lines
     }
 
