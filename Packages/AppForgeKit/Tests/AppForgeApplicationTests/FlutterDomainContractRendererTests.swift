@@ -150,7 +150,6 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             )
         }
     }
-
 }
 
 private extension FlutterDomainContractRendererTests {
