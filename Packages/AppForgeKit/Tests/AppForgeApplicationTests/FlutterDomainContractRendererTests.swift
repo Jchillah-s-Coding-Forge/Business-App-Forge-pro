@@ -11,12 +11,7 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             "lib/core/domain/domain_values.dart",
             in: plan
         )
-        XCTAssertTrue(values.contains("class DomainRecord<T>"))
-        XCTAssertTrue(values.contains("final String recordId;"))
-        XCTAssertTrue(values.contains("final T value;"))
-        XCTAssertTrue(
-            values.contains("Record ID must not be empty.")
-        )
+        assertDomainRecordContract(values)
         XCTAssertTrue(values.contains("class DomainFileValue"))
         XCTAssertTrue(values.contains("class DomainImageValue"))
         XCTAssertTrue(values.contains("class DomainColorValue"))
@@ -167,6 +162,15 @@ final class FlutterDomainContractRendererTests: XCTestCase {
 }
 
 private extension FlutterDomainContractRendererTests {
+    func assertDomainRecordContract(_ values: String) {
+        XCTAssertTrue(values.contains("class DomainRecord<T>"))
+        XCTAssertTrue(values.contains("final String recordId;"))
+        XCTAssertTrue(values.contains("final T value;"))
+        XCTAssertTrue(
+            values.contains("Record ID must not be empty.")
+        )
+    }
+
     func makeSpecification() -> ProjectSpecification {
         let asset = makeAsset()
         let user = makeUser()
