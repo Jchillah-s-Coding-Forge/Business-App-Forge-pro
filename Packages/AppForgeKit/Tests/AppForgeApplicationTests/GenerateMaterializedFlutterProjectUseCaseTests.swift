@@ -240,6 +240,7 @@ private final class RecordingProjectMaterializer: FlutterProjectMaterializing, @
                 .inspectToolchain,
                 .create,
                 .pubGet,
+                .format,
                 .analyze,
                 .test
             ],

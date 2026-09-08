@@ -4,15 +4,18 @@ import Foundation
 public struct FlutterToolchainInspection: Equatable, Sendable {
     public let sdkRootPath: String
     public let flutterExecutablePath: String
+    public let dartExecutablePath: String
     public let identity: FlutterToolchainIdentity
 
     public init(
         sdkRootPath: String,
         flutterExecutablePath: String,
+        dartExecutablePath: String,
         identity: FlutterToolchainIdentity
     ) {
         self.sdkRootPath = sdkRootPath
         self.flutterExecutablePath = flutterExecutablePath
+        self.dartExecutablePath = dartExecutablePath
         self.identity = identity
     }
 }
@@ -43,7 +46,8 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
 
         return FlutterToolchainInspection(
             sdkRootPath: paths.root.path,
-            flutterExecutablePath: paths.executable.path,
+            flutterExecutablePath: paths.flutterExecutable.path,
+            dartExecutablePath: paths.dartExecutable.path,
             identity: identity
         )
     }
@@ -67,25 +71,37 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
             throw FlutterMaterializationError.invalidFlutterSDKPath
         }
 
-        let executableURL = rootURL
+        let binURL = rootURL
             .appendingPathComponent(
                 "bin",
                 isDirectory: true
             )
+        let flutterExecutableURL = binURL
             .appendingPathComponent("flutter")
+            .standardizedFileURL
+            .resolvingSymlinksInPath()
+        let dartExecutableURL = binURL
+            .appendingPathComponent("dart")
             .standardizedFileURL
             .resolvingSymlinksInPath()
         let rootPrefix = rootURL.path + "/"
 
-        let executableIsValid = executableURL.path.hasPrefix(rootPrefix)
-            && FileManager.default.isExecutableFile(atPath: executableURL.path)
-        guard executableIsValid else {
+        let flutterIsValid = flutterExecutableURL.path.hasPrefix(rootPrefix)
+            && FileManager.default.isExecutableFile(
+                atPath: flutterExecutableURL.path
+            )
+        let dartIsValid = dartExecutableURL.path.hasPrefix(rootPrefix)
+            && FileManager.default.isExecutableFile(
+                atPath: dartExecutableURL.path
+            )
+        guard flutterIsValid, dartIsValid else {
             throw FlutterMaterializationError.invalidFlutterSDKPath
         }
 
         return FlutterSDKPaths(
             root: rootURL,
-            executable: executableURL
+            flutterExecutable: flutterExecutableURL,
+            dartExecutable: dartExecutableURL
         )
     }
 
@@ -94,7 +110,7 @@ public struct SystemFlutterToolchainInspector: FlutterToolchainInspecting {
     ) throws -> ToolchainCommandResult {
         let result = try runner.run(
             ToolchainCommandRequest(
-                executablePath: paths.executable.path,
+                executablePath: paths.flutterExecutable.path,
                 arguments: [
                     "--no-version-check",
                     "--version",
@@ -150,5 +166,6 @@ enum FlutterToolchainProcessEnvironment {
 
 private struct FlutterSDKPaths {
     let root: URL
-    let executable: URL
+    let flutterExecutable: URL
+    let dartExecutable: URL
 }

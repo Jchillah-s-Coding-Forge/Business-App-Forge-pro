@@ -29,6 +29,13 @@ final class FlutterToolchainInspectorTests: XCTestCase {
             inspection.identity.engineRevision,
             String(repeating: "b", count: 40)
         )
+        XCTAssertEqual(
+            inspection.dartExecutablePath,
+            sdkURL
+                .appendingPathComponent("bin/dart")
+                .resolvingSymlinksInPath()
+                .path
+        )
 
         let request = try XCTUnwrap(runner.requests.first)
         XCTAssertEqual(
@@ -104,7 +111,31 @@ final class FlutterToolchainInspectorTests: XCTestCase {
         }
     }
 
-    private func makeFakeSDK() throws -> URL {
+    func testInspectorRejectsSDKWithoutDartExecutable() throws {
+        let sdkURL = try makeFakeSDK(includeDart: false)
+        defer { try? FileManager.default.removeItem(at: sdkURL) }
+
+        XCTAssertThrowsError(
+            try SystemFlutterToolchainInspector(
+                runner: RecordingToolchainRunner(
+                    result: ToolchainCommandResult(
+                        exitCode: 0,
+                        output: machineVersionJSON(version: "3.47.2"),
+                        timedOut: false
+                    )
+                )
+            ).inspect(sdkRootPath: sdkURL.path)
+        ) { error in
+            XCTAssertEqual(
+                error as? FlutterMaterializationError,
+                .invalidFlutterSDKPath
+            )
+        }
+    }
+
+    private func makeFakeSDK(
+        includeDart: Bool = true
+    ) throws -> URL {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(
             "appforge-sdk-tests-\(UUID().uuidString)",
             isDirectory: true
@@ -115,17 +146,22 @@ final class FlutterToolchainInspectorTests: XCTestCase {
             withIntermediateDirectories: true
         )
 
-        let executable = bin.appendingPathComponent("flutter")
-        guard FileManager.default.createFile(
-            atPath: executable.path,
-            contents: Data()
-        ) else {
-            throw CocoaError(.fileWriteUnknown)
+        let executableNames = includeDart
+            ? ["flutter", "dart"]
+            : ["flutter"]
+        for executableName in executableNames {
+            let executable = bin.appendingPathComponent(executableName)
+            guard FileManager.default.createFile(
+                atPath: executable.path,
+                contents: Data()
+            ) else {
+                throw CocoaError(.fileWriteUnknown)
+            }
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o755],
+                ofItemAtPath: executable.path
+            )
         }
-        try FileManager.default.setAttributes(
-            [.posixPermissions: 0o755],
-            ofItemAtPath: executable.path
-        )
         return root
     }
 

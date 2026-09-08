@@ -54,8 +54,9 @@ final class FlutterToolchainReceiptMigrationTests: XCTestCase {
         XCTAssertNil(decoded.nixEnvironment)
     }
 
-    func testSchemaTwoNixReceiptRoundTrips() throws {
+    func testSchemaTwoNixReceiptWithoutFormatStillRoundTrips() throws {
         let original = FlutterToolchainReceipt(
+            schemaVersion: 2,
             flutter: FlutterToolchainIdentity(
                 flutterVersion: "3.47.2",
                 channel: "stable",
@@ -101,6 +102,48 @@ final class FlutterToolchainReceiptMigrationTests: XCTestCase {
         let decoded = try FlutterToolchainReceiptCodec()
             .decode(data)
 
+        XCTAssertEqual(decoded, original)
+    }
+
+    func testSchemaThreeReceiptWithFormatRoundTrips() throws {
+        let original = FlutterToolchainReceipt(
+            flutter: FlutterToolchainIdentity(
+                flutterVersion: "3.47.2",
+                channel: "stable",
+                frameworkRevision: String(
+                    repeating: "a",
+                    count: 40
+                ),
+                engineRevision: String(
+                    repeating: "b",
+                    count: 40
+                ),
+                dartSDKVersion: "3.11.0"
+            ),
+            projectPackageName: "inventory_app",
+            organizationIdentifier: "de.example",
+            targetPlatforms: [.android, .iOS],
+            pubspecLockSHA256: String(
+                repeating: "c",
+                count: 64
+            ),
+            validatedSteps: [
+                .inspectToolchain,
+                .create,
+                .pubGet,
+                .format,
+                .analyze,
+                .test
+            ],
+            executionMode: .directSDK
+        )
+
+        let data = try FlutterToolchainReceiptCodec()
+            .encode(original)
+        let decoded = try FlutterToolchainReceiptCodec()
+            .decode(data)
+
+        XCTAssertEqual(original.schemaVersion, 3)
         XCTAssertEqual(decoded, original)
     }
 

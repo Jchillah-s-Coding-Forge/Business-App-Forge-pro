@@ -90,7 +90,7 @@ struct ProjectGenerationSection: View {
                     .controlSize(.small)
                 Text(
                     "Package-Auflösung, Rendering, Flutter create, "
-                        + "pub get, analyze und test laufen."
+                        + "pub get, Dart-Formatierung, analyze und test laufen."
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)

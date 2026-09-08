@@ -369,6 +369,7 @@ private final class RecordingStudioProjectBuilder: MaterializedFlutterProjectBui
                 .inspectToolchain,
                 .create,
                 .pubGet,
+                .format,
                 .analyze,
                 .test
             ],

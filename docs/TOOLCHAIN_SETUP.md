@@ -26,7 +26,7 @@ Optionale Werkzeuge blockieren die Generierung nicht:
 
 ## Flutter
 
-Ein vorhandenes Flutter SDK kann über seinen SDK-Root ausgewählt werden. Der Root muss `bin/flutter` enthalten.
+Ein vorhandenes Flutter SDK kann über seinen SDK-Root ausgewählt werden. Der Root muss ausführbare `bin/flutter`- und `bin/dart`-Werkzeuge enthalten.
 
 Fehlt Flutter, kann der Nutzer einen vorhandenen, beschreibbaren Elternordner auswählen. `VerifiedFlutterSDKInstaller`:
 
@@ -35,7 +35,7 @@ Fehlt Flutter, kann der Nutzer einen vorhandenen, beschreibbaren Elternordner au
 3. lädt das Architektur-passende SDK,
 4. prüft SHA-256 vor dem Entpacken,
 5. entpackt in einen temporären Staging-Ordner,
-6. validiert `bin/flutter --version`,
+6. validiert `bin/flutter --version` und die SDK-Struktur einschließlich `bin/dart`,
 7. verschiebt das validierte SDK atomar nach `<Ziel>/flutter`,
 8. überschreibt nie einen vorhandenen `flutter`-Eintrag,
 9. räumt temporäre Artefakte auch bei Fehlern auf.

@@ -209,6 +209,9 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
         try executor.resolveDependencies(
             in: workspace.projectURL
         )
+        try executor.format(
+            projectURL: workspace.projectURL
+        )
         try executor.analyze(
             projectURL: workspace.projectURL
         )
@@ -249,6 +252,7 @@ public struct MaterializeFlutterProjectUseCase: Sendable {
                 .inspectToolchain,
                 .create,
                 .pubGet,
+                .format,
                 .analyze,
                 .test
             ],

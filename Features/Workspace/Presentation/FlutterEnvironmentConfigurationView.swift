@@ -104,11 +104,11 @@ struct FlutterEnvironmentConfigurationView: View {
 
     private var configurationDetail: String {
         if viewModel.developmentEnvironmentMode == .existingToolchain {
-            return "Wählen Sie ein bereits installiertes Flutter-SDK mit bin/flutter. "
+            return "Wählen Sie ein bereits installiertes Flutter-SDK mit bin/flutter und bin/dart. "
                 + "AppForge installiert in diesem Modus keine SDKs."
         }
 
-        return "Vorhandenes SDK: Wählen Sie den Flutter-Ordner mit bin/flutter. "
+        return "Vorhandenes SDK: Wählen Sie den Flutter-Ordner mit bin/flutter und bin/dart. "
             + "Neue Installation: Wählen Sie den übergeordneten Zielordner; "
             + "AppForge erstellt darin flutter."
     }

@@ -23,9 +23,7 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
             result.projectPath,
             fixture.targetURL.path
         )
-        try assertPublishedProject(
-            fixture: fixture
-        )
+        try assertPublishedProject(fixture: fixture)
         assertNixCommandContract(
             runner.requests,
             fixture: fixture
@@ -196,7 +194,7 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
         _ requests: [ToolchainCommandRequest],
         fixture: NixFlutterMaterializationFixture
     ) {
-        XCTAssertEqual(requests.count, 6)
+        XCTAssertEqual(requests.count, 7)
         assertNixExecutableRequests(requests)
         XCTAssertEqual(
             requests[0].arguments,
@@ -233,14 +231,12 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
             "nix-command flakes",
             "develop",
             fixture.environmentURL.path,
-            "--command",
-            "flutter",
-            "--no-version-check"
+            "--command"
         ]
 
         for request in requests {
             XCTAssertEqual(
-                Array(request.arguments.prefix(7)),
+                Array(request.arguments.prefix(5)),
                 expectedPrefix
             )
             XCTAssertNil(
@@ -250,6 +246,16 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
                 request.environment["OPENAI_API_KEY"]
             )
         }
+
+        XCTAssertEqual(requests[0].arguments[5], "flutter")
+        XCTAssertEqual(requests[1].arguments[5], "flutter")
+        XCTAssertEqual(requests[2].arguments[5], "flutter")
+        XCTAssertEqual(
+            requests[3].arguments,
+            expectedPrefix + ["dart", "format", "lib", "test"]
+        )
+        XCTAssertEqual(requests[4].arguments[5], "flutter")
+        XCTAssertEqual(requests[5].arguments[5], "flutter")
     }
 
     private func assertFlutterSteps(
@@ -262,10 +268,13 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
             requests[3].arguments.contains("pub")
         )
         XCTAssertTrue(
-            requests[4].arguments.contains("analyze")
+            requests[4].arguments.contains("format")
         )
         XCTAssertTrue(
-            requests[5].arguments.contains("test")
+            requests[5].arguments.contains("analyze")
+        )
+        XCTAssertTrue(
+            requests[6].arguments.contains("test")
         )
     }
 
@@ -282,7 +291,7 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
             .decode(data)
 
         XCTAssertEqual(receipt, result.receipt)
-        XCTAssertEqual(receipt.schemaVersion, 2)
+        XCTAssertEqual(receipt.schemaVersion, 3)
         XCTAssertEqual(
             receipt.executionMode,
             .nixEnvironment
@@ -297,6 +306,17 @@ final class NixFlutterProjectMaterializerTests: XCTestCase {
         XCTAssertEqual(
             receipt.flutter.flutterVersion,
             "3.47.2"
+        )
+        XCTAssertEqual(
+            receipt.validatedSteps,
+            [
+                .inspectToolchain,
+                .create,
+                .pubGet,
+                .format,
+                .analyze,
+                .test
+            ]
         )
 
         let text = String(
