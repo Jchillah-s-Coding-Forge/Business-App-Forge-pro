@@ -1,3 +1,5 @@
+import AppForgeDomain
+
 struct FlutterGeneratedEntityListScreenSource {
     func file() -> GeneratedFile {
         GeneratedFile(
