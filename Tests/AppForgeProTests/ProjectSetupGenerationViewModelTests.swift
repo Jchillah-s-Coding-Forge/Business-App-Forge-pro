@@ -431,7 +431,7 @@ private struct StudioIDEHandoffDetector: IDEHandoffDetecting {
             return nil
         }
 
-        switch ide {
+        return switch ide {
         case .finder, .systemDefault:
             nil
         default:
