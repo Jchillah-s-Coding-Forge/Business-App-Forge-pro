@@ -10,9 +10,15 @@ struct FlutterGeneratedContractValidator {
         try FlutterFormScreenContractValidator().validate(
             specification
         )
+        try FlutterListScreenContractValidator().validate(
+            specification
+        )
         try validateGeneratedTypes(
             entities,
             formScreens: FlutterFormRenderingSupport.formScreens(
+                in: specification
+            ),
+            listScreens: FlutterListRenderingSupport.listScreens(
                 in: specification
             ),
             offlineEnabled: specification.offline.isEnabled
@@ -56,6 +62,13 @@ private extension FlutterGeneratedContractValidator {
         "GeneratedChoiceField",
         "GeneratedChoiceOption",
         "GeneratedEntityFormScreen",
+        "GeneratedEntityListScreen",
+        "GeneratedListErrorMessageBuilder",
+        "GeneratedListFieldValue",
+        "GeneratedListFieldsBuilder",
+        "GeneratedListLoader",
+        "GeneratedListRecordSelected",
+        "GeneratedListValueKind",
         "GeneratedExternalPickerField",
         "GeneratedExternalValuePicker",
         "GeneratedFormControl",
@@ -100,6 +113,7 @@ private extension FlutterGeneratedContractValidator {
     func validateGeneratedTypes(
         _ entities: [EntityDefinition],
         formScreens: [ScreenDefinition],
+        listScreens: [ScreenDefinition],
         offlineEnabled: Bool
     ) throws {
         var generatedTypes: [String: String] = [:]
@@ -110,46 +124,52 @@ private extension FlutterGeneratedContractValidator {
                 typeName: typeName,
                 offlineEnabled: offlineEnabled
             ) {
-                if Self.reservedTopLevelTypes.contains(generatedType) {
-                    throw FlutterRendererError.reservedGeneratedTypeName(
-                        definitionID: entity.id,
-                        typeName: generatedType
-                    )
-                }
-                if let firstDefinitionID = generatedTypes[generatedType] {
-                    if firstDefinitionID != entity.id {
-                        throw FlutterRendererError.generatedTypeNameCollision(
-                            firstDefinitionID: firstDefinitionID,
-                            secondDefinitionID: entity.id,
-                            typeName: generatedType
-                        )
-                    }
-                }
-                generatedTypes[generatedType] = entity.id
+                try registerGeneratedType(
+                    generatedType,
+                    definitionID: entity.id,
+                    generatedTypes: &generatedTypes
+                )
             }
         }
 
         for screen in formScreens {
-            let generatedType = try FlutterFormRenderingSupport.typeName(
-                for: screen
+            try registerGeneratedType(
+                FlutterFormRenderingSupport.typeName(for: screen),
+                definitionID: screen.id,
+                generatedTypes: &generatedTypes
             )
-            if Self.reservedTopLevelTypes.contains(generatedType) {
-                throw FlutterRendererError.reservedGeneratedTypeName(
-                    definitionID: screen.id,
-                    typeName: generatedType
-                )
-            }
-            if let firstDefinitionID = generatedTypes[generatedType] {
-                if firstDefinitionID != screen.id {
-                    throw FlutterRendererError.generatedTypeNameCollision(
-                        firstDefinitionID: firstDefinitionID,
-                        secondDefinitionID: screen.id,
-                        typeName: generatedType
-                    )
-                }
-            }
-            generatedTypes[generatedType] = screen.id
         }
+
+        for screen in listScreens {
+            try registerGeneratedType(
+                FlutterListRenderingSupport.typeName(for: screen),
+                definitionID: screen.id,
+                generatedTypes: &generatedTypes
+            )
+        }
+    }
+
+    func registerGeneratedType(
+        _ typeName: String,
+        definitionID: String,
+        generatedTypes: inout [String: String]
+    ) throws {
+        if Self.reservedTopLevelTypes.contains(typeName) {
+            throw FlutterRendererError.reservedGeneratedTypeName(
+                definitionID: definitionID,
+                typeName: typeName
+            )
+        }
+        if let firstDefinitionID = generatedTypes[typeName],
+           firstDefinitionID != definitionID
+        {
+            throw FlutterRendererError.generatedTypeNameCollision(
+                firstDefinitionID: firstDefinitionID,
+                secondDefinitionID: definitionID,
+                typeName: typeName
+            )
+        }
+        generatedTypes[typeName] = definitionID
     }
 
     func validateMembers(
