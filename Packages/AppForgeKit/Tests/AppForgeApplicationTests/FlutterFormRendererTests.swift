@@ -74,9 +74,11 @@ final class FlutterFormRendererTests: XCTestCase {
         XCTAssertTrue(picker.contains("DomainColorValue"))
         XCTAssertTrue(picker.contains("DomainLocationValue"))
 
-        for file in plan.files where file.relativePath.contains("generated_form")
-            || file.relativePath.hasSuffix("_form_screen.dart")
-        {
+        let generatedFormFiles = plan.files.filter {
+            $0.relativePath.contains("generated_form")
+                || $0.relativePath.hasSuffix("_form_screen.dart")
+        }
+        for file in generatedFormFiles {
             XCTAssertFalse(file.contents.contains("package:appforge"))
             XCTAssertFalse(file.contents.contains("supabase"))
             XCTAssertFalse(file.contents.contains("firebase"))
@@ -85,56 +87,7 @@ final class FlutterFormRendererTests: XCTestCase {
     }
 
     func testMissingPresentationUsesDocumentedDeterministicDefaults() throws {
-        let name = field(id: "field.asset.name", code: "name", type: .string)
-        let quantity = field(
-            id: "field.asset.quantity",
-            code: "quantity",
-            type: .integer
-        )
-        let enabled = field(
-            id: "field.asset.enabled",
-            code: "enabled",
-            type: .boolean
-        )
-        let date = field(id: "field.asset.date", code: "date", type: .date)
-        let file = field(id: "field.asset.file", code: "file", type: .file)
-        let location = field(
-            id: "field.asset.location",
-            code: "location",
-            type: .location
-        )
-        let status = FieldDefinition(
-            identity: DefinitionIdentity(
-                id: "field.asset.status",
-                code: "status",
-                label: "Status"
-            ),
-            dataType: .enumeration,
-            options: [
-                FieldOptionDefinition(
-                    id: "option.active",
-                    value: "active",
-                    label: "Active"
-                )
-            ]
-        )
-        let asset = entity(
-            id: "entity.asset",
-            code: "asset",
-            fields: [name, quantity, enabled, date, file, location, status]
-        )
-        let screen = formScreen(
-            id: "screen.asset.form",
-            code: "asset_form",
-            entityID: asset.id,
-            fields: asset.fields.map(\.id)
-        )
-        let plan = try render(
-            specification(
-                entities: [asset],
-                screens: [screen]
-            )
-        )
+        let plan = try render(defaultControlSpecification())
         let source = try XCTUnwrap(
             plan.file(
                 at: "lib/features/asset/presentation/screens/asset_form_form_screen.dart"
@@ -166,8 +119,86 @@ private extension FlutterFormRendererTests {
         let screen: ScreenDefinition
     }
 
+    struct FixtureFields {
+        let name: FieldDefinition
+        let quantity: FieldDefinition
+        let active: FieldDefinition
+        let status: FieldDefinition
+        let dueDate: FieldDefinition
+        let attachment: FieldDefinition
+        let location: FieldDefinition
+
+        var all: [FieldDefinition] {
+            [name, quantity, active, status, dueDate, attachment, location]
+        }
+
+        var visibleIDs: [String] {
+            [
+                status.id,
+                name.id,
+                quantity.id,
+                active.id,
+                dueDate.id,
+                attachment.id,
+                location.id
+            ]
+        }
+    }
+
     func makeFormFixture() -> FormFixture {
-        let name = FieldDefinition(
+        let fields = makeFixtureFields()
+        let asset = entity(
+            id: "entity.asset",
+            code: "asset",
+            fields: fields.all
+        )
+        let screen = formScreen(
+            id: "screen.asset.editor",
+            code: "asset_editor",
+            entityID: asset.id,
+            fields: fields.visibleIDs
+        )
+
+        return FormFixture(
+            specification: specification(
+                entities: [asset],
+                presentations: fixturePresentations(fields),
+                screens: [screen]
+            ),
+            screen: screen
+        )
+    }
+
+    func makeFixtureFields() -> FixtureFields {
+        FixtureFields(
+            name: fixtureNameField(),
+            quantity: fixtureQuantityField(),
+            active: field(
+                id: "field.asset.active",
+                code: "active",
+                type: .boolean
+            ),
+            status: fixtureStatusField(),
+            dueDate: field(
+                id: "field.asset.dueDate",
+                code: "due_date",
+                type: .date
+            ),
+            attachment: field(
+                id: "field.asset.attachment",
+                code: "attachment",
+                type: .file
+            ),
+            location: field(
+                id: "field.asset.location",
+                code: "location",
+                type: .location
+            )
+        )
+    }
+
+    func fixtureNameField() -> FieldDefinition {
+        FieldDefinition(
             identity: DefinitionIdentity(
                 id: "field.asset.name",
                 code: "name",
@@ -181,7 +212,10 @@ private extension FlutterFormRendererTests {
                 .pattern("^[A-Za-z0-9 ]+$")
             ]
         )
-        let quantity = FieldDefinition(
+    }
+
+    func fixtureQuantityField() -> FieldDefinition {
+        FieldDefinition(
             identity: DefinitionIdentity(
                 id: "field.asset.quantity",
                 code: "quantity",
@@ -194,12 +228,10 @@ private extension FlutterFormRendererTests {
                 .maximumValue(200)
             ]
         )
-        let active = field(
-            id: "field.asset.active",
-            code: "active",
-            type: .boolean
-        )
-        let status = FieldDefinition(
+    }
+
+    func fixtureStatusField() -> FieldDefinition {
+        FieldDefinition(
             identity: DefinitionIdentity(
                 id: "field.asset.status",
                 code: "status",
@@ -219,75 +251,74 @@ private extension FlutterFormRendererTests {
                 )
             ]
         )
-        let dueDate = field(
-            id: "field.asset.dueDate",
-            code: "due_date",
-            type: .date
-        )
-        let attachment = field(
-            id: "field.asset.attachment",
-            code: "attachment",
-            type: .file
-        )
-        let location = field(
-            id: "field.asset.location",
-            code: "location",
-            type: .location
-        )
-        let asset = entity(
-            id: "entity.asset",
-            code: "asset",
-            fields: [
-                name,
-                quantity,
-                active,
-                status,
-                dueDate,
-                attachment,
-                location
-            ]
-        )
-        let screen = formScreen(
-            id: "screen.asset.editor",
-            code: "asset_editor",
-            entityID: asset.id,
-            fields: [
-                status.id,
-                name.id,
-                quantity.id,
-                active.id,
-                dueDate.id,
-                attachment.id,
-                location.id
-            ]
-        )
-        let presentations = [
+    }
+
+    func fixturePresentations(
+        _ fields: FixtureFields
+    ) -> [FieldPresentationDefinition] {
+        [
             presentation(
                 id: "presentation.status",
-                fieldID: status.id,
+                fieldID: fields.status.id,
                 control: .comboBox
             ),
             presentation(
                 id: "presentation.quantity",
-                fieldID: quantity.id,
+                fieldID: fields.quantity.id,
                 control: .slider,
                 range: NumericRange(minimum: 0, maximum: 100)
             ),
             presentation(
                 id: "presentation.active",
-                fieldID: active.id,
+                fieldID: fields.active.id,
                 control: .segmented
             )
         ]
+    }
 
-        return FormFixture(
-            specification: specification(
-                entities: [asset],
-                presentations: presentations,
-                screens: [screen]
-            ),
-            screen: screen
+    func defaultControlSpecification() -> ProjectSpecification {
+        let fields = defaultControlFields()
+        let asset = entity(
+            id: "entity.asset",
+            code: "asset",
+            fields: fields
         )
+        let screen = formScreen(
+            id: "screen.asset.form",
+            code: "asset_form",
+            entityID: asset.id,
+            fields: fields.map(\.id)
+        )
+        return specification(
+            entities: [asset],
+            screens: [screen]
+        )
+    }
+
+    func defaultControlFields() -> [FieldDefinition] {
+        [
+            field(id: "field.asset.name", code: "name", type: .string),
+            field(id: "field.asset.quantity", code: "quantity", type: .integer),
+            field(id: "field.asset.enabled", code: "enabled", type: .boolean),
+            field(id: "field.asset.date", code: "date", type: .date),
+            field(id: "field.asset.file", code: "file", type: .file),
+            field(id: "field.asset.location", code: "location", type: .location),
+            FieldDefinition(
+                identity: DefinitionIdentity(
+                    id: "field.asset.status",
+                    code: "status",
+                    label: "Status"
+                ),
+                dataType: .enumeration,
+                options: [
+                    FieldOptionDefinition(
+                        id: "option.active",
+                        value: "active",
+                        label: "Active"
+                    )
+                ]
+            )
+        ]
     }
 
     func specification(
