@@ -54,6 +54,12 @@ struct FlutterSQLiteSchema {
         let columns = try FlutterOfflineStorageNaming.columnNames(
             for: entity
         )
+        let relations = specification.relations
+            .filter { $0.sourceEntityID == entity.id }
+            .sorted(by: Self.relationSort)
+        let relationColumns = try FlutterOfflineStorageNaming.relationColumnNames(
+            for: relations
+        )
 
         var definitions = [
             "\"_record_id\" TEXT PRIMARY KEY",
@@ -73,6 +79,17 @@ struct FlutterSQLiteSchema {
             }
             if field.isUnique {
                 definition += " UNIQUE"
+            }
+            definitions.append(definition)
+        }
+
+        for relation in relations {
+            guard let columnName = relationColumns[relation.id] else {
+                continue
+            }
+            var definition = "\"\(columnName)\" TEXT"
+            if relation.isRequired {
+                definition += " NOT NULL"
             }
             definitions.append(definition)
         }
@@ -122,6 +139,16 @@ struct FlutterSQLiteSchema {
     private static func entitySort(
         _ lhs: EntityDefinition,
         _ rhs: EntityDefinition
+    ) -> Bool {
+        if lhs.identity.code != rhs.identity.code {
+            return lhs.identity.code < rhs.identity.code
+        }
+        return lhs.id < rhs.id
+    }
+
+    private static func relationSort(
+        _ lhs: RelationDefinition,
+        _ rhs: RelationDefinition
     ) -> Bool {
         if lhs.identity.code != rhs.identity.code {
             return lhs.identity.code < rhs.identity.code
