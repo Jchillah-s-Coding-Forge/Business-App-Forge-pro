@@ -176,7 +176,10 @@ final class ProjectSetupGenerationViewModelTests: XCTestCase {
         viewModel.openGeneratedProject()
 
         XCTAssertNil(opener.lastPreferredIDE)
-        XCTAssertNotNil(viewModel.generationErrorMessage)
+        XCTAssertEqual(
+            viewModel.generationErrorMessage,
+            "Android Studio wurde auf diesem Mac nicht gefunden."
+        )
 
         viewModel.openGeneratedProject(in: .finder)
 
