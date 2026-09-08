@@ -187,11 +187,11 @@ private extension FlutterGeneratedFormScreenSource {
     }
 
     func optional(_ value: Int?) -> String {
-        value.map(String.init) ?? "null"
+        value.map { String($0) } ?? "null"
     }
 
     func optional(_ value: Double?) -> String {
-        value.map(String.init) ?? "null"
+        value.map { String($0) } ?? "null"
     }
 }
 
