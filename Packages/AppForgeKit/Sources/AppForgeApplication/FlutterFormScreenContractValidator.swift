@@ -60,6 +60,7 @@ private extension FlutterFormScreenContractValidator {
             )
         }
     }
+
     func validateMaterializableControls(
         screen: ScreenDefinition,
         entity: EntityDefinition,
@@ -88,5 +89,4 @@ private extension FlutterFormScreenContractValidator {
             }
         }
     }
-
 }
