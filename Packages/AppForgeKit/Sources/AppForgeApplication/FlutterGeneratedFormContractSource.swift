@@ -1,4 +1,5 @@
 import AppForgeDomain
+
 struct FlutterGeneratedFormContractSource {
     func file() -> GeneratedFile {
         GeneratedFile(
@@ -7,6 +8,7 @@ struct FlutterGeneratedFormContractSource {
         )
     }
 
+    // swiftformat:disable indent trailingSpace
     private var content: String {
         """
         enum GeneratedFormValueKind {
@@ -248,4 +250,5 @@ struct FlutterGeneratedFormContractSource {
         """
             + "\n"
     }
+    // swiftformat:enable indent trailingSpace
 }
