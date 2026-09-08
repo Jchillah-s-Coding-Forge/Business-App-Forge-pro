@@ -142,7 +142,23 @@ Source-side relations are materialized as `DomainReference(entityId, recordId)`.
 
 `FieldPresentationDefinition` and relation metadata are emitted as standalone generated schema metadata so later form/screen renderers can consume the original product intent without an AppForge runtime dependency.
 
-Dart reserved member names are mapped deterministically rather than emitted as invalid source. Generated member collisions across fields and source-side relations fail closed rather than being silently renamed.
+Dart reserved member names are mapped deterministically rather than emitted as invalid source.
+
+## Generated contract collision validation
+
+Before any source file is rendered, AppForge validates the complete generated Dart contract.
+
+The validator rejects:
+
+- different entity codes that normalize to the same `lib/features/<feature>` path;
+- field/relation members that normalize to the same Dart member name;
+- members reserved for generated or Dart object contracts such as `copyWith`, `toJson`, `hashCode` and `runtimeType`;
+- entity-derived types that collide with fixed AppForge-owned types such as `DomainReference`, `AppDatabase` or sync contracts;
+- collisions between generated entity, repository, use-case, view-model and offline implementation type names.
+
+Collision errors retain both relevant definition IDs whenever two project definitions conflict. AppForge does not silently append suffixes or rename one side of a collision.
+
+This pre-render check complements `GenerationPlan` path validation: `GenerationPlan` remains the final filesystem-safety boundary, while the generated-contract validator can report the responsible business definitions before file emission.
 
 ## Atomic writer
 
