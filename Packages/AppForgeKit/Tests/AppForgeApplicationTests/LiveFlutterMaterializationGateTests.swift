@@ -39,6 +39,7 @@ final class LiveFlutterMaterializationGateTests: XCTestCase {
         XCTAssertTrue(
             result.toolchainReceipt.validatedSteps.contains(.format)
         )
+        try assertRecordAwareFormSource(projectURL: targetURL)
         try assertFormattingIsStable(
             projectURL: targetURL,
             sdkPath: sdkPath
@@ -51,6 +52,25 @@ final class LiveFlutterMaterializationGateTests: XCTestCase {
 }
 
 private extension LiveFlutterMaterializationGateTests {
+    func assertRecordAwareFormSource(
+        projectURL: URL
+    ) throws {
+        let sourceURL = projectURL
+            .appendingPathComponent("lib/features/asset/presentation/screens")
+            .appendingPathComponent("asset_form_form_screen.dart")
+        let source = try String(contentsOf: sourceURL)
+
+        XCTAssertTrue(
+            source.contains("final DomainRecord<Asset>? record;")
+        )
+        XCTAssertTrue(
+            source.contains("GeneratedIdentifiedFormSubmit")
+        )
+        XCTAssertTrue(
+            source.contains("recordId: record?.recordId")
+        )
+    }
+
     func assertFormattingIsStable(
         projectURL: URL,
         sdkPath: String
