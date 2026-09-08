@@ -2,6 +2,15 @@ import AppForgeDomain
 import Foundation
 
 struct ExecutableToolDetector {
+    private let applicationLocator: any MacOSApplicationLocating
+
+    init(
+        applicationLocator: any MacOSApplicationLocating =
+            SystemMacOSApplicationLocator()
+    ) {
+        self.applicationLocator = applicationLocator
+    }
+
     func detect(
         requirement: ToolRequirement,
         flutterSDKPath: String?
@@ -60,17 +69,9 @@ struct ExecutableToolDetector {
         case .java:
             executableCandidate(command: "java", arguments: ["-version"])
         case .vsCode:
-            applicationCandidate(
-                applicationPath: "/Applications/Visual Studio Code.app",
-                command: "code",
-                arguments: ["--version"]
-            )
+            ideApplicationCandidate(.vsCode)
         case .androidStudio:
-            applicationCandidate(
-                applicationPath: "/Applications/Android Studio.app",
-                command: nil,
-                arguments: nil
-            )
+            ideApplicationCandidate(.androidStudio)
         case .xcodeGen:
             executableCandidate(command: "xcodegen", arguments: ["--version"])
         case .supabaseCLI:
@@ -116,17 +117,26 @@ struct ExecutableToolDetector {
         return executableCandidate(command: "flutter", arguments: ["--version"])
     }
 
-    private func applicationCandidate(
-        applicationPath: String,
-        command: String?,
-        arguments: [String]?
+    private func ideApplicationCandidate(
+        _ ide: PreferredIDE
     ) -> ToolCandidate? {
-        if let command, let executable = SystemToolDetectionSupport.executablePath(for: command) {
-            return ToolCandidate(path: executable, executablePath: executable, versionArguments: arguments)
+        let descriptor = IDEApplicationDescriptor(
+            ide: ide
+        )
+        guard let bundleIdentifier = descriptor.bundleIdentifier,
+              let path = applicationLocator.locate(
+                  bundleIdentifier: bundleIdentifier,
+                  knownPaths: descriptor.knownPaths
+              )
+        else {
+            return nil
         }
 
-        guard FileManager.default.fileExists(atPath: applicationPath) else { return nil }
-        return ToolCandidate(path: applicationPath, executablePath: applicationPath, versionArguments: nil)
+        return ToolCandidate(
+            path: path,
+            executablePath: path,
+            versionArguments: nil
+        )
     }
 
     private func executableCandidate(command: String, arguments: [String]) -> ToolCandidate? {

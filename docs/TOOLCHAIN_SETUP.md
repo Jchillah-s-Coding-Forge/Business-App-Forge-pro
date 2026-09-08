@@ -110,3 +110,12 @@ Nach der späteren Projektgenerierung öffnet `GeneratedProjectOpening` ausschli
 - keine automatischen Änderungen an Xcode-Auswahl oder Android-SDK-Komponenten,
 - optionale Tools blockieren nicht global,
 - erforderliche Toolchain-Fehler werden vor der Generierung hart abgewiesen.
+
+
+## IDE-Handoff nach Generierung
+
+Nach erfolgreicher Produktionsgenerierung erkennt AppForge unterstützte macOS-Entwicklungsumgebungen über Bundle-IDs und bekannte Application-Pfade. Die bevorzugte IDE wird als Primäraktion angeboten, wenn sie aktuell verfügbar ist; Finder und Systemstandard bleiben explizite Alternativen.
+
+Der Handoff verändert den generierten Source Tree nicht und verwendet keine Shell-Kommandoketten.
+
+Der vollständige Detection-, Command- und No-Fallback-Vertrag ist in [IDE_HANDOFF.md](IDE_HANDOFF.md) dokumentiert.

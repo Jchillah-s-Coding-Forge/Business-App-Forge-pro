@@ -32,6 +32,7 @@ Die Roadmap ist fähigkeitsorientiert. Ein Meilenstein endet erst nach Nutzerabn
 - toolchain-gepinnte Flutter-Materialisierung mit nativen iOS-/Android-Shells
 - direkte SDK- oder verifizierte Nix-backed Flutter-Materialisierung
 - Project-Setup-Handoff zur produktiven Flutter-Materialisierung
+- Bundle-aware IDE-Handoff mit expliziten macOS-Fallbacks
 - `flutter pub get`, `flutter analyze` und `flutter test` als Materialisierungs-Gates
 - Toolchain-/Dependency-Provenienz über `appforge.toolchain.json`
 - Architektur- und Golden Tests

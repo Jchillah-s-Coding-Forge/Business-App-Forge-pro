@@ -58,6 +58,7 @@
 		4CFC68B345B3B408237076FF /* PRODUCT_VISION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRODUCT_VISION.md; sourceTree = "<group>"; };
 		4D55E9AEE487CE52EA349CC5 /* GIT_WORKFLOW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GIT_WORKFLOW.md; sourceTree = "<group>"; };
 		52A30BB954D6A2B6A69AE174 /* PRD.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRD.md; sourceTree = "<group>"; };
+		542A32BFE9613F96CF2C88CA /* IDE_HANDOFF.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = IDE_HANDOFF.md; sourceTree = "<group>"; };
 		550C17458B1B176817565B39 /* ProjectSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSetupView.swift; sourceTree = "<group>"; };
 		5E6F91737C991DC763DE412C /* ADR-001-project-foundation.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "ADR-001-project-foundation.md"; sourceTree = "<group>"; };
 		5E7CB9DF868D27E6CC1F76F1 /* AppForgeKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppForgeKit; path = Packages/AppForgeKit; sourceTree = SOURCE_ROOT; };
@@ -184,6 +185,7 @@
 				2DFE79363D3EFD74C8B1795A /* architecture */,
 				1238B38AD2FF4590EAA6F5CC /* development */,
 				1D8B56D5E96F4006BA099F8F /* product */,
+				542A32BFE9613F96CF2C88CA /* IDE_HANDOFF.md */,
 				75D51E4FCDDBD593BEC6C71F /* TOOLCHAIN_SETUP.md */,
 			);
 			path = docs;
