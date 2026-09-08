@@ -11,6 +11,9 @@ struct FlutterGeneratedContractValidator {
             entities,
             offlineEnabled: specification.offline.isEnabled
         )
+        try FlutterFormScreenContractValidator().validate(
+            specification
+        )
 
         for entity in entities {
             try validateMembers(
