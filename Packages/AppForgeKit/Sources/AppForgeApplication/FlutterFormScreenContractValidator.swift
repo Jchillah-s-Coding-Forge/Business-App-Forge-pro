@@ -32,6 +32,11 @@ struct FlutterFormScreenContractValidator {
                 screen: screen,
                 presentations: presentations
             )
+            try validateMaterializableControls(
+                screen: screen,
+                entity: entity,
+                presentations: presentations
+            )
         }
     }
 }
@@ -55,4 +60,33 @@ private extension FlutterFormScreenContractValidator {
             )
         }
     }
+    func validateMaterializableControls(
+        screen: ScreenDefinition,
+        entity: EntityDefinition,
+        presentations: [String: [FieldPresentationDefinition]]
+    ) throws {
+        let fields = Dictionary(
+            uniqueKeysWithValues: entity.fields.map { ($0.id, $0) }
+        )
+
+        for fieldID in screen.visibleFieldIDs {
+            guard let field = fields[fieldID] else {
+                continue
+            }
+            let control = FlutterFormRenderingSupport.control(
+                for: field,
+                presentations: presentations
+            )
+            if field.dataType == .location,
+               control != .locationPicker
+            {
+                throw FlutterRendererError.unsupportedFormControl(
+                    screenID: screen.id,
+                    fieldID: field.id,
+                    control: control
+                )
+            }
+        }
+    }
+
 }
