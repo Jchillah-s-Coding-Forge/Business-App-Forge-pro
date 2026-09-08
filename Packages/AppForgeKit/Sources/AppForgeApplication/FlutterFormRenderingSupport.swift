@@ -96,28 +96,31 @@ enum FlutterFormRenderingSupport {
     static func defaultControl(
         for dataType: FieldDataType
     ) -> FieldControl {
-        defaultControls[dataType] ?? .textField
+        switch dataType {
+        case .string, .email, .phone, .url:
+            .textField
+        case .integer, .decimal, .currency, .percentage:
+            .numericField
+        case .boolean:
+            .switchToggle
+        case .date:
+            .datePicker
+        case .dateTime:
+            .dateTimePicker
+        case .time:
+            .timePicker
+        case .enumeration:
+            .select
+        case .file:
+            .filePicker
+        case .image:
+            .imagePicker
+        case .color:
+            .colorPicker
+        case .location:
+            .locationPicker
+        }
     }
-
-    private static let defaultControls: [FieldDataType: FieldControl] = [
-        .string: .textField,
-        .email: .textField,
-        .phone: .textField,
-        .url: .textField,
-        .integer: .numericField,
-        .decimal: .numericField,
-        .currency: .numericField,
-        .percentage: .numericField,
-        .boolean: .switchToggle,
-        .date: .datePicker,
-        .dateTime: .dateTimePicker,
-        .time: .timePicker,
-        .enumeration: .select,
-        .file: .filePicker,
-        .image: .imagePicker,
-        .color: .colorPicker,
-        .location: .locationPicker
-    ]
 
     private static func screenSort(
         _ lhs: ScreenDefinition,

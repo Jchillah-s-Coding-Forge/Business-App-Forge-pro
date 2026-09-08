@@ -11,6 +11,8 @@ struct FlutterGeneratedFormContractSource {
     // swiftformat:disable indent trailingSpace
     private var content: String {
         """
+        import '../domain/domain_values.dart';
+
         enum GeneratedFormValueKind {
           string,
           integer,
@@ -148,6 +150,11 @@ struct FlutterGeneratedFormContractSource {
               return null;
             }
 
+            final typeError = _validateType(value);
+            if (typeError != null) {
+              return typeError;
+            }
+
             final numericError = _validateNumber(value);
             if (numericError != null) {
               return numericError;
@@ -179,6 +186,29 @@ struct FlutterGeneratedFormContractSource {
             }
 
             return null;
+          }
+
+          String? _validateType(Object value) {
+            final isValid = switch (valueKind) {
+              GeneratedFormValueKind.string ||
+              GeneratedFormValueKind.email ||
+              GeneratedFormValueKind.phone ||
+              GeneratedFormValueKind.url ||
+              GeneratedFormValueKind.enumeration => value is String,
+              GeneratedFormValueKind.integer ||
+              GeneratedFormValueKind.decimal ||
+              GeneratedFormValueKind.currency ||
+              GeneratedFormValueKind.percentage => true,
+              GeneratedFormValueKind.boolean => value is bool,
+              GeneratedFormValueKind.date ||
+              GeneratedFormValueKind.dateTime ||
+              GeneratedFormValueKind.time => value is DateTime,
+              GeneratedFormValueKind.file => value is DomainFileValue,
+              GeneratedFormValueKind.image => value is DomainImageValue,
+              GeneratedFormValueKind.color => value is DomainColorValue,
+              GeneratedFormValueKind.location => value is DomainLocationValue,
+            };
+            return isValid ? null : '$label has an invalid value.';
           }
 
           String? _validateNumber(Object value) {

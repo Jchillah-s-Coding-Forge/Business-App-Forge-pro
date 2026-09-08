@@ -11,6 +11,7 @@ struct FlutterGeneratedEntityFormScreenSource {
     // swiftformat:disable indent trailingSpace
     private var content: String {
         """
+        import 'package:flutter/foundation.dart';
         import 'package:flutter/material.dart';
 
         import 'generated_form_contract.dart';
@@ -45,7 +46,7 @@ struct FlutterGeneratedEntityFormScreenSource {
 
         class _GeneratedEntityFormScreenState
             extends State<GeneratedEntityFormScreen> {
-          final _formKey = GlobalKey<FormState>();
+          late GlobalKey<FormState> _formKey;
           late Map<String, Object?> _values;
           bool _isSubmitting = false;
           String? _submissionError;
@@ -53,13 +54,16 @@ struct FlutterGeneratedEntityFormScreenSource {
           @override
           void initState() {
             super.initState();
+            _formKey = GlobalKey<FormState>();
             _values = _initialValues();
           }
 
           @override
           void didUpdateWidget(GeneratedEntityFormScreen oldWidget) {
             super.didUpdateWidget(oldWidget);
-            if (oldWidget.screenId != widget.screenId) {
+            if (oldWidget.screenId != widget.screenId ||
+                !mapEquals(oldWidget.initialValues, widget.initialValues)) {
+              _formKey = GlobalKey<FormState>();
               _values = _initialValues();
               _submissionError = null;
             }

@@ -29,7 +29,8 @@ struct FlutterGeneratedFormChoiceFieldsSource {
 
           @override
           Widget build(BuildContext context) {
-            final current = value as bool? ?? false;
+            final initialValue = value;
+            final current = initialValue is bool ? initialValue : false;
             if (spec.control == GeneratedFormControl.checkbox) {
               return CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
@@ -214,7 +215,15 @@ struct FlutterGeneratedFormChoiceFieldsSource {
 
           String? _selectedValue() {
             final current = value;
-            return current is bool ? current.toString() : current?.toString();
+            final candidate = current is bool
+                ? current.toString()
+                : current?.toString();
+            if (candidate == null) {
+              return null;
+            }
+            return spec.options.any((option) => option.value == candidate)
+                ? candidate
+                : null;
           }
 
           Object? _outputValue(String? selected) {
