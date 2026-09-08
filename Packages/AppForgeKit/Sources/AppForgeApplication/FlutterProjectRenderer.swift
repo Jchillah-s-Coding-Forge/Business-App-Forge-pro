@@ -51,7 +51,7 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
 }
 
 public struct DeterministicFlutterProjectRenderer: FlutterProjectRendering {
-    public static let rendererVersion = 3
+    public static let rendererVersion = 4
 
     private let specificationValidator: ProjectSpecificationValidator
     private let lockfileBuilder: ForgeLockfileBuilder
