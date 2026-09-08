@@ -129,15 +129,16 @@ final class FlutterFormRendererTests: XCTestCase {
             entityID: asset.id,
             fields: asset.fields.map(\.id)
         )
-        let source = try formSource(
-            from: render(
-                specification(
-                    entities: [asset],
-                    screens: [screen]
-                )
-            ),
-            screen: screen,
-            entity: asset
+        let plan = try render(
+            specification(
+                entities: [asset],
+                screens: [screen]
+            )
+        )
+        let source = try XCTUnwrap(
+            plan.file(
+                at: "lib/features/asset/presentation/screens/asset_form_form_screen.dart"
+            )?.contents
         )
 
         XCTAssertTrue(source.contains("GeneratedFormControl.textField"))
@@ -541,18 +542,5 @@ private extension FlutterFormRendererTests {
         )
     }
 
-    func formSource(
-        from plan: GenerationPlan,
-        screen: ScreenDefinition,
-        entity: EntityDefinition
-    ) throws -> String {
-        try XCTUnwrap(
-            plan.file(
-                at: FlutterFormRenderingSupport.outputPath(
-                    for: screen,
-                    entity: entity
-                )
-            )?.contents
-        )
-    }
+
 }
