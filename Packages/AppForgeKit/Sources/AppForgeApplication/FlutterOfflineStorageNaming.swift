@@ -45,6 +45,38 @@ enum FlutterOfflineStorageNaming {
         return result
     }
 
+    static func relationColumnNames(
+        for relations: [RelationDefinition]
+    ) throws -> [String: String] {
+        var result: [String: String] = [:]
+        var seen = Set<String>()
+
+        for relation in relations.sorted(by: relationSort) {
+            let businessIdentifier = FlutterDartNaming.snakeCase(
+                relation.identity.code
+            )
+            guard FlutterDartNaming.isUsableIdentifier(businessIdentifier),
+                  !businessIdentifier.hasPrefix("_")
+            else {
+                throw FlutterRendererError.reservedGeneratedStorageIdentifier(
+                    definitionID: relation.id,
+                    identifier: businessIdentifier
+                )
+            }
+
+            let identifier = "_rel_\(businessIdentifier)"
+            guard seen.insert(identifier.lowercased()).inserted else {
+                throw FlutterRendererError.duplicateGeneratedStorageIdentifier(
+                    entityID: relation.sourceEntityID,
+                    identifier: identifier
+                )
+            }
+            result[relation.id] = identifier
+        }
+
+        return result
+    }
+
     private static func validateBusinessIdentifier(
         _ identifier: String,
         definitionID: String
@@ -57,6 +89,16 @@ enum FlutterOfflineStorageNaming {
                 identifier: identifier
             )
         }
+    }
+
+    private static func relationSort(
+        _ lhs: RelationDefinition,
+        _ rhs: RelationDefinition
+    ) -> Bool {
+        if lhs.identity.code != rhs.identity.code {
+            return lhs.identity.code < rhs.identity.code
+        }
+        return lhs.id < rhs.id
     }
 
     private static func fieldSort(
