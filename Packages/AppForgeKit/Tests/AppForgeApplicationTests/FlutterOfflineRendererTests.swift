@@ -125,6 +125,23 @@ final class FlutterOfflineRendererTests: XCTestCase {
         XCTAssertTrue(
             domainRepository.contains("Future<void> delete(String recordId);")
         )
+        try assertReadIdentityUseCaseAndViewModel(plan)
+
+        XCTAssertNotNil(
+            plan.file(
+                at: "lib/features/customer/domain/use_cases/save_customer.dart"
+            )
+        )
+        XCTAssertNotNil(
+            plan.file(
+                at: "lib/features/customer/domain/use_cases/delete_customer.dart"
+            )
+        )
+    }
+
+    private func assertReadIdentityUseCaseAndViewModel(
+        _ plan: GenerationPlan
+    ) throws {
         let getList = try FlutterOfflineTestFixture.contents(
             "lib/features/customer/domain/use_cases/get_customer_list.dart",
             in: plan
@@ -139,17 +156,6 @@ final class FlutterOfflineRendererTests: XCTestCase {
         )
         XCTAssertTrue(
             viewModel.contains("Future<List<DomainRecord<Customer>>> load()")
-        )
-
-        XCTAssertNotNil(
-            plan.file(
-                at: "lib/features/customer/domain/use_cases/save_customer.dart"
-            )
-        )
-        XCTAssertNotNil(
-            plan.file(
-                at: "lib/features/customer/domain/use_cases/delete_customer.dart"
-            )
         )
     }
 
