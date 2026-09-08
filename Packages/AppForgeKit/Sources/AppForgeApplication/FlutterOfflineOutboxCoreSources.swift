@@ -85,8 +85,6 @@ struct FlutterOfflineOutboxCoreSources {
     ]
 
     private static let repositoryLines = [
-        "import 'package:sqflite/sqflite.dart';",
-        "",
         "import '../storage/app_database.dart';",
         "import 'sync_outbox_entry.dart';",
         "",
