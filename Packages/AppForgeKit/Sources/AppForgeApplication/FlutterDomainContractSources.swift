@@ -15,7 +15,6 @@ struct FlutterDomainContractSources {
             )
         ]
     }
-
 }
 
 private extension FlutterDomainContractSources {
@@ -170,7 +169,6 @@ private extension FlutterDomainContractSources {
             ""
         ]
     }
-
 }
 
 private extension FlutterDomainContractSources {
