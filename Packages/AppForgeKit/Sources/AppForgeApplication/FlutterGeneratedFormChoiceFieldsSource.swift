@@ -1,3 +1,4 @@
+import AppForgeDomain
 struct FlutterGeneratedFormChoiceFieldsSource {
     func file() -> GeneratedFile {
         GeneratedFile(
@@ -27,7 +28,7 @@ struct FlutterGeneratedFormChoiceFieldsSource {
           @override
           Widget build(BuildContext context) {
             final current = value as bool? ?? false;
-            if (spec.control == 'checkbox') {
+            if (spec.control == GeneratedFormControl.checkbox) {
               return CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(spec.label),
@@ -59,39 +60,41 @@ struct FlutterGeneratedFormChoiceFieldsSource {
           @override
           Widget build(BuildContext context) {
             return switch (spec.control) {
-              'radioGroup' => _radioGroup(),
-              'segmented' => _segmented(),
-              'comboBox' => _comboBox(),
-              'autocomplete' => _autocomplete(),
+              GeneratedFormControl.radioGroup => _radioGroup(),
+              GeneratedFormControl.segmented => _segmented(),
+              GeneratedFormControl.comboBox => _comboBox(),
+              GeneratedFormControl.autocomplete => _autocomplete(),
               _ => _select(),
             };
           }
 
           Widget _radioGroup() {
-            final current = value?.toString();
+            final current = _selectedValue();
             return InputDecorator(
               decoration: InputDecoration(
                 labelText: spec.label,
                 border: const OutlineInputBorder(),
               ),
-              child: Column(
-                children: spec.options
-                    .map(
-                      (option) => RadioListTile<String>(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(option.label),
-                        value: option.value,
-                        groupValue: current,
-                        onChanged: onChanged,
-                      ),
-                    )
-                    .toList(growable: false),
+              child: RadioGroup<String>(
+                groupValue: current,
+                onChanged: (next) => onChanged(_outputValue(next)),
+                child: Column(
+                  children: spec.options
+                      .map(
+                        (option) => RadioListTile<String>(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(option.label),
+                          value: option.value,
+                        ),
+                      )
+                      .toList(growable: false),
+                ),
               ),
             );
           }
 
           Widget _segmented() {
-            final current = value?.toString();
+            final current = _selectedValue();
             final selected = current == null
                 ? <String>{}
                 : <String>{current};
@@ -112,7 +115,9 @@ struct FlutterGeneratedFormChoiceFieldsSource {
                     .toList(growable: false),
                 selected: selected,
                 onSelectionChanged: (selection) {
-                  onChanged(selection.isEmpty ? null : selection.first);
+                  onChanged(
+                    _outputValue(selection.isEmpty ? null : selection.first),
+                  );
                 },
               ),
             );
@@ -120,7 +125,7 @@ struct FlutterGeneratedFormChoiceFieldsSource {
 
           Widget _select() {
             return DropdownButtonFormField<String>(
-              value: value?.toString(),
+              initialValue: _selectedValue(),
               decoration: InputDecoration(
                 labelText: spec.label,
                 border: const OutlineInputBorder(),
@@ -133,13 +138,13 @@ struct FlutterGeneratedFormChoiceFieldsSource {
                     ),
                   )
                   .toList(growable: false),
-              onChanged: onChanged,
+              onChanged: (next) => onChanged(_outputValue(next)),
             );
           }
 
           Widget _comboBox() {
             return DropdownMenu<String>(
-              initialSelection: value?.toString(),
+              initialSelection: _selectedValue(),
               label: Text(spec.label),
               expandedInsets: EdgeInsets.zero,
               dropdownMenuEntries: spec.options
@@ -150,12 +155,12 @@ struct FlutterGeneratedFormChoiceFieldsSource {
                     ),
                   )
                   .toList(growable: false),
-              onSelected: onChanged,
+              onSelected: (next) => onChanged(_outputValue(next)),
             );
           }
 
           Widget _autocomplete() {
-            final initial = value?.toString() ?? '';
+            final initial = _selectedValue() ?? '';
             return Autocomplete<String>(
               initialValue: TextEditingValue(text: initial),
               optionsBuilder: (textEditingValue) {
@@ -174,7 +179,7 @@ struct FlutterGeneratedFormChoiceFieldsSource {
                     .firstWhere((option) => option.value == candidate)
                     .label;
               },
-              onSelected: onChanged,
+              onSelected: (next) => onChanged(_outputValue(next)),
               fieldViewBuilder: (
                 context,
                 controller,
@@ -196,13 +201,28 @@ struct FlutterGeneratedFormChoiceFieldsSource {
                     if (exact.isEmpty) {
                       onChanged(null);
                     } else {
-                      onChanged(exact.first.value);
+                      onChanged(_outputValue(exact.first.value));
                     }
                   },
                   onSubmitted: (_) => onFieldSubmitted(),
                 );
               },
             );
+          }
+
+          String? _selectedValue() {
+            final current = value;
+            return current is bool ? current.toString() : current?.toString();
+          }
+
+          Object? _outputValue(String? selected) {
+            if (selected == null) {
+              return null;
+            }
+            if (spec.valueKind == GeneratedFormValueKind.boolean) {
+              return selected == 'true';
+            }
+            return selected;
           }
         }
         """

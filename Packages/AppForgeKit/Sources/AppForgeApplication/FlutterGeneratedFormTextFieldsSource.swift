@@ -1,3 +1,4 @@
+import AppForgeDomain
 struct FlutterGeneratedFormTextFieldsSource {
     func file() -> GeneratedFile {
         GeneratedFile(
@@ -26,15 +27,22 @@ struct FlutterGeneratedFormTextFieldsSource {
 
           @override
           Widget build(BuildContext context) {
-            final isNumeric =
-                spec.valueKind == 'integer' || spec.valueKind == 'double';
             return TextFormField(
               key: ValueKey<String>('generated-form-${spec.id}'),
               initialValue: value?.toString() ?? '',
-              maxLines: spec.control == 'textArea' ? 4 : 1,
-              keyboardType: isNumeric
-                  ? const TextInputType.numberWithOptions(decimal: true)
+              minLines: spec.control == GeneratedFormControl.textArea ? 3 : 1,
+              maxLines: spec.control == GeneratedFormControl.textArea ? 5 : 1,
+              keyboardType: spec.isNumeric
+                  ? TextInputType.numberWithOptions(
+                      decimal:
+                          spec.valueKind != GeneratedFormValueKind.integer,
+                      signed: true,
+                    )
                   : _keyboardType(),
+              textInputAction:
+                  spec.control == GeneratedFormControl.textArea
+                  ? TextInputAction.newline
+                  : TextInputAction.next,
               decoration: InputDecoration(
                 labelText: spec.label,
                 border: const OutlineInputBorder(),
@@ -45,11 +53,11 @@ struct FlutterGeneratedFormTextFieldsSource {
 
           TextInputType _keyboardType() {
             switch (spec.valueKind) {
-              case 'email':
+              case GeneratedFormValueKind.email:
                 return TextInputType.emailAddress;
-              case 'phone':
+              case GeneratedFormValueKind.phone:
                 return TextInputType.phone;
-              case 'url':
+              case GeneratedFormValueKind.url:
                 return TextInputType.url;
               default:
                 return TextInputType.text;
@@ -118,14 +126,14 @@ struct FlutterGeneratedFormTextFieldsSource {
             if (spec.maximumValue != null && next > spec.maximumValue!) {
               next = spec.maximumValue!;
             }
-            if (spec.valueKind == 'integer') {
+            if (spec.valueKind == GeneratedFormValueKind.integer) {
               return next.round();
             }
             return next;
           }
 
           String _displayValue(double value) {
-            if (spec.valueKind == 'integer') {
+            if (spec.valueKind == GeneratedFormValueKind.integer) {
               return value.round().toString();
             }
             return value.toString();

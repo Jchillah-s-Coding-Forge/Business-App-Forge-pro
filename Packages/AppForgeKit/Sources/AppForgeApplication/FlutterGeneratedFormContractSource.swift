@@ -1,5 +1,4 @@
 import AppForgeDomain
-
 struct FlutterGeneratedFormContractSource {
     func file() -> GeneratedFile {
         GeneratedFile(
@@ -10,6 +9,48 @@ struct FlutterGeneratedFormContractSource {
 
     private var content: String {
         """
+        enum GeneratedFormValueKind {
+          string,
+          integer,
+          decimal,
+          boolean,
+          date,
+          dateTime,
+          time,
+          email,
+          phone,
+          url,
+          currency,
+          percentage,
+          enumeration,
+          file,
+          image,
+          color,
+          location,
+        }
+
+        enum GeneratedFormControl {
+          textField,
+          textArea,
+          numericField,
+          stepper,
+          slider,
+          checkbox,
+          switchToggle,
+          radioGroup,
+          segmented,
+          select,
+          comboBox,
+          autocomplete,
+          datePicker,
+          timePicker,
+          dateTimePicker,
+          filePicker,
+          imagePicker,
+          colorPicker,
+          locationPicker,
+        }
+
         typedef GeneratedFormSubmit = Future<void> Function(
           Map<String, Object?> values,
         );
@@ -17,8 +58,14 @@ struct FlutterGeneratedFormContractSource {
         typedef GeneratedExternalValuePicker = Future<Object?> Function({
           required String screenId,
           required String fieldId,
+          required GeneratedFormValueKind valueKind,
           required Object? currentValue,
         });
+
+        typedef GeneratedFormErrorMessageBuilder = String Function(
+          Object error,
+          StackTrace stackTrace,
+        );
 
         class GeneratedChoiceOption {
           const GeneratedChoiceOption({
@@ -49,8 +96,8 @@ struct FlutterGeneratedFormContractSource {
 
           final String id;
           final String label;
-          final String valueKind;
-          final String control;
+          final GeneratedFormValueKind valueKind;
+          final GeneratedFormControl control;
           final bool isRequired;
           final List<GeneratedChoiceOption> options;
           final int? minimumLength;
@@ -61,29 +108,47 @@ struct FlutterGeneratedFormContractSource {
           final double? rangeMinimum;
           final double? rangeMaximum;
 
+          bool get isNumeric {
+            switch (valueKind) {
+              case GeneratedFormValueKind.integer:
+              case GeneratedFormValueKind.decimal:
+              case GeneratedFormValueKind.currency:
+              case GeneratedFormValueKind.percentage:
+                return true;
+              default:
+                return false;
+            }
+          }
+
+          Object? get fallbackInitialValue {
+            switch (control) {
+              case GeneratedFormControl.checkbox:
+              case GeneratedFormControl.switchToggle:
+                return false;
+              case GeneratedFormControl.stepper:
+                return valueKind == GeneratedFormValueKind.integer
+                    ? (minimumValue ?? 0).round()
+                    : minimumValue ?? 0.0;
+              case GeneratedFormControl.slider:
+                return valueKind == GeneratedFormValueKind.integer
+                    ? (rangeMinimum ?? 0).round()
+                    : rangeMinimum ?? 0.0;
+              default:
+                return null;
+            }
+          }
+
           String? validate(Object? value) {
             if (isRequired && _isEmpty(value)) {
               return '$label is required.';
             }
-            if (value == null || (value is String && value.isEmpty)) {
+            if (value == null || (value is String && value.trim().isEmpty)) {
               return null;
             }
 
-            if (valueKind == 'integer' || valueKind == 'double') {
-              final text = value.toString().trim();
-              final parsed = valueKind == 'integer'
-                  ? int.tryParse(text)
-                  : double.tryParse(text);
-              if (parsed == null) {
-                return '$label must be a number.';
-              }
-              final number = parsed.toDouble();
-              if (minimumValue != null && number < minimumValue!) {
-                return '$label must be at least $minimumValue.';
-              }
-              if (maximumValue != null && number > maximumValue!) {
-                return '$label must be at most $maximumValue.';
-              }
+            final numericError = _validateNumber(value);
+            if (numericError != null) {
+              return numericError;
             }
 
             if (value is String) {
@@ -102,8 +167,11 @@ struct FlutterGeneratedFormContractSource {
                   return '$label has an invalid validation pattern.';
                 }
               }
-              if (options.isNotEmpty &&
-                  !options.any((option) => option.value == value)) {
+            }
+
+            if (options.isNotEmpty) {
+              final selected = value is bool ? value.toString() : '$value';
+              if (!options.any((option) => option.value == selected)) {
                 return '$label has an invalid selection.';
               }
             }
@@ -111,19 +179,60 @@ struct FlutterGeneratedFormContractSource {
             return null;
           }
 
+          String? _validateNumber(Object value) {
+            if (!isNumeric) {
+              return null;
+            }
+
+            final num? parsed;
+            if (valueKind == GeneratedFormValueKind.integer) {
+              parsed = value is int ? value : int.tryParse(value.toString());
+            } else {
+              parsed = value is num
+                  ? value
+                  : double.tryParse(value.toString());
+            }
+            if (parsed == null) {
+              return '$label must be a number.';
+            }
+
+            final number = parsed.toDouble();
+            if (minimumValue != null && number < minimumValue!) {
+              return '$label must be at least $minimumValue.';
+            }
+            if (maximumValue != null && number > maximumValue!) {
+              return '$label must be at most $maximumValue.';
+            }
+            return null;
+          }
+
           Object? normalize(Object? value) {
             if (value == null) {
               return null;
             }
-            if (valueKind == 'integer') {
-              return value is int ? value : int.tryParse(value.toString());
+            switch (valueKind) {
+              case GeneratedFormValueKind.integer:
+                return value is int ? value : int.tryParse(value.toString());
+              case GeneratedFormValueKind.decimal:
+              case GeneratedFormValueKind.currency:
+              case GeneratedFormValueKind.percentage:
+                return value is double
+                    ? value
+                    : value is num
+                    ? value.toDouble()
+                    : double.tryParse(value.toString());
+              case GeneratedFormValueKind.boolean:
+                if (value is bool) {
+                  return value;
+                }
+                return switch (value.toString()) {
+                  'true' => true,
+                  'false' => false,
+                  _ => value,
+                };
+              default:
+                return value;
             }
-            if (valueKind == 'double') {
-              return value is double
-                  ? value
-                  : double.tryParse(value.toString());
-            }
-            return value;
           }
 
           bool _isEmpty(Object? value) {

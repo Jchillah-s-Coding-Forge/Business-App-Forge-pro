@@ -4,27 +4,19 @@ struct FlutterFormScreenContractValidator {
     func validate(
         _ specification: ProjectSpecification
     ) throws {
-        let entities = Dictionary(
-            uniqueKeysWithValues: specification.entities.map {
-                ($0.id, $0)
-            }
-        )
-        let presentations = presentationsByField(
+        let presentations = FlutterFormRenderingSupport.presentationsByField(
             specification.fieldPresentations
         )
         var paths: [String: String] = [:]
 
-        for screen in formScreens(specification.screens) {
-            guard let entityID = screen.entityID,
-                  let entity = entities[entityID]
-            else {
-                throw FlutterRendererError.formScreenRequiresEntity(
-                    screenID: screen.id
-                )
-            }
+        for screen in FlutterFormRenderingSupport.formScreens(in: specification) {
+            let entity = try FlutterFormRenderingSupport.entity(
+                for: screen,
+                in: specification
+            )
 
-            let path = try outputPath(
-                screen: screen,
+            let path = try FlutterFormRenderingSupport.outputPath(
+                for: screen,
                 entity: entity
             )
             if let firstDefinitionID = paths[path] {
@@ -45,60 +37,6 @@ struct FlutterFormScreenContractValidator {
 }
 
 private extension FlutterFormScreenContractValidator {
-    func formScreens(
-        _ screens: [ScreenDefinition]
-    ) -> [ScreenDefinition] {
-        screens
-            .filter { $0.kind == .form }
-            .sorted(by: Self.screenSort)
-    }
-
-    func outputPath(
-        screen: ScreenDefinition,
-        entity: EntityDefinition
-    ) throws -> String {
-        let featureName = FlutterDartNaming.snakeCase(
-            entity.identity.code
-        )
-        let screenName = FlutterDartNaming.snakeCase(
-            screen.identity.code
-        )
-        let typeName = FlutterDartNaming.typeName(
-            screen.identity.code
-        ) + "FormScreen"
-
-        guard FlutterDartNaming.isUsableIdentifier(screenName),
-              FlutterDartNaming.isUsableIdentifier(typeName)
-        else {
-            throw FlutterRendererError.invalidGeneratedIdentifier(
-                definitionID: screen.id,
-                code: screen.identity.code
-            )
-        }
-
-        return "lib/features/\(featureName)"
-            + "/presentation/screens/"
-            + "\(screenName)_form_screen.dart"
-    }
-
-    func presentationsByField(
-        _ presentations: [FieldPresentationDefinition]
-    ) -> [String: [FieldPresentationDefinition]] {
-        var result: [String: [FieldPresentationDefinition]] = [:]
-
-        for presentation in presentations {
-            guard case let .field(fieldID) = presentation.target else {
-                continue
-            }
-            result[fieldID, default: []].append(presentation)
-        }
-
-        for fieldID in result.keys {
-            result[fieldID]?.sort { $0.id < $1.id }
-        }
-        return result
-    }
-
     func validatePresentationAmbiguity(
         screen: ScreenDefinition,
         presentations: [String: [FieldPresentationDefinition]]
@@ -116,15 +54,5 @@ private extension FlutterFormScreenContractValidator {
                 secondPresentationID: matches[1].id
             )
         }
-    }
-
-    static func screenSort(
-        _ lhs: ScreenDefinition,
-        _ rhs: ScreenDefinition
-    ) -> Bool {
-        if lhs.identity.code != rhs.identity.code {
-            return lhs.identity.code < rhs.identity.code
-        }
-        return lhs.id < rhs.id
     }
 }

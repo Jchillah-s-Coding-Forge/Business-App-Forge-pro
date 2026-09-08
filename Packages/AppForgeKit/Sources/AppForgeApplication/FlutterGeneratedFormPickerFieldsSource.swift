@@ -1,3 +1,4 @@
+import AppForgeDomain
 struct FlutterGeneratedFormPickerFieldsSource {
     func file() -> GeneratedFile {
         GeneratedFile(
@@ -10,6 +11,7 @@ struct FlutterGeneratedFormPickerFieldsSource {
         """
         import 'package:flutter/material.dart';
 
+        import '../domain/domain_values.dart';
         import 'generated_form_contract.dart';
 
         class GeneratedSliderField extends StatelessWidget {
@@ -26,8 +28,8 @@ struct FlutterGeneratedFormPickerFieldsSource {
 
           @override
           Widget build(BuildContext context) {
-            final minimum = spec.rangeMinimum ?? 0;
-            final maximum = spec.rangeMaximum ?? 100;
+            final minimum = spec.rangeMinimum ?? 0.0;
+            final maximum = spec.rangeMaximum ?? 100.0;
             final raw = value is num ? (value! as num).toDouble() : minimum;
             final current = raw.clamp(minimum, maximum).toDouble();
 
@@ -45,7 +47,7 @@ struct FlutterGeneratedFormPickerFieldsSource {
                     min: minimum,
                     max: maximum,
                     onChanged: (next) {
-                      if (spec.valueKind == 'integer') {
+                      if (spec.valueKind == GeneratedFormValueKind.integer) {
                         onChanged(next.round());
                       } else {
                         onChanged(next);
@@ -58,7 +60,7 @@ struct FlutterGeneratedFormPickerFieldsSource {
           }
 
           String _displayValue(double value) {
-            if (spec.valueKind == 'integer') {
+            if (spec.valueKind == GeneratedFormValueKind.integer) {
               return value.round().toString();
             }
             return value.toStringAsFixed(2);
@@ -106,12 +108,14 @@ struct FlutterGeneratedFormPickerFieldsSource {
 
           Future<void> _pick(BuildContext context) async {
             switch (spec.control) {
-              case 'datePicker':
+              case GeneratedFormControl.datePicker:
                 await _pickDate(context);
-              case 'timePicker':
+              case GeneratedFormControl.timePicker:
                 await _pickTime(context);
-              case 'dateTimePicker':
+              case GeneratedFormControl.dateTimePicker:
                 await _pickDateTime(context);
+              default:
+                return;
             }
           }
 
@@ -129,15 +133,21 @@ struct FlutterGeneratedFormPickerFieldsSource {
           }
 
           Future<void> _pickTime(BuildContext context) async {
-            final current = value is TimeOfDay
-                ? value! as TimeOfDay
-                : TimeOfDay.now();
+            final current = value is DateTime ? value! as DateTime : DateTime.now();
             final selected = await showTimePicker(
               context: context,
-              initialTime: current,
+              initialTime: TimeOfDay.fromDateTime(current),
             );
             if (selected != null) {
-              onChanged(selected);
+              onChanged(
+                DateTime(
+                  current.year,
+                  current.month,
+                  current.day,
+                  selected.hour,
+                  selected.minute,
+                ),
+              );
             }
           }
 
@@ -173,13 +183,17 @@ struct FlutterGeneratedFormPickerFieldsSource {
           String _displayValue(BuildContext context) {
             final current = value;
             if (current is DateTime) {
-              if (spec.control == 'datePicker') {
+              if (spec.control == GeneratedFormControl.datePicker) {
                 return MaterialLocalizations.of(context).formatMediumDate(current);
               }
-              return current.toLocal().toString();
-            }
-            if (current is TimeOfDay) {
-              return current.format(context);
+              if (spec.control == GeneratedFormControl.timePicker) {
+                return MaterialLocalizations.of(context).formatTimeOfDay(
+                  TimeOfDay.fromDateTime(current),
+                );
+              }
+              final localizations = MaterialLocalizations.of(context);
+              return '${localizations.formatMediumDate(current)} '
+                  '${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(current))}';
             }
             return 'Not selected';
           }
@@ -212,7 +226,7 @@ struct FlutterGeneratedFormPickerFieldsSource {
                 children: [
                   Expanded(
                     child: Text(
-                      value?.toString() ?? 'Not selected',
+                      _displayValue(),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -236,11 +250,32 @@ struct FlutterGeneratedFormPickerFieldsSource {
             final selected = await picker!(
               screenId: screenId,
               fieldId: spec.id,
+              valueKind: spec.valueKind,
               currentValue: value,
             );
             if (selected != null) {
               onChanged(selected);
             }
+          }
+
+          String _displayValue() {
+            final current = value;
+            if (current == null) {
+              return 'Not selected';
+            }
+            if (current is DomainFileValue) {
+              return current.uri.toString();
+            }
+            if (current is DomainImageValue) {
+              return current.uri.toString();
+            }
+            if (current is DomainColorValue) {
+              return current.hex;
+            }
+            if (current is DomainLocationValue) {
+              return '${current.latitude}, ${current.longitude}';
+            }
+            return current.toString();
           }
         }
         """

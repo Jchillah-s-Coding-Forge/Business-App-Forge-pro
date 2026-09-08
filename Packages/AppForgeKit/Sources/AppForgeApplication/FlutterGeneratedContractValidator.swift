@@ -9,6 +9,9 @@ struct FlutterGeneratedContractValidator {
         try validateFeaturePaths(entities)
         try validateGeneratedTypes(
             entities,
+            formScreens: FlutterFormRenderingSupport.formScreens(
+                in: specification
+            ),
             offlineEnabled: specification.offline.isEnabled
         )
         try FlutterFormScreenContractValidator().validate(
@@ -48,7 +51,23 @@ private extension FlutterGeneratedContractValidator {
         "DomainLocationValue",
         "DomainReference",
         "GeneratedFieldPresentationSchema",
+        "GeneratedBooleanField",
+        "GeneratedChoiceField",
+        "GeneratedChoiceOption",
+        "GeneratedEntityFormScreen",
+        "GeneratedExternalPickerField",
+        "GeneratedExternalValuePicker",
+        "GeneratedFormControl",
+        "GeneratedFormErrorMessageBuilder",
+        "GeneratedFormField",
+        "GeneratedFormFieldSpec",
+        "GeneratedFormSubmit",
+        "GeneratedFormValueKind",
         "GeneratedRelationSchema",
+        "GeneratedSliderField",
+        "GeneratedStepperField",
+        "GeneratedTemporalField",
+        "GeneratedTextField",
         "SqfliteSyncOutboxRepository",
         "SyncConflictStrategy",
         "SyncOperation",
@@ -79,6 +98,7 @@ private extension FlutterGeneratedContractValidator {
 
     func validateGeneratedTypes(
         _ entities: [EntityDefinition],
+        formScreens: [ScreenDefinition],
         offlineEnabled: Bool
     ) throws {
         var generatedTypes: [String: String] = [:]
@@ -106,6 +126,28 @@ private extension FlutterGeneratedContractValidator {
                 }
                 generatedTypes[generatedType] = entity.id
             }
+        }
+
+        for screen in formScreens {
+            let generatedType = try FlutterFormRenderingSupport.typeName(
+                for: screen
+            )
+            if Self.reservedTopLevelTypes.contains(generatedType) {
+                throw FlutterRendererError.reservedGeneratedTypeName(
+                    definitionID: screen.id,
+                    typeName: generatedType
+                )
+            }
+            if let firstDefinitionID = generatedTypes[generatedType],
+               firstDefinitionID != screen.id
+            {
+                throw FlutterRendererError.generatedTypeNameCollision(
+                    firstDefinitionID: firstDefinitionID,
+                    secondDefinitionID: screen.id,
+                    typeName: generatedType
+                )
+            }
+            generatedTypes[generatedType] = screen.id
         }
     }
 
