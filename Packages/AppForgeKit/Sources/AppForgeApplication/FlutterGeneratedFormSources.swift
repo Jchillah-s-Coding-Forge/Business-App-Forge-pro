@@ -24,8 +24,8 @@ struct FlutterGeneratedFormSources {
                 for: screen,
                 in: specification
             )
-            result.append(
-                try FlutterGeneratedFormScreenSource(
+            try result.append(
+                FlutterGeneratedFormScreenSource(
                     specification: specification,
                     screen: screen,
                     entity: entity
