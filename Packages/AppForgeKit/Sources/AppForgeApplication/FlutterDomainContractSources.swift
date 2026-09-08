@@ -21,6 +21,7 @@ private extension FlutterDomainContractSources {
     func domainValuesDart() -> String {
         FlutterGeneratedText.lines(
             domainReferenceLines
+                + domainRecordLines
                 + domainFileValueLines
                 + domainImageValueLines
                 + domainColorValueLines
@@ -38,6 +39,31 @@ private extension FlutterDomainContractSources {
             "",
             "  final String entityId;",
             "  final String recordId;",
+            "}",
+            ""
+        ]
+    }
+
+    private var domainRecordLines: [String] {
+        [
+            "class DomainRecord<T> {",
+            "  factory DomainRecord({",
+            "    required String recordId,",
+            "    required T value,",
+            "  }) {",
+            "    if (recordId.trim().isEmpty) {",
+            "      throw const FormatException('Record ID must not be empty.');",
+            "    }",
+            "    return DomainRecord._(recordId: recordId, value: value);",
+            "  }",
+            "",
+            "  const DomainRecord._({",
+            "    required this.recordId,",
+            "    required this.value,",
+            "  });",
+            "",
+            "  final String recordId;",
+            "  final T value;",
             "}",
             ""
         ]

@@ -237,10 +237,12 @@ private extension FlutterFeatureSources {
         typeName: String
     ) -> String {
         FlutterGeneratedText.lines([
+            "import '../../../../core/domain/domain_values.dart';",
+            "",
             "import '../entities/\(featureName).dart';",
             "",
             "abstract interface class \(typeName)Repository {",
-            "  Future<List<\(typeName)>> fetchAll();",
+            "  Future<List<DomainRecord<\(typeName)>>> fetchAll();",
             "  Future<void> save({",
             "    required String recordId,",
             "    required \(typeName) value,",
@@ -256,6 +258,8 @@ private extension FlutterFeatureSources {
         typeName: String
     ) -> String {
         FlutterGeneratedText.lines([
+            "import '../../../../core/domain/domain_values.dart';",
+            "",
             "import '../entities/\(featureName).dart';",
             "import '../repositories/\(featureName)_repository.dart';",
             "",
@@ -264,7 +268,8 @@ private extension FlutterFeatureSources {
             "",
             "  final \(typeName)Repository _repository;",
             "",
-            "  Future<List<\(typeName)>> call() => _repository.fetchAll();",
+            "  Future<List<DomainRecord<\(typeName)>>> call() =>",
+            "      _repository.fetchAll();",
             "}",
             ""
         ])
@@ -316,6 +321,8 @@ private extension FlutterFeatureSources {
         typeName: String
     ) -> String {
         FlutterGeneratedText.lines([
+            "import '../../../../core/domain/domain_values.dart';",
+            "",
             "import '../../domain/entities/\(featureName).dart';",
             "import '../../domain/use_cases/get_\(featureName)_list.dart';",
             "",
@@ -324,7 +331,8 @@ private extension FlutterFeatureSources {
             "",
             "  final Get\(typeName)List _get\(typeName)List;",
             "",
-            "  Future<List<\(typeName)>> load() => _get\(typeName)List();",
+            "  Future<List<DomainRecord<\(typeName)>>> load() =>",
+            "      _get\(typeName)List();",
             "}",
             ""
         ])

@@ -12,12 +12,17 @@ struct FlutterOfflineRowMappingSource {
         let sourceRelations = sortedRelations
         guard !fields.isEmpty || !sourceRelations.isEmpty else {
             return [
-                "    return const \(typeName)();"
+                "    return DomainRecord<\(typeName)>(",
+                "      recordId: row['_record_id']! as String,",
+                "      value: const \(typeName)(),",
+                "    );"
             ]
         }
 
         var lines = [
-            "    return \(typeName)("
+            "    return DomainRecord<\(typeName)>(",
+            "      recordId: row['_record_id']! as String,",
+            "      value: \(typeName)("
         ]
         for field in fields {
             guard let columnName = columnNames[field.id] else {
@@ -27,7 +32,7 @@ struct FlutterOfflineRowMappingSource {
                 field.identity.code
             )
             lines.append(
-                "      \(memberName): \(fromRowExpression(field, columnName: columnName)),"
+                "        \(memberName): \(fromRowExpression(field, columnName: columnName)),"
             )
         }
         for relation in sourceRelations {
@@ -38,10 +43,11 @@ struct FlutterOfflineRowMappingSource {
                 relation.identity.code
             )
             lines.append(
-                "      \(memberName): \(fromRowExpression(relation, columnName: columnName)),"
+                "        \(memberName): \(fromRowExpression(relation, columnName: columnName)),"
             )
         }
         lines += [
+            "      ),",
             "    );"
         ]
         return lines

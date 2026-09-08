@@ -49,7 +49,7 @@ struct FlutterOfflineLocalDataSourceSource {
             "  static const _table = '\(tableName)';",
             "  final AppDatabase _database;",
             "",
-            "  Future<List<\(typeName)>> fetchAll() async {",
+            "  Future<List<DomainRecord<\(typeName)>>> fetchAll() async {",
             "    final db = await _database.database;",
             "    final rows = await db.query(",
             "      _table,",
@@ -67,7 +67,7 @@ struct FlutterOfflineLocalDataSourceSource {
     ) -> [String] {
         var lines = [
             "",
-            "  \(typeName) _fromRow(Map<String, Object?> row) {"
+            "  DomainRecord<\(typeName)> _fromRow(Map<String, Object?> row) {"
         ]
         lines += mapping.fromRowLines()
         lines += [
@@ -97,14 +97,9 @@ struct FlutterOfflineLocalDataSourceSource {
             "import '../../../../core/sync/sync_status.dart';"
         ]
 
-        let needsDomainValueImport = entity.fields.contains(
-            where: FlutterDartNaming.usesDomainValueObject
-        ) || !relations.isEmpty
-        if needsDomainValueImport {
-            imports.append(
-                "import '../../../../core/domain/domain_values.dart';"
-            )
-        }
+        imports.append(
+            "import '../../../../core/domain/domain_values.dart';"
+        )
 
         if specification.offline.usesSyncOutbox {
             imports.append(

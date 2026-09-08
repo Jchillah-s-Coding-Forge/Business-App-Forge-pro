@@ -49,6 +49,7 @@ private extension FlutterGeneratedContractValidator {
         "DomainFileValue",
         "DomainImageValue",
         "DomainLocationValue",
+        "DomainRecord",
         "DomainReference",
         "GeneratedFieldPresentationSchema",
         "GeneratedBooleanField",

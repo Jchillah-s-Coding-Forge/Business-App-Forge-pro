@@ -4,6 +4,8 @@ struct FlutterOfflineRepositorySource {
 
     func content() -> String {
         FlutterGeneratedText.lines([
+            "import '../../../../core/domain/domain_values.dart';",
+            "",
             "import '../../domain/entities/\(featureName).dart';",
             "import '../../domain/repositories/\(featureName)_repository.dart';",
             "import '../local/\(featureName)_local_data_source.dart';",
@@ -14,7 +16,8 @@ struct FlutterOfflineRepositorySource {
             "  final \(typeName)LocalDataSource _local;",
             "",
             "  @override",
-            "  Future<List<\(typeName)>> fetchAll() => _local.fetchAll();",
+            "  Future<List<DomainRecord<\(typeName)>>> fetchAll() =>",
+            "      _local.fetchAll();",
             "",
             "  @override",
             "  Future<void> save({",

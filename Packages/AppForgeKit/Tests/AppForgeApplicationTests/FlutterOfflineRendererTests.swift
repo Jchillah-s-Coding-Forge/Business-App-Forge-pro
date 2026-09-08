@@ -82,6 +82,15 @@ final class FlutterOfflineRendererTests: XCTestCase {
             )
         )
         XCTAssertFalse(local.contains("await db.delete("))
+        XCTAssertTrue(
+            local.contains("Future<List<DomainRecord<Customer>>> fetchAll()")
+        )
+        XCTAssertTrue(
+            local.contains("DomainRecord<Customer> _fromRow")
+        )
+        XCTAssertTrue(
+            local.contains("recordId: row['_record_id']! as String")
+        )
     }
 
     private func assertRepositoryContract(
@@ -92,6 +101,11 @@ final class FlutterOfflineRendererTests: XCTestCase {
             in: plan
         )
         XCTAssertTrue(repository.contains("implements CustomerRepository"))
+        XCTAssertTrue(
+            repository.contains(
+                "Future<List<DomainRecord<Customer>>> fetchAll()"
+            )
+        )
         XCTAssertTrue(repository.contains("_local.fetchAll()"))
         XCTAssertTrue(
             repository.contains("_local.save(recordId: recordId, value: value)")
@@ -102,10 +116,17 @@ final class FlutterOfflineRendererTests: XCTestCase {
             "lib/features/customer/domain/repositories/customer_repository.dart",
             in: plan
         )
+        XCTAssertTrue(
+            domainRepository.contains(
+                "Future<List<DomainRecord<Customer>>> fetchAll();"
+            )
+        )
         XCTAssertTrue(domainRepository.contains("Future<void> save({"))
         XCTAssertTrue(
             domainRepository.contains("Future<void> delete(String recordId);")
         )
+        try assertReadIdentityUseCaseAndViewModel(plan)
+
         XCTAssertNotNil(
             plan.file(
                 at: "lib/features/customer/domain/use_cases/save_customer.dart"
@@ -115,6 +136,26 @@ final class FlutterOfflineRendererTests: XCTestCase {
             plan.file(
                 at: "lib/features/customer/domain/use_cases/delete_customer.dart"
             )
+        )
+    }
+
+    private func assertReadIdentityUseCaseAndViewModel(
+        _ plan: GenerationPlan
+    ) throws {
+        let getList = try FlutterOfflineTestFixture.contents(
+            "lib/features/customer/domain/use_cases/get_customer_list.dart",
+            in: plan
+        )
+        XCTAssertTrue(
+            getList.contains("Future<List<DomainRecord<Customer>>> call()")
+        )
+
+        let viewModel = try FlutterOfflineTestFixture.contents(
+            "lib/features/customer/presentation/view_models/customer_view_model.dart",
+            in: plan
+        )
+        XCTAssertTrue(
+            viewModel.contains("Future<List<DomainRecord<Customer>>> load()")
         )
     }
 

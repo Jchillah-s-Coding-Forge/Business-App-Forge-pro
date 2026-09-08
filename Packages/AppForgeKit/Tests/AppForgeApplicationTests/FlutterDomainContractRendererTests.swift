@@ -11,13 +11,8 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             "lib/core/domain/domain_values.dart",
             in: plan
         )
-        XCTAssertTrue(values.contains("class DomainFileValue"))
-        XCTAssertTrue(values.contains("class DomainImageValue"))
-        XCTAssertTrue(values.contains("class DomainColorValue"))
-        XCTAssertTrue(values.contains("class DomainLocationValue"))
-        XCTAssertTrue(values.contains("lat < -90 || lat > 90"))
-        XCTAssertTrue(values.contains("lon < -180 || lon > 180"))
-        XCTAssertFalse(values.contains("package:appforge"))
+        assertDomainRecordContract(values)
+        assertRichDomainValueContract(values)
 
         let asset = try contents(
             "lib/features/asset/domain/entities/asset.dart",
@@ -79,6 +74,12 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             )
         )
         XCTAssertTrue(local.contains("import 'dart:convert';"))
+        XCTAssertTrue(
+            local.contains("DomainRecord<Asset> _fromRow")
+        )
+        XCTAssertTrue(
+            local.contains("recordId: row['_record_id']! as String")
+        )
         XCTAssertTrue(
             local.contains("DomainFileValue.fromStorageString")
         )
@@ -155,6 +156,25 @@ final class FlutterDomainContractRendererTests: XCTestCase {
 }
 
 private extension FlutterDomainContractRendererTests {
+    func assertRichDomainValueContract(_ values: String) {
+        XCTAssertTrue(values.contains("class DomainFileValue"))
+        XCTAssertTrue(values.contains("class DomainImageValue"))
+        XCTAssertTrue(values.contains("class DomainColorValue"))
+        XCTAssertTrue(values.contains("class DomainLocationValue"))
+        XCTAssertTrue(values.contains("lat < -90 || lat > 90"))
+        XCTAssertTrue(values.contains("lon < -180 || lon > 180"))
+        XCTAssertFalse(values.contains("package:appforge"))
+    }
+
+    func assertDomainRecordContract(_ values: String) {
+        XCTAssertTrue(values.contains("class DomainRecord<T>"))
+        XCTAssertTrue(values.contains("final String recordId;"))
+        XCTAssertTrue(values.contains("final T value;"))
+        XCTAssertTrue(
+            values.contains("Record ID must not be empty.")
+        )
+    }
+
     func makeSpecification() -> ProjectSpecification {
         let asset = makeAsset()
         let user = makeUser()
