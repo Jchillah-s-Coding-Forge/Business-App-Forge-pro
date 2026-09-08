@@ -78,9 +78,7 @@ private extension FlutterFormScreenContractValidator {
                 for: field,
                 presentations: presentations
             )
-            if field.dataType == .location,
-               control != .locationPicker
-            {
+            if field.dataType == .location && control != .locationPicker {
                 throw FlutterRendererError.unsupportedFormControl(
                     screenID: screen.id,
                     fieldID: field.id,
