@@ -76,7 +76,8 @@ public struct SystemMacOSApplicationLocator: MacOSApplicationLocating {
         knownPaths: [String]
     ) -> String? {
         if let known = existingKnownPath(
-            knownPaths
+            knownPaths,
+            bundleIdentifier: bundleIdentifier
         ) {
             return known
         }
@@ -87,7 +88,8 @@ public struct SystemMacOSApplicationLocator: MacOSApplicationLocating {
     }
 
     private func existingKnownPath(
-        _ paths: [String]
+        _ paths: [String],
+        bundleIdentifier: String
     ) -> String? {
         for path in paths {
             let expanded = NSString(
@@ -99,10 +101,15 @@ public struct SystemMacOSApplicationLocator: MacOSApplicationLocating {
                 isDirectory: &isDirectory
             )
             if exists, isDirectory.boolValue {
-                return URL(
+                let applicationURL = URL(
                     fileURLWithPath: expanded,
                     isDirectory: true
-                ).standardizedFileURL.path
+                ).standardizedFileURL
+                if applicationBundleIdentifier(
+                    at: applicationURL
+                ) == bundleIdentifier {
+                    return applicationURL.path
+                }
             }
         }
         return nil
@@ -124,11 +131,17 @@ public struct SystemMacOSApplicationLocator: MacOSApplicationLocating {
         return execution.output
             .split(separator: "\n")
             .map(String.init)
-            .first(where: isApplicationPath)
+            .first {
+                isApplicationPath(
+                    $0,
+                    bundleIdentifier: bundleIdentifier
+                )
+            }
     }
 
     private func isApplicationPath(
-        _ path: String
+        _ path: String,
+        bundleIdentifier: String
     ) -> Bool {
         guard path.hasSuffix(".app") else {
             return false
@@ -139,7 +152,34 @@ public struct SystemMacOSApplicationLocator: MacOSApplicationLocating {
             atPath: path,
             isDirectory: &isDirectory
         )
-        return exists && isDirectory.boolValue
+        guard exists, isDirectory.boolValue else {
+            return false
+        }
+
+        return applicationBundleIdentifier(
+            at: URL(
+                fileURLWithPath: path,
+                isDirectory: true
+            )
+        ) == bundleIdentifier
+    }
+
+    private func applicationBundleIdentifier(
+        at applicationURL: URL
+    ) -> String? {
+        let infoURL = applicationURL
+            .appendingPathComponent("Contents", isDirectory: true)
+            .appendingPathComponent("Info.plist")
+        guard let data = try? Data(contentsOf: infoURL),
+              let object = try? PropertyListSerialization.propertyList(
+                  from: data,
+                  format: nil
+              ),
+              let dictionary = object as? [String: Any]
+        else {
+            return nil
+        }
+        return dictionary["CFBundleIdentifier"] as? String
     }
 }
 
