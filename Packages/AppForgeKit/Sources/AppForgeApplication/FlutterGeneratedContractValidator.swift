@@ -7,15 +7,15 @@ struct FlutterGeneratedContractValidator {
         let entities = specification.entities.sorted(by: Self.entitySort)
 
         try validateFeaturePaths(entities)
+        try FlutterFormScreenContractValidator().validate(
+            specification
+        )
         try validateGeneratedTypes(
             entities,
             formScreens: FlutterFormRenderingSupport.formScreens(
                 in: specification
             ),
             offlineEnabled: specification.offline.isEnabled
-        )
-        try FlutterFormScreenContractValidator().validate(
-            specification
         )
 
         for entity in entities {
