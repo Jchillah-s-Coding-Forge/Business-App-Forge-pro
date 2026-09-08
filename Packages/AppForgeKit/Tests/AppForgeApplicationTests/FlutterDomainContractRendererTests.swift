@@ -11,6 +11,12 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             "lib/core/domain/domain_values.dart",
             in: plan
         )
+        XCTAssertTrue(values.contains("class DomainRecord<T>"))
+        XCTAssertTrue(values.contains("final String recordId;"))
+        XCTAssertTrue(values.contains("final T value;"))
+        XCTAssertTrue(
+            values.contains("Record ID must not be empty.")
+        )
         XCTAssertTrue(values.contains("class DomainFileValue"))
         XCTAssertTrue(values.contains("class DomainImageValue"))
         XCTAssertTrue(values.contains("class DomainColorValue"))
@@ -79,6 +85,12 @@ final class FlutterDomainContractRendererTests: XCTestCase {
             )
         )
         XCTAssertTrue(local.contains("import 'dart:convert';"))
+        XCTAssertTrue(
+            local.contains("DomainRecord<Asset> _fromRow")
+        )
+        XCTAssertTrue(
+            local.contains("recordId: row['_record_id']! as String")
+        )
         XCTAssertTrue(
             local.contains("DomainFileValue.fromStorageString")
         )
