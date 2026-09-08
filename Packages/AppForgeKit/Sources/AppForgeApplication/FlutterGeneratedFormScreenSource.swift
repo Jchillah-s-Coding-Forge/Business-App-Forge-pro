@@ -34,6 +34,7 @@ private extension FlutterGeneratedFormScreenSource {
                     screenID: escapedScreenID,
                     title: escapedTitle
                 )
+                + editMapperLines(entityType: entityType)
                 + initialValuesMethodLines(entityType: entityType)
                 + fieldSpecDeclarationLines()
         )
@@ -106,6 +107,103 @@ private extension FlutterGeneratedFormScreenSource {
             "  }",
             ""
         ]
+    }
+
+    func editMapperLines(entityType: String) -> [String] {
+        [
+            "  static \(entityType) applyEditValues({",
+            "    required DomainRecord<\(entityType)> record,",
+            "    required Map<String, Object?> values,",
+            "  }) {",
+            "    final current = record.value;",
+            "    return \(entityType)("
+        ] + editEntityArgumentLines() + [
+            "    );",
+            "  }",
+            "",
+            "  static T _requiredEditValue<T>(",
+            "    Map<String, Object?> values,",
+            "    String fieldId,",
+            "  ) {",
+            "    if (!values.containsKey(fieldId)) {",
+            "      throw StateError(",
+            "        'Missing normalized edit value for $fieldId.',",
+            "      );",
+            "    }",
+            "    final value = values[fieldId];",
+            "    if (value is T) {",
+            "      return value;",
+            "    }",
+            "    throw StateError(",
+            "      'Invalid normalized edit value for $fieldId.',",
+            "    );",
+            "  }",
+            "",
+            "  static T? _optionalEditValue<T>(",
+            "    Map<String, Object?> values,",
+            "    String fieldId,",
+            "  ) {",
+            "    if (!values.containsKey(fieldId)) {",
+            "      throw StateError(",
+            "        'Missing normalized edit value for $fieldId.',",
+            "      );",
+            "    }",
+            "    final value = values[fieldId];",
+            "    if (value == null) {",
+            "      return null;",
+            "    }",
+            "    if (value is T) {",
+            "      return value;",
+            "    }",
+            "    throw StateError(",
+            "      'Invalid normalized edit value for $fieldId.',",
+            "    );",
+            "  }",
+            ""
+        ]
+    }
+
+    func editEntityArgumentLines() -> [String] {
+        let visibleFieldIDs = Set(screen.visibleFieldIDs)
+        let fieldLines = entity.fields
+            .sorted(by: Self.fieldSort)
+            .map { field in
+                let member = FlutterDartNaming.memberName(
+                    field.identity.code
+                )
+                let value: String
+                if visibleFieldIDs.contains(field.id) {
+                    let helper = field.isRequired
+                        ? "_requiredEditValue"
+                        : "_optionalEditValue"
+                    let type = editValueType(field)
+                    let fieldID = FlutterDartEscaping.singleQuoted(field.id)
+                    value = "\(helper)<\(type)>(values, '\(fieldID)')"
+                } else {
+                    value = "current.\(member)"
+                }
+                return "      \(member): \(value),"
+            }
+
+        let relationLines = specification.relations
+            .filter { $0.sourceEntityID == entity.id }
+            .sorted(by: Self.relationSort)
+            .map { relation in
+                let member = FlutterDartNaming.memberName(
+                    relation.identity.code
+                )
+                return "      \(member): current.\(member),"
+            }
+
+        return fieldLines + relationLines
+    }
+
+    func editValueType(_ field: FieldDefinition) -> String {
+        let type = FlutterDartNaming.dartType(for: field)
+        guard !field.isRequired, type.hasSuffix("?") else {
+            return type
+        }
+        return String(type.dropLast())
     }
 
     func initialValuesMethodLines(
@@ -265,6 +363,26 @@ private extension FlutterGeneratedFormScreenSource {
             maximumValue: maximumValues.min(),
             patterns: patterns.sorted()
         )
+    }
+
+    static func fieldSort(
+        _ lhs: FieldDefinition,
+        _ rhs: FieldDefinition
+    ) -> Bool {
+        if lhs.identity.code != rhs.identity.code {
+            return lhs.identity.code < rhs.identity.code
+        }
+        return lhs.id < rhs.id
+    }
+
+    static func relationSort(
+        _ lhs: RelationDefinition,
+        _ rhs: RelationDefinition
+    ) -> Bool {
+        if lhs.identity.code != rhs.identity.code {
+            return lhs.identity.code < rhs.identity.code
+        }
+        return lhs.id < rhs.id
     }
 
     func optional(_ value: Int?) -> String {

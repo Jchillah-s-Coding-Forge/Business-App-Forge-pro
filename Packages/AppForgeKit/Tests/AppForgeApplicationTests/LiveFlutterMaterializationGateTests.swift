@@ -69,6 +69,15 @@ private extension LiveFlutterMaterializationGateTests {
         XCTAssertTrue(
             source.contains("recordId: record?.recordId")
         )
+        XCTAssertTrue(
+            source.contains("static Asset applyEditValues({")
+        )
+        XCTAssertTrue(
+            source.contains("name: _requiredEditValue<String>(")
+        )
+        XCTAssertTrue(
+            source.contains("active: _optionalEditValue<bool>(")
+        )
     }
 
     func assertFormattingIsStable(
