@@ -82,8 +82,6 @@ private extension FlutterFeatureSources {
             )
         ]
     }
-
-
 }
 
 private extension FlutterFeatureSources {
