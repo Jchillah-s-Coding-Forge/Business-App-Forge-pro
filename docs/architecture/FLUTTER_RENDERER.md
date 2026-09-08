@@ -98,14 +98,17 @@ lib/features/<feature>/
     └── view_models/
 ```
 
-The first renderer slice generates:
+The renderer generates:
 
 - framework-free Dart entities
+- provider-neutral rich domain value objects
+- source-side relationship references
 - repository interfaces
-- list use cases
+- list/save/delete use cases
 - plain view-model boundaries
+- deterministic relation and field-presentation metadata
 
-Backend adapters, data sources, SQLite, Supabase, Firebase, advanced screen controls, and relation materialization are later renderer/backend slices.
+Offline-first projects additionally materialize SQLite storage and outbox mappings. Supabase/Firebase adapters, concrete Flutter form controls, provider foreign keys/RLS, file uploads, image processing, and maps/geocoding remain later renderer/backend slices.
 
 DTOs and backend implementation details must remain outside the domain layer.
 
@@ -117,7 +120,10 @@ Current deterministic field mapping:
 | --- | --- |
 | string, email, phone, URL | `String` |
 | enumeration | `String` |
-| file, image, color, location | `String` |
+| file | `DomainFileValue` |
+| image | `DomainImageValue` |
+| color | `DomainColorValue` |
+| location | `DomainLocationValue` |
 | integer | `int` |
 | decimal, currency, percentage | `double` |
 | boolean | `bool` |
@@ -125,7 +131,18 @@ Current deterministic field mapping:
 
 Required fields are non-nullable and constructor-required. Optional fields are nullable.
 
-Dart reserved member names are mapped deterministically rather than emitted as invalid source.
+Rich values remain framework- and provider-neutral:
+
+- file/image values validate and retain URI references;
+- colors normalize and validate `#RRGGBB` / `#RRGGBBAA`;
+- locations validate finite latitude/longitude values and geographic ranges;
+- offline SQLite storage uses deterministic string representations and reconstructs the value objects when reading.
+
+Source-side relations are materialized as `DomainReference(entityId, recordId)`. One-to-one and many-to-one relations are single references; one-to-many and many-to-many relations are defensively unmodifiable lists. Offline storage persists to-one record IDs as text and to-many record IDs as deterministic JSON arrays. This slice intentionally does not imply provider foreign keys or RLS.
+
+`FieldPresentationDefinition` and relation metadata are emitted as standalone generated schema metadata so later form/screen renderers can consume the original product intent without an AppForge runtime dependency.
+
+Dart reserved member names are mapped deterministically rather than emitted as invalid source. Generated member collisions across fields and source-side relations fail closed rather than being silently renamed.
 
 ## Atomic writer
 

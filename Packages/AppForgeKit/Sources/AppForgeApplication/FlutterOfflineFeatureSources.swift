@@ -15,6 +15,11 @@ struct FlutterOfflineFeatureSources {
         let columnNames = try FlutterOfflineStorageNaming.columnNames(
             for: entity
         )
+        let relations = specification.relations
+            .filter { $0.sourceEntityID == entity.id }
+        let relationColumnNames = try FlutterOfflineStorageNaming.relationColumnNames(
+            for: relations
+        )
 
         return [
             GeneratedFile(
@@ -22,10 +27,12 @@ struct FlutterOfflineFeatureSources {
                 contents: FlutterOfflineLocalDataSourceSource(
                     specification: specification,
                     entity: entity,
+                    relations: relations,
                     featureName: featureName,
                     typeName: typeName,
                     tableName: tableName,
-                    columnNames: columnNames
+                    columnNames: columnNames,
+                    relationColumnNames: relationColumnNames
                 ).content()
             ),
             GeneratedFile(

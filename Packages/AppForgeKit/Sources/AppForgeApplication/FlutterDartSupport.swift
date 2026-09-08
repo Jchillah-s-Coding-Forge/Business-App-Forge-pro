@@ -78,6 +78,15 @@ enum FlutterDartNaming {
         ) != nil
     }
 
+    static func usesDomainValueObject(_ field: FieldDefinition) -> Bool {
+        switch field.dataType {
+        case .file, .image, .color, .location:
+            true
+        default:
+            false
+        }
+    }
+
     static func dartType(for field: FieldDefinition) -> String {
         let baseType = switch field.dataType {
         case .integer:
@@ -88,7 +97,15 @@ enum FlutterDartNaming {
             "bool"
         case .date, .dateTime, .time:
             "DateTime"
-        case .string, .email, .phone, .url, .enumeration, .file, .image, .color, .location:
+        case .file:
+            "DomainFileValue"
+        case .image:
+            "DomainImageValue"
+        case .color:
+            "DomainColorValue"
+        case .location:
+            "DomainLocationValue"
+        case .string, .email, .phone, .url, .enumeration:
             "String"
         }
 

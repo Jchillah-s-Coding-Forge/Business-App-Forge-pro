@@ -15,8 +15,14 @@ struct FlutterSourceBuilder {
             lockfile: lockfile,
             packageName: packageName
         ).files()
+        files.append(contentsOf: FlutterDomainContractSources(
+            specification: specification
+        ).files())
         for entity in specification.entities.sorted(by: Self.entitySort) {
-            try files.append(contentsOf: FlutterFeatureSources(entity: entity).files())
+            try files.append(contentsOf: FlutterFeatureSources(
+                specification: specification,
+                entity: entity
+            ).files())
             try files.append(
                 contentsOf: FlutterOfflineFeatureSources(
                     specification: specification,

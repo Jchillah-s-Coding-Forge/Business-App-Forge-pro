@@ -1,6 +1,7 @@
 import AppForgeDomain
 
 struct FlutterFeatureSources {
+    let specification: ProjectSpecification
     let entity: EntityDefinition
 
     func files() throws -> [GeneratedFile] {
@@ -16,102 +17,266 @@ struct FlutterFeatureSources {
         }
 
         let fields = entity.fields.sorted(by: Self.fieldSort)
-        try validateFieldIdentifiers(fields)
+        let relations = specification.relations
+            .filter { $0.sourceEntityID == entity.id }
+            .sorted(by: Self.relationSort)
+        try validateMemberIdentifiers(fields: fields, relations: relations)
 
-        return [
+        return generatedFiles(
+            featureName: featureName,
+            typeName: typeName,
+            fields: fields,
+            relations: relations
+        )
+    }
+}
+
+private extension FlutterFeatureSources {
+    func generatedFiles(
+        featureName: String,
+        typeName: String,
+        fields: [FieldDefinition],
+        relations: [RelationDefinition]
+    ) -> [GeneratedFile] {
+        [
             GeneratedFile(
                 relativePath: "lib/features/\(featureName)/domain/entities/\(featureName).dart",
-                contents: entityDart(typeName: typeName, fields: fields)
+                contents: entityDart(
+                    typeName: typeName,
+                    fields: fields,
+                    relations: relations
+                )
             ),
             GeneratedFile(
                 relativePath: "lib/features/\(featureName)/domain/repositories/\(featureName)_repository.dart",
-                contents: repositoryDart(featureName: featureName, typeName: typeName)
+                contents: repositoryDart(
+                    featureName: featureName,
+                    typeName: typeName
+                )
             ),
             GeneratedFile(
                 relativePath: "lib/features/\(featureName)/domain/use_cases/get_\(featureName)_list.dart",
-                contents: useCaseDart(featureName: featureName, typeName: typeName)
+                contents: useCaseDart(
+                    featureName: featureName,
+                    typeName: typeName
+                )
             ),
             GeneratedFile(
                 relativePath: "lib/features/\(featureName)/domain/use_cases/save_\(featureName).dart",
-                contents: saveUseCaseDart(featureName: featureName, typeName: typeName)
+                contents: saveUseCaseDart(
+                    featureName: featureName,
+                    typeName: typeName
+                )
             ),
             GeneratedFile(
                 relativePath: "lib/features/\(featureName)/domain/use_cases/delete_\(featureName).dart",
-                contents: deleteUseCaseDart(featureName: featureName, typeName: typeName)
+                contents: deleteUseCaseDart(
+                    featureName: featureName,
+                    typeName: typeName
+                )
             ),
             GeneratedFile(
                 relativePath: "lib/features/\(featureName)/presentation/view_models/\(featureName)_view_model.dart",
-                contents: viewModelDart(featureName: featureName, typeName: typeName)
+                contents: viewModelDart(
+                    featureName: featureName,
+                    typeName: typeName
+                )
             )
         ]
     }
 
-    private func validateFieldIdentifiers(
-        _ fields: [FieldDefinition]
+    func validateMemberIdentifiers(
+        fields: [FieldDefinition],
+        relations: [RelationDefinition]
     ) throws {
         var generatedNames = Set<String>()
 
         for field in fields {
-            let identifier = FlutterDartNaming.memberName(field.identity.code)
-            guard FlutterDartNaming.isUsableIdentifier(identifier) else {
-                throw FlutterRendererError.invalidGeneratedIdentifier(
-                    definitionID: field.id,
-                    code: field.identity.code
-                )
-            }
-            guard generatedNames.insert(identifier).inserted else {
-                throw FlutterRendererError.duplicateGeneratedIdentifier(
-                    entityID: entity.id,
-                    identifier: identifier
-                )
-            }
+            try insertGeneratedMember(
+                definitionID: field.id,
+                code: field.identity.code,
+                into: &generatedNames
+            )
+        }
+        for relation in relations {
+            try insertGeneratedMember(
+                definitionID: relation.id,
+                code: relation.identity.code,
+                into: &generatedNames
+            )
         }
     }
 
-    private func entityDart(
+    func insertGeneratedMember(
+        definitionID: String,
+        code: String,
+        into generatedNames: inout Set<String>
+    ) throws {
+        let identifier = FlutterDartNaming.memberName(code)
+        guard FlutterDartNaming.isUsableIdentifier(identifier) else {
+            throw FlutterRendererError.invalidGeneratedIdentifier(
+                definitionID: definitionID,
+                code: code
+            )
+        }
+        guard generatedNames.insert(identifier).inserted else {
+            throw FlutterRendererError.duplicateGeneratedIdentifier(
+                entityID: entity.id,
+                identifier: identifier
+            )
+        }
+    }
+}
+
+private extension FlutterFeatureSources {
+    func entityDart(
         typeName: String,
-        fields: [FieldDefinition]
+        fields: [FieldDefinition],
+        relations: [RelationDefinition]
     ) -> String {
-        guard !fields.isEmpty else {
-            return FlutterGeneratedText.lines([
-                "class \(typeName) {",
-                "  const \(typeName)();",
-                "}",
-                ""
-            ])
+        let needsDomainImport = fields.contains(
+            where: FlutterDartNaming.usesDomainValueObject
+        ) || !relations.isEmpty
+        guard !fields.isEmpty || !relations.isEmpty else {
+            return emptyEntityDart(
+                typeName: typeName,
+                needsDomainImport: needsDomainImport
+            )
         }
 
-        let constructorLines = fields.map { field in
-            let identifier = FlutterDartNaming.memberName(field.identity.code)
-            return field.isRequired
-                ? "    required this.\(identifier),"
-                : "    this.\(identifier),"
+        var lines = domainImportLines(when: needsDomainImport)
+        lines += ["class \(typeName) {"]
+        lines += constructorLines(
+            typeName: typeName,
+            fields: fields,
+            relations: relations
+        )
+        lines += [""]
+        lines += propertyLines(fields: fields, relations: relations)
+        lines += ["}", ""]
+        return FlutterGeneratedText.lines(lines)
+    }
+
+    func emptyEntityDart(
+        typeName: String,
+        needsDomainImport: Bool
+    ) -> String {
+        var lines = domainImportLines(when: needsDomainImport)
+        lines += [
+            "class \(typeName) {",
+            "  const \(typeName)();",
+            "}",
+            ""
+        ]
+        return FlutterGeneratedText.lines(lines)
+    }
+
+    func domainImportLines(when needed: Bool) -> [String] {
+        needed
+            ? [
+                "import '../../../../core/domain/domain_values.dart';",
+                ""
+            ]
+            : []
+    }
+
+    func constructorLines(
+        typeName: String,
+        fields: [FieldDefinition],
+        relations: [RelationDefinition]
+    ) -> [String] {
+        let hasToManyRelation = relations.contains(where: Self.isToMany)
+        var lines = [
+            "  \(hasToManyRelation ? "" : "const ")\(typeName)({"
+        ]
+        lines += fields.map(fieldConstructorLine)
+        lines += relations.map(relationConstructorLine)
+        lines += relationInitializerLines(
+            relations: relations,
+            hasToManyRelation: hasToManyRelation
+        )
+        return lines
+    }
+
+    func fieldConstructorLine(_ field: FieldDefinition) -> String {
+        let identifier = FlutterDartNaming.memberName(field.identity.code)
+        return field.isRequired
+            ? "    required this.\(identifier),"
+            : "    this.\(identifier),"
+    }
+
+    func relationConstructorLine(_ relation: RelationDefinition) -> String {
+        let identifier = FlutterDartNaming.memberName(relation.identity.code)
+        let type = relationBaseType(relation)
+        if Self.isToMany(relation) {
+            return relation.isRequired
+                ? "    required \(type) \(identifier),"
+                : "    \(type)? \(identifier),"
         }
-        let propertyLines = fields.map { field in
+        return relation.isRequired
+            ? "    required this.\(identifier),"
+            : "    this.\(identifier),"
+    }
+
+    func relationInitializerLines(
+        relations: [RelationDefinition],
+        hasToManyRelation: Bool
+    ) -> [String] {
+        guard hasToManyRelation else {
+            return ["  });"]
+        }
+
+        let initializers = relations
+            .filter(Self.isToMany)
+            .map(relationInitializer)
+        var lines = ["  })"]
+        for (index, initializer) in initializers.enumerated() {
+            let prefix = index == 0 ? "      : " : "        "
+            let suffix = index == initializers.count - 1 ? ";" : ","
+            lines.append("\(prefix)\(initializer)\(suffix)")
+        }
+        return lines
+    }
+
+    func relationInitializer(_ relation: RelationDefinition) -> String {
+        let identifier = FlutterDartNaming.memberName(relation.identity.code)
+        if relation.isRequired {
+            return "\(identifier) = "
+                + "List<DomainReference>.unmodifiable(\(identifier))"
+        }
+        return "\(identifier) = \(identifier) == null ? null : "
+            + "List<DomainReference>.unmodifiable(\(identifier))"
+    }
+
+    func propertyLines(
+        fields: [FieldDefinition],
+        relations: [RelationDefinition]
+    ) -> [String] {
+        let fieldLines = fields.map { field in
             let identifier = FlutterDartNaming.memberName(field.identity.code)
             let type = FlutterDartNaming.dartType(for: field)
             return "  final \(type) \(identifier);"
         }
-
-        return FlutterGeneratedText.lines(
-            [
-                "class \(typeName) {",
-                "  const \(typeName)({"
-            ]
-                + constructorLines
-                + [
-                    "  });",
-                    ""
-                ]
-                + propertyLines
-                + [
-                    "}",
-                    ""
-                ]
-        )
+        let relationLines = relations.map { relation in
+            let identifier = FlutterDartNaming.memberName(
+                relation.identity.code
+            )
+            let type = relationBaseType(relation)
+            return "  final \(type)\(relation.isRequired ? "" : "?") "
+                + "\(identifier);"
+        }
+        return fieldLines + relationLines
     }
 
-    private func repositoryDart(
+    func relationBaseType(_ relation: RelationDefinition) -> String {
+        Self.isToMany(relation)
+            ? "List<DomainReference>"
+            : "DomainReference"
+    }
+}
+
+private extension FlutterFeatureSources {
+    func repositoryDart(
         featureName: String,
         typeName: String
     ) -> String {
@@ -130,7 +295,7 @@ struct FlutterFeatureSources {
         ])
     }
 
-    private func useCaseDart(
+    func useCaseDart(
         featureName: String,
         typeName: String
     ) -> String {
@@ -149,7 +314,7 @@ struct FlutterFeatureSources {
         ])
     }
 
-    private func saveUseCaseDart(
+    func saveUseCaseDart(
         featureName: String,
         typeName: String
     ) -> String {
@@ -172,7 +337,7 @@ struct FlutterFeatureSources {
         ])
     }
 
-    private func deleteUseCaseDart(
+    func deleteUseCaseDart(
         featureName: String,
         typeName: String
     ) -> String {
@@ -190,7 +355,7 @@ struct FlutterFeatureSources {
         ])
     }
 
-    private func viewModelDart(
+    func viewModelDart(
         featureName: String,
         typeName: String
     ) -> String {
@@ -208,8 +373,10 @@ struct FlutterFeatureSources {
             ""
         ])
     }
+}
 
-    private static func fieldSort(
+private extension FlutterFeatureSources {
+    static func fieldSort(
         _ lhs: FieldDefinition,
         _ rhs: FieldDefinition
     ) -> Bool {
@@ -217,5 +384,24 @@ struct FlutterFeatureSources {
             return lhs.identity.code < rhs.identity.code
         }
         return lhs.id < rhs.id
+    }
+
+    static func relationSort(
+        _ lhs: RelationDefinition,
+        _ rhs: RelationDefinition
+    ) -> Bool {
+        if lhs.identity.code != rhs.identity.code {
+            return lhs.identity.code < rhs.identity.code
+        }
+        return lhs.id < rhs.id
+    }
+
+    static func isToMany(_ relation: RelationDefinition) -> Bool {
+        switch relation.cardinality {
+        case .oneToMany, .manyToMany:
+            true
+        case .oneToOne, .manyToOne:
+            false
+        }
     }
 }

@@ -3,16 +3,20 @@ import AppForgeDomain
 struct FlutterOfflineLocalDataSourceSource {
     let specification: ProjectSpecification
     let entity: EntityDefinition
+    let relations: [RelationDefinition]
     let featureName: String
     let typeName: String
     let tableName: String
     let columnNames: [String: String]
+    let relationColumnNames: [String: String]
 
     func content() -> String {
         let mapping = FlutterOfflineRowMappingSource(
             entity: entity,
+            relations: relations,
             typeName: typeName,
-            columnNames: columnNames
+            columnNames: columnNames,
+            relationColumnNames: relationColumnNames
         )
         let mutations = FlutterOfflineMutationSource(
             specification: specification,
@@ -78,7 +82,10 @@ struct FlutterOfflineLocalDataSourceSource {
 
     private var importLines: [String] {
         var imports: [String] = []
-        if specification.offline.usesSyncOutbox {
+        let usesRelationJSON = relations.contains {
+            $0.cardinality == .oneToMany || $0.cardinality == .manyToMany
+        }
+        if specification.offline.usesSyncOutbox || usesRelationJSON {
             imports.append("import 'dart:convert';")
         }
 
@@ -89,6 +96,15 @@ struct FlutterOfflineLocalDataSourceSource {
             "import '../../../../core/storage/app_database.dart';",
             "import '../../../../core/sync/sync_status.dart';"
         ]
+
+        let needsDomainValueImport = entity.fields.contains(
+            where: FlutterDartNaming.usesDomainValueObject
+        ) || !relations.isEmpty
+        if needsDomainValueImport {
+            imports.append(
+                "import '../../../../core/domain/domain_values.dart';"
+            )
+        }
 
         if specification.offline.usesSyncOutbox {
             imports.append(
