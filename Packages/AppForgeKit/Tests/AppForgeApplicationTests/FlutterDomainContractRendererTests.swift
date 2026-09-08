@@ -151,7 +151,10 @@ final class FlutterDomainContractRendererTests: XCTestCase {
         }
     }
 
-    private func makeSpecification() -> ProjectSpecification {
+}
+
+private extension FlutterDomainContractRendererTests {
+    func makeSpecification() -> ProjectSpecification {
         let asset = makeAsset()
         let user = makeUser()
         let relations = makeRelations(asset: asset, user: user)
