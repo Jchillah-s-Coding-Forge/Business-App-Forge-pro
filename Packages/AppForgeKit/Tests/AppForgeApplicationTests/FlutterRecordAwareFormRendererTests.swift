@@ -139,6 +139,7 @@ private extension FlutterRecordAwareFormRendererTests {
 
     func makeFixture() -> Fixture {
         let fields = fixtureFields()
+        let mappings = fixtureMappings()
         let asset = EntityDefinition(
             identity: DefinitionIdentity(
                 id: "entity.asset",
@@ -147,16 +148,6 @@ private extension FlutterRecordAwareFormRendererTests {
             ),
             fields: fields
         )
-        let visibleIDs = [
-            "field.asset.name",
-            "field.asset.quantity",
-            "field.asset.active",
-            "field.asset.scheduled_at",
-            "field.asset.attachment",
-            "field.asset.image",
-            "field.asset.color",
-            "field.asset.location"
-        ]
         let screen = ScreenDefinition(
             identity: DefinitionIdentity(
                 id: "screen.asset.editor",
@@ -165,7 +156,7 @@ private extension FlutterRecordAwareFormRendererTests {
             ),
             kind: .form,
             entityID: asset.id,
-            visibleFieldIDs: visibleIDs
+            visibleFieldIDs: mappings.map(\.fieldID)
         )
 
         return Fixture(
@@ -173,41 +164,33 @@ private extension FlutterRecordAwareFormRendererTests {
                 entities: [asset],
                 screens: [screen]
             ),
-            visibleMappings: [
-                VisibleMapping(
-                    fieldID: "field.asset.name",
-                    member: "name"
-                ),
-                VisibleMapping(
-                    fieldID: "field.asset.quantity",
-                    member: "quantity"
-                ),
-                VisibleMapping(
-                    fieldID: "field.asset.active",
-                    member: "active"
-                ),
-                VisibleMapping(
-                    fieldID: "field.asset.scheduled_at",
-                    member: "scheduledAt"
-                ),
-                VisibleMapping(
-                    fieldID: "field.asset.attachment",
-                    member: "attachment"
-                ),
-                VisibleMapping(
-                    fieldID: "field.asset.image",
-                    member: "image"
-                ),
-                VisibleMapping(
-                    fieldID: "field.asset.color",
-                    member: "color"
-                ),
-                VisibleMapping(
-                    fieldID: "field.asset.location",
-                    member: "location"
-                )
-            ]
+            visibleMappings: mappings
         )
+    }
+
+    func fixtureMappings() -> [VisibleMapping] {
+        [
+            VisibleMapping(fieldID: "field.asset.name", member: "name"),
+            VisibleMapping(
+                fieldID: "field.asset.quantity",
+                member: "quantity"
+            ),
+            VisibleMapping(fieldID: "field.asset.active", member: "active"),
+            VisibleMapping(
+                fieldID: "field.asset.scheduled_at",
+                member: "scheduledAt"
+            ),
+            VisibleMapping(
+                fieldID: "field.asset.attachment",
+                member: "attachment"
+            ),
+            VisibleMapping(fieldID: "field.asset.image", member: "image"),
+            VisibleMapping(fieldID: "field.asset.color", member: "color"),
+            VisibleMapping(
+                fieldID: "field.asset.location",
+                member: "location"
+            )
+        ]
     }
 
     func fixtureFields() -> [FieldDefinition] {
