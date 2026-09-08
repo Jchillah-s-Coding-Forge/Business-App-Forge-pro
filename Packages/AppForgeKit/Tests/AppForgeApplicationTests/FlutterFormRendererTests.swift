@@ -86,6 +86,39 @@ final class FlutterFormRendererTests: XCTestCase {
         }
     }
 
+    func testGeneratedFormDefendsAgainstStaleInitialValuesAndInvalidRuntimeTypes() throws {
+        let plan = try render(makeFormFixture().specification)
+        let contract = try XCTUnwrap(
+            plan.file(
+                at: "lib/core/presentation/generated_form_contract.dart"
+            )?.contents
+        )
+        let screen = try XCTUnwrap(
+            plan.file(
+                at: "lib/core/presentation/generated_entity_form_screen.dart"
+            )?.contents
+        )
+        let choices = try XCTUnwrap(
+            plan.file(
+                at: "lib/core/presentation/generated_form_choice_fields.dart"
+            )?.contents
+        )
+
+        XCTAssertTrue(contract.contains("import '../domain/domain_values.dart';"))
+        XCTAssertTrue(contract.contains("final typeError = _validateType(value);"))
+        XCTAssertTrue(contract.contains("value is DomainFileValue"))
+        XCTAssertTrue(contract.contains("value is DomainImageValue"))
+        XCTAssertTrue(contract.contains("value is DomainColorValue"))
+        XCTAssertTrue(contract.contains("value is DomainLocationValue"))
+        XCTAssertTrue(screen.contains("mapEquals(oldWidget.initialValues"))
+        XCTAssertTrue(screen.contains("_formKey = GlobalKey<FormState>();"))
+        XCTAssertTrue(
+            choices.contains(
+                "spec.options.any((option) => option.value == candidate)"
+            )
+        )
+    }
+
     func testMissingPresentationUsesDocumentedDeterministicDefaults() throws {
         let plan = try render(defaultControlSpecification())
         let source = try XCTUnwrap(
