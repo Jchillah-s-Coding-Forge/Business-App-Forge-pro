@@ -223,6 +223,19 @@ private extension LiveFlutterMaterializationGateTests {
                     "field.asset.name",
                     "field.asset.active"
                 ]
+            ),
+            ScreenDefinition(
+                identity: DefinitionIdentity(
+                    id: "screen.asset.detail",
+                    code: "asset_detail",
+                    label: "Asset details"
+                ),
+                kind: .detail,
+                entityID: entityID,
+                visibleFieldIDs: [
+                    "field.asset.name",
+                    "field.asset.active"
+                ]
             )
         ]
     }

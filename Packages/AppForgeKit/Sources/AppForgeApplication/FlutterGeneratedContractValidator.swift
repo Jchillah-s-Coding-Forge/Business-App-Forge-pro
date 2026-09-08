@@ -13,12 +13,18 @@ struct FlutterGeneratedContractValidator {
         try FlutterListScreenContractValidator().validate(
             specification
         )
+        try FlutterDetailScreenContractValidator().validate(
+            specification
+        )
         try validateGeneratedTypes(
             entities,
             formScreens: FlutterFormRenderingSupport.formScreens(
                 in: specification
             ),
             listScreens: FlutterListRenderingSupport.listScreens(
+                in: specification
+            ),
+            detailScreens: FlutterDetailRenderingSupport.detailScreens(
                 in: specification
             ),
             offlineEnabled: specification.offline.isEnabled
@@ -61,14 +67,17 @@ private extension FlutterGeneratedContractValidator {
         "GeneratedBooleanField",
         "GeneratedChoiceField",
         "GeneratedChoiceOption",
+        "GeneratedDetailEdit",
+        "GeneratedDetailFieldsBuilder",
+        "GeneratedEntityDetailScreen",
         "GeneratedEntityFormScreen",
         "GeneratedEntityListScreen",
         "GeneratedListErrorMessageBuilder",
-        "GeneratedListFieldValue",
         "GeneratedListFieldsBuilder",
         "GeneratedListLoader",
         "GeneratedListRecordSelected",
-        "GeneratedListValueKind",
+        "GeneratedRecordFieldValue",
+        "GeneratedRecordValueKind",
         "GeneratedExternalPickerField",
         "GeneratedExternalValuePicker",
         "GeneratedFormControl",
@@ -114,6 +123,7 @@ private extension FlutterGeneratedContractValidator {
         _ entities: [EntityDefinition],
         formScreens: [ScreenDefinition],
         listScreens: [ScreenDefinition],
+        detailScreens: [ScreenDefinition],
         offlineEnabled: Bool
     ) throws {
         var generatedTypes: [String: String] = [:]
@@ -143,6 +153,14 @@ private extension FlutterGeneratedContractValidator {
         for screen in listScreens {
             try registerGeneratedType(
                 FlutterListRenderingSupport.typeName(for: screen),
+                definitionID: screen.id,
+                generatedTypes: &generatedTypes
+            )
+        }
+
+        for screen in detailScreens {
+            try registerGeneratedType(
+                FlutterDetailRenderingSupport.typeName(for: screen),
                 definitionID: screen.id,
                 generatedTypes: &generatedTypes
             )

@@ -42,8 +42,18 @@ struct FlutterSourceBuilder {
                 specification: specification
             ).files()
         )
+        files.append(
+            contentsOf: FlutterGeneratedRecordDisplaySources(
+                specification: specification
+            ).files()
+        )
         try files.append(
             contentsOf: FlutterGeneratedListSources(
+                specification: specification
+            ).files()
+        )
+        try files.append(
+            contentsOf: FlutterGeneratedDetailSources(
                 specification: specification
             ).files()
         )

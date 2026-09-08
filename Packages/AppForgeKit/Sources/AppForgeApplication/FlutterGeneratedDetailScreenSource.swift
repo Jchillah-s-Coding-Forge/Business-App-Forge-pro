@@ -1,12 +1,12 @@
 import AppForgeDomain
 
-struct FlutterGeneratedListScreenSource {
+struct FlutterGeneratedDetailScreenSource {
     let screen: ScreenDefinition
     let entity: EntityDefinition
 
     func file() throws -> GeneratedFile {
         try GeneratedFile(
-            relativePath: FlutterListRenderingSupport.outputPath(
+            relativePath: FlutterDetailRenderingSupport.outputPath(
                 for: screen,
                 entity: entity
             ),
@@ -15,9 +15,9 @@ struct FlutterGeneratedListScreenSource {
     }
 }
 
-private extension FlutterGeneratedListScreenSource {
+private extension FlutterGeneratedDetailScreenSource {
     func content() throws -> String {
-        let typeName = try FlutterListRenderingSupport.typeName(for: screen)
+        let typeName = try FlutterDetailRenderingSupport.typeName(for: screen)
         let featureName = FlutterDartNaming.snakeCase(entity.identity.code)
         let entityType = FlutterDartNaming.typeName(entity.identity.code)
         let escapedTitle = FlutterDartEscaping.singleQuoted(screen.identity.label)
@@ -25,33 +25,31 @@ private extension FlutterGeneratedListScreenSource {
         return FlutterGeneratedText.lines([
             "import 'package:flutter/material.dart';",
             "",
-            "import '../../../../core/presentation/generated_entity_list_screen.dart';",
+            "import '../../../../core/domain/domain_values.dart';",
+            "import '../../../../core/presentation/generated_entity_detail_screen.dart';",
             "import '../../../../core/presentation/generated_record_display.dart';",
             "import '../../domain/entities/\(featureName).dart';",
             "",
             "class \(typeName) extends StatelessWidget {",
             "  const \(typeName)({",
             "    super.key,",
-            "    required this.loadRecords,",
-            "    this.onRecordSelected,",
-            "    this.emptyMessage = 'No records available.',",
-            "    this.errorMessageBuilder,",
+            "    required this.record,",
+            "    this.onEdit,",
+            "    this.emptyMessage = 'No visible fields',",
             "  });",
             "",
-            "  final GeneratedListLoader<\(entityType)> loadRecords;",
-            "  final GeneratedListRecordSelected<\(entityType)>? onRecordSelected;",
+            "  final DomainRecord<\(entityType)> record;",
+            "  final GeneratedDetailEdit<\(entityType)>? onEdit;",
             "  final String emptyMessage;",
-            "  final GeneratedListErrorMessageBuilder? errorMessageBuilder;",
             "",
             "  @override",
             "  Widget build(BuildContext context) {",
-            "    return GeneratedEntityListScreen<\(entityType)>(",
+            "    return GeneratedEntityDetailScreen<\(entityType)>(",
             "      title: '\(escapedTitle)',",
-            "      loadRecords: loadRecords,",
+            "      record: record,",
             "      fieldsFor: _fieldsFor,",
-            "      onRecordSelected: onRecordSelected,",
+            "      onEdit: onEdit,",
             "      emptyMessage: emptyMessage,",
-            "      errorMessageBuilder: errorMessageBuilder,",
             "    );",
             "  }",
             "",

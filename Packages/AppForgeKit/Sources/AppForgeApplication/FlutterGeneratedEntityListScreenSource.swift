@@ -14,26 +14,7 @@ struct FlutterGeneratedEntityListScreenSource {
         import 'package:flutter/material.dart';
 
         import '../domain/domain_values.dart';
-
-        enum GeneratedListValueKind {
-          string,
-          integer,
-          decimal,
-          boolean,
-          date,
-          dateTime,
-          time,
-          email,
-          phone,
-          url,
-          currency,
-          percentage,
-          enumeration,
-          file,
-          image,
-          color,
-          location,
-        }
+        import 'generated_record_display.dart';
 
         typedef GeneratedListLoader<T> =
             Future<List<DomainRecord<T>>> Function();
@@ -42,22 +23,10 @@ struct FlutterGeneratedEntityListScreenSource {
             void Function(DomainRecord<T> record);
 
         typedef GeneratedListFieldsBuilder<T> =
-            List<GeneratedListFieldValue> Function(T value);
+            List<GeneratedRecordFieldValue> Function(T value);
 
         typedef GeneratedListErrorMessageBuilder =
             String Function(Object error);
-
-        class GeneratedListFieldValue {
-          const GeneratedListFieldValue({
-            required this.label,
-            required this.valueKind,
-            required this.value,
-          });
-
-          final String label;
-          final GeneratedListValueKind valueKind;
-          final Object? value;
-        }
 
         class GeneratedEntityListScreen<T> extends StatefulWidget {
           const GeneratedEntityListScreen({
@@ -188,7 +157,7 @@ struct FlutterGeneratedEntityListScreenSource {
         class _GeneratedListFieldLine extends StatelessWidget {
           const _GeneratedListFieldLine({required this.field});
 
-          final GeneratedListFieldValue field;
+          final GeneratedRecordFieldValue field;
 
           @override
           Widget build(BuildContext context) {
@@ -206,7 +175,7 @@ struct FlutterGeneratedEntityListScreenSource {
                   const SizedBox(width: 12),
                   Expanded(
                     flex: 2,
-                    child: Text(_displayValue(field)),
+                    child: Text(generatedRecordDisplayValue(field)),
                   ),
                 ],
               ),
@@ -214,49 +183,6 @@ struct FlutterGeneratedEntityListScreenSource {
           }
         }
 
-        String _displayValue(GeneratedListFieldValue field) {
-          final value = field.value;
-          if (value == null) {
-            return '—';
-          }
-
-          switch (field.valueKind) {
-            case GeneratedListValueKind.boolean:
-              return value as bool ? 'Yes' : 'No';
-            case GeneratedListValueKind.date:
-              return (value as DateTime)
-                  .toUtc()
-                  .toIso8601String()
-                  .split('T')
-                  .first;
-            case GeneratedListValueKind.dateTime:
-              return (value as DateTime).toUtc().toIso8601String();
-            case GeneratedListValueKind.time:
-              return (value as DateTime)
-                  .toUtc()
-                  .toIso8601String()
-                  .substring(11, 16);
-            case GeneratedListValueKind.file:
-              return (value as DomainFileValue).uri.toString();
-            case GeneratedListValueKind.image:
-              return (value as DomainImageValue).uri.toString();
-            case GeneratedListValueKind.color:
-              return (value as DomainColorValue).hex;
-            case GeneratedListValueKind.location:
-              final location = value as DomainLocationValue;
-              return '${location.latitude}, ${location.longitude}';
-            case GeneratedListValueKind.string:
-            case GeneratedListValueKind.integer:
-            case GeneratedListValueKind.decimal:
-            case GeneratedListValueKind.email:
-            case GeneratedListValueKind.phone:
-            case GeneratedListValueKind.url:
-            case GeneratedListValueKind.currency:
-            case GeneratedListValueKind.percentage:
-            case GeneratedListValueKind.enumeration:
-              return value.toString();
-          }
-        }
         """
             + "\n"
     }
