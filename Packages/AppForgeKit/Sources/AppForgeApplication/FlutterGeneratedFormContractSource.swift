@@ -59,6 +59,11 @@ struct FlutterGeneratedFormContractSource {
           Map<String, Object?> values,
         );
 
+        typedef GeneratedIdentifiedFormSubmit = Future<void> Function({
+          required String? recordId,
+          required Map<String, Object?> values,
+        });
+
         typedef GeneratedExternalValuePicker = Future<Object?> Function({
           required String screenId,
           required String fieldId,
