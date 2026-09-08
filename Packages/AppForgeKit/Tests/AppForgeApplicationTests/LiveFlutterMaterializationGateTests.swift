@@ -4,7 +4,7 @@ import Foundation
 import XCTest
 
 final class LiveFlutterMaterializationGateTests: XCTestCase {
-    func testFreshGeneratedFormAppIsFormattedAndBuildsForIOS() throws {
+    func testFreshGeneratedScreenAppIsFormattedAndBuildsForIOS() throws {
         let environment = ProcessInfo.processInfo.environment
         guard let sdkPath = environment["APPFORGE_LIVE_FLUTTER_SDK"],
               !sdkPath.isEmpty
@@ -205,6 +205,19 @@ private extension LiveFlutterMaterializationGateTests {
                     label: "Asset erfassen"
                 ),
                 kind: .form,
+                entityID: entityID,
+                visibleFieldIDs: [
+                    "field.asset.name",
+                    "field.asset.active"
+                ]
+            ),
+            ScreenDefinition(
+                identity: DefinitionIdentity(
+                    id: "screen.asset.list",
+                    code: "asset_list",
+                    label: "Assets"
+                ),
+                kind: .list,
                 entityID: entityID,
                 visibleFieldIDs: [
                     "field.asset.name",

@@ -42,6 +42,11 @@ struct FlutterSourceBuilder {
                 specification: specification
             ).files()
         )
+        try files.append(
+            contentsOf: FlutterGeneratedListSources(
+                specification: specification
+            ).files()
+        )
         try files.append(generationManifestFile(existingFiles: files))
         return files
     }

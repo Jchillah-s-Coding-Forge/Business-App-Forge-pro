@@ -34,6 +34,7 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
         typeName: String
     )
     case formScreenRequiresEntity(screenID: String)
+    case listScreenRequiresEntity(screenID: String)
     case ambiguousFieldPresentation(
         screenID: String,
         fieldID: String,
@@ -51,7 +52,7 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
 }
 
 public struct DeterministicFlutterProjectRenderer: FlutterProjectRendering {
-    public static let rendererVersion = 4
+    public static let rendererVersion = 5
 
     private let specificationValidator: ProjectSpecificationValidator
     private let lockfileBuilder: ForgeLockfileBuilder
