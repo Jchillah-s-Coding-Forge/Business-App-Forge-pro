@@ -15,6 +15,24 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
     case invalidProjectPackageName(String)
     case invalidGeneratedIdentifier(definitionID: String, code: String)
     case duplicateGeneratedIdentifier(entityID: String, identifier: String)
+    case reservedGeneratedMember(definitionID: String, identifier: String)
+    case generatedMemberCollision(
+        entityID: String,
+        firstDefinitionID: String,
+        secondDefinitionID: String,
+        identifier: String
+    )
+    case generatedOutputPathCollision(
+        firstDefinitionID: String,
+        secondDefinitionID: String,
+        path: String
+    )
+    case reservedGeneratedTypeName(definitionID: String, typeName: String)
+    case generatedTypeNameCollision(
+        firstDefinitionID: String,
+        secondDefinitionID: String,
+        typeName: String
+    )
     case reservedGeneratedStorageIdentifier(definitionID: String, identifier: String)
     case duplicateGeneratedStorageIdentifier(entityID: String, identifier: String)
     case encodingFailed
@@ -47,6 +65,10 @@ public struct DeterministicFlutterProjectRenderer: FlutterProjectRendering {
         guard issues.isEmpty else {
             throw FlutterRendererError.invalidSpecification(issues)
         }
+
+        try FlutterGeneratedContractValidator().validate(
+            specification
+        )
 
         let expectedLockfile = lockfileBuilder.build(
             graph: graph,

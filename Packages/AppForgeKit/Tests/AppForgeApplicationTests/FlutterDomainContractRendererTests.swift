@@ -143,8 +143,10 @@ final class FlutterDomainContractRendererTests: XCTestCase {
         XCTAssertThrowsError(try render(specification)) { error in
             XCTAssertEqual(
                 error as? FlutterRendererError,
-                .duplicateGeneratedIdentifier(
+                .generatedMemberCollision(
                     entityID: asset.id,
+                    firstDefinitionID: "field.asset.owner",
+                    secondDefinitionID: "relation.asset.owner",
                     identifier: "owner"
                 )
             )
