@@ -17,7 +17,17 @@ struct FlutterDomainContractSources {
     }
 
     private func domainValuesDart() -> String {
-        FlutterGeneratedText.lines([
+        FlutterGeneratedText.lines(
+            domainReferenceLines
+                + domainFileValueLines
+                + domainImageValueLines
+                + domainColorValueLines
+                + domainLocationValueLines
+        )
+    }
+
+    private var domainReferenceLines: [String] {
+        [
             "class DomainReference {",
             "  const DomainReference({",
             "    required this.entityId,",
@@ -27,57 +37,62 @@ struct FlutterDomainContractSources {
             "  final String entityId;",
             "  final String recordId;",
             "}",
-            "",
-            "class DomainFileValue {",
-            "  factory DomainFileValue(Uri uri) {",
+            ""
+        ]
+    }
+
+    private var domainFileValueLines: [String] {
+        uriValueLines(
+            typeName: "DomainFileValue",
+            label: "File",
+            privateConstructor: "DomainFileValue._"
+        )
+    }
+
+    private var domainImageValueLines: [String] {
+        uriValueLines(
+            typeName: "DomainImageValue",
+            label: "Image",
+            privateConstructor: "DomainImageValue._"
+        )
+    }
+
+    private func uriValueLines(
+        typeName: String,
+        label: String,
+        privateConstructor: String
+    ) -> [String] {
+        [
+            "class \(typeName) {",
+            "  factory \(typeName)(Uri uri) {",
             "    if (uri.toString().trim().isEmpty) {",
-            "      throw const FormatException('File URI must not be empty.');",
+            "      throw const FormatException('\(label) URI must not be empty.');",
             "    }",
-            "    return DomainFileValue._(uri);",
+            "    return \(privateConstructor)(uri);",
             "  }",
             "",
-            "  const DomainFileValue._(this.uri);",
+            "  const \(privateConstructor)(this.uri);",
             "  final Uri uri;",
             "",
-            "  factory DomainFileValue.fromStorageString(String value) {",
+            "  factory \(typeName).fromStorageString(String value) {",
             "    if (value.trim().isEmpty) {",
-            "      throw const FormatException('File URI must not be empty.');",
+            "      throw const FormatException('\(label) URI must not be empty.');",
             "    }",
             "    final uri = Uri.tryParse(value);",
             "    if (uri == null) {",
-            "      throw FormatException('Invalid file URI: $value');",
+            "      throw FormatException('Invalid \(label.lowercased()) URI: $value');",
             "    }",
-            "    return DomainFileValue(uri);",
+            "    return \(typeName)(uri);",
             "  }",
             "",
             "  String toStorageString() => uri.toString();",
             "}",
-            "",
-            "class DomainImageValue {",
-            "  factory DomainImageValue(Uri uri) {",
-            "    if (uri.toString().trim().isEmpty) {",
-            "      throw const FormatException('Image URI must not be empty.');",
-            "    }",
-            "    return DomainImageValue._(uri);",
-            "  }",
-            "",
-            "  const DomainImageValue._(this.uri);",
-            "  final Uri uri;",
-            "",
-            "  factory DomainImageValue.fromStorageString(String value) {",
-            "    if (value.trim().isEmpty) {",
-            "      throw const FormatException('Image URI must not be empty.');",
-            "    }",
-            "    final uri = Uri.tryParse(value);",
-            "    if (uri == null) {",
-            "      throw FormatException('Invalid image URI: $value');",
-            "    }",
-            "    return DomainImageValue(uri);",
-            "  }",
-            "",
-            "  String toStorageString() => uri.toString();",
-            "}",
-            "",
+            ""
+        ]
+    }
+
+    private var domainColorValueLines: [String] {
+        [
             "class DomainColorValue {",
             "  factory DomainColorValue(String value) {",
             "    final normalized = value.trim().toUpperCase();",
@@ -97,7 +112,12 @@ struct FlutterDomainContractSources {
             "",
             "  String toStorageString() => hex;",
             "}",
-            "",
+            ""
+        ]
+    }
+
+    private var domainLocationValueLines: [String] {
+        [
             "class DomainLocationValue {",
             "  factory DomainLocationValue({",
             "    required num latitude,",
@@ -145,11 +165,20 @@ struct FlutterDomainContractSources {
             "  String toStorageString() => '$latitude,$longitude';",
             "}",
             ""
-        ])
+        ]
     }
 
     private func domainSchemaDart() -> String {
-        var lines = [
+        FlutterGeneratedText.lines(
+            relationSchemaTypeLines
+                + relationSchemaValueLines()
+                + presentationSchemaTypeLines
+                + presentationSchemaValueLines()
+        )
+    }
+
+    private var relationSchemaTypeLines: [String] {
+        [
             "class GeneratedRelationSchema {",
             "  const GeneratedRelationSchema({",
             "    required this.id,",
@@ -172,6 +201,41 @@ struct FlutterDomainContractSources {
             "  final String? joinEntityId;",
             "}",
             "",
+            "const List<GeneratedRelationSchema> generatedRelations =",
+            "    <GeneratedRelationSchema>["
+        ]
+    }
+
+    private func relationSchemaValueLines() -> [String] {
+        var lines: [String] = []
+        for relation in specification.relations.sorted(by: Self.relationSort) {
+            lines += relationSchemaLines(relation)
+        }
+        lines += ["];",""]
+        return lines
+    }
+
+    private func relationSchemaLines(
+        _ relation: RelationDefinition
+    ) -> [String] {
+        [
+            "  GeneratedRelationSchema(",
+            "    id: '\(FlutterDartEscaping.singleQuoted(relation.id))',",
+            "    sourceEntityId: '\(FlutterDartEscaping.singleQuoted(relation.sourceEntityID))',",
+            "    targetEntityId: '\(FlutterDartEscaping.singleQuoted(relation.targetEntityID))',",
+            "    cardinality: '\(relation.cardinality.rawValue)',",
+            "    ownership: '\(relation.ownership.rawValue)',",
+            "    isRequired: \(relation.isRequired),",
+            "    deleteRule: '\(relation.deleteRule.rawValue)',",
+            relation.joinEntityID.map {
+                "    joinEntityId: '\(FlutterDartEscaping.singleQuoted($0))',"
+            } ?? "    joinEntityId: null,",
+            "  ),"
+        ]
+    }
+
+    private var presentationSchemaTypeLines: [String] {
+        [
             "class GeneratedFieldPresentationSchema {",
             "  const GeneratedFieldPresentationSchema({",
             "    required this.id,",
@@ -190,58 +254,47 @@ struct FlutterDomainContractSources {
             "  final double? maximum;",
             "}",
             "",
-            "const List<GeneratedRelationSchema> generatedRelations =",
-            "    <GeneratedRelationSchema>["
-        ]
-
-        for relation in specification.relations.sorted(by: Self.relationSort) {
-            lines += [
-                "  GeneratedRelationSchema(",
-                "    id: '\(FlutterDartEscaping.singleQuoted(relation.id))',",
-                "    sourceEntityId: '\(FlutterDartEscaping.singleQuoted(relation.sourceEntityID))',",
-                "    targetEntityId: '\(FlutterDartEscaping.singleQuoted(relation.targetEntityID))',",
-                "    cardinality: '\(relation.cardinality.rawValue)',",
-                "    ownership: '\(relation.ownership.rawValue)',",
-                "    isRequired: \(relation.isRequired),",
-                "    deleteRule: '\(relation.deleteRule.rawValue)',",
-                relation.joinEntityID.map {
-                    "    joinEntityId: '\(FlutterDartEscaping.singleQuoted($0))',"
-                } ?? "    joinEntityId: null,",
-                "  ),"
-            ]
-        }
-
-        lines += [
-            "];",
-            "",
             "const List<GeneratedFieldPresentationSchema> generatedFieldPresentations =",
             "    <GeneratedFieldPresentationSchema>["
         ]
+    }
 
-        for presentation in specification.fieldPresentations.sorted(by: Self.presentationSort) {
-            let target = switch presentation.target {
-            case let .field(id):
-                ("field", id)
-            case let .relation(id):
-                ("relation", id)
-            }
-            lines += [
-                "  GeneratedFieldPresentationSchema(",
-                "    id: '\(FlutterDartEscaping.singleQuoted(presentation.id))',",
-                "    targetKind: '\(target.0)',",
-                "    targetId: '\(FlutterDartEscaping.singleQuoted(target.1))',",
-                "    control: '\(presentation.control.rawValue)',",
-                presentation.numericRange.map { "    minimum: \($0.minimum)," } ?? "    minimum: null,",
-                presentation.numericRange.map { "    maximum: \($0.maximum)," } ?? "    maximum: null,",
-                "  ),"
-            ]
+    private func presentationSchemaValueLines() -> [String] {
+        var lines: [String] = []
+        for presentation in specification.fieldPresentations.sorted(
+            by: Self.presentationSort
+        ) {
+            lines += presentationSchemaLines(presentation)
         }
+        lines += ["];",""]
+        return lines
+    }
 
-        lines += [
-            "];",
-            ""
+    private func presentationSchemaLines(
+        _ presentation: FieldPresentationDefinition
+    ) -> [String] {
+        let target = presentationTarget(presentation.target)
+        return [
+            "  GeneratedFieldPresentationSchema(",
+            "    id: '\(FlutterDartEscaping.singleQuoted(presentation.id))',",
+            "    targetKind: '\(target.kind)',",
+            "    targetId: '\(FlutterDartEscaping.singleQuoted(target.id))',",
+            "    control: '\(presentation.control.rawValue)',",
+            presentation.numericRange.map { "    minimum: \($0.minimum)," } ?? "    minimum: null,",
+            presentation.numericRange.map { "    maximum: \($0.maximum)," } ?? "    maximum: null,",
+            "  ),"
         ]
-        return FlutterGeneratedText.lines(lines)
+    }
+
+    private func presentationTarget(
+        _ target: PresentationTarget
+    ) -> (kind: String, id: String) {
+        switch target {
+        case let .field(id):
+            ("field", id)
+        case let .relation(id):
+            ("relation", id)
+        }
     }
 
     private static func relationSort(
