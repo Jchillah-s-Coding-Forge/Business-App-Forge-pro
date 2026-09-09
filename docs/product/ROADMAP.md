@@ -34,6 +34,7 @@ Die Roadmap ist fähigkeitsorientiert. Ein Meilenstein endet erst nach Nutzerabn
 - Project-Setup-Handoff zur produktiven Flutter-Materialisierung
 - Bundle-aware IDE-Handoff mit expliziten macOS-Fallbacks
 - `flutter pub get`, `dart format`, `flutter analyze` und `flutter test` als Materialisierungs-Gates
+- navigierbarer Formular-Startflow mit typisierter Entity-Erzeugung und echter SQLite-Speicherung
 - Toolchain-/Dependency-Provenienz über `appforge.toolchain.json`
 - Architektur- und Golden Tests
 
