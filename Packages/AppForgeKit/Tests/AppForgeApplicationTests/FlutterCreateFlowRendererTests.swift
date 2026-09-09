@@ -18,6 +18,16 @@ final class FlutterCreateFlowRendererTests: XCTestCase {
             plan,
             at: "lib/core/domain/record_id_generator.dart"
         )
+        let app = try contents(plan, at: "lib/app.dart")
+        let dependencies = try contents(
+            plan,
+            at: "lib/core/bootstrap/app_dependencies.dart"
+        )
+        let home = try contents(
+            plan,
+            at: "lib/core/presentation/generated_app_home.dart"
+        )
+        let smokeTest = try contents(plan, at: "test/app_smoke_test.dart")
 
         XCTAssertTrue(viewModel.contains("class AssetCreateFormViewModel"))
         XCTAssertTrue(viewModel.contains("final SaveAsset _save;"))
@@ -33,6 +43,16 @@ final class FlutterCreateFlowRendererTests: XCTestCase {
         XCTAssertTrue(recordIDs.contains("Random.secure()"))
         XCTAssertTrue(recordIDs.contains("bytes[6] = (bytes[6] & 0x0f) | 0x40"))
         XCTAssertFalse(recordIDs.contains("DateTime.now"))
+        XCTAssertTrue(app.contains("title: 'Asset erfassen'"))
+        XCTAssertTrue(app.contains("_dependencies.assetCreateForm.create(values)"))
+        XCTAssertFalse(app.contains("Generated with AppForge Pro"))
+        XCTAssertTrue(dependencies.contains("AssetRepositoryImpl("))
+        XCTAssertTrue(dependencies.contains("AssetLocalDataSource(database)"))
+        XCTAssertTrue(dependencies.contains("save: SaveAsset(assetRepository)"))
+        XCTAssertTrue(home.contains("Navigator.of(context).push<bool>"))
+        XCTAssertTrue(home.contains("Saved successfully."))
+        XCTAssertTrue(smokeTest.contains("opens the generated create flow"))
+        XCTAssertTrue(smokeTest.contains("find.byType(BackButton)"))
     }
 
     func testRequiredHiddenFieldFailsClosed() throws {
@@ -108,6 +128,40 @@ final class FlutterCreateFlowRendererTests: XCTestCase {
                 .formScreenRequiresOfflinePersistence(
                     screenID: fixture.screen.id
                 )
+            )
+        }
+    }
+
+    func testRoleProtectedFormFailsUntilRoleEvaluationIsMaterialized() throws {
+        let fixture = makeFixture()
+        var screen = fixture.screen
+        screen.allowedRoleIDs = ["role.owner"]
+        let specification = ProjectSpecification(
+            identity: ProjectIdentity(
+                name: "Inventory App",
+                organizationIdentifier: "de.example"
+            ),
+            framework: .flutter,
+            targetPlatforms: [.iOS],
+            backend: .localOnly,
+            flutterStateManagement: .riverpod,
+            entities: [fixture.entity],
+            roles: [
+                RoleDefinition(
+                    identity: DefinitionIdentity(
+                        id: "role.owner",
+                        code: "owner",
+                        label: "Owner"
+                    )
+                )
+            ],
+            screens: [screen]
+        )
+
+        XCTAssertThrowsError(try render(specification)) { error in
+            XCTAssertEqual(
+                error as? FlutterRendererError,
+                .formScreenRequiresRoleEvaluation(screenID: screen.id)
             )
         }
     }

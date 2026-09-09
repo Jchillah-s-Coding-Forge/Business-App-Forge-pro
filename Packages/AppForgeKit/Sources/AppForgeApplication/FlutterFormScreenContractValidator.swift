@@ -106,6 +106,15 @@ private extension FlutterFormScreenContractValidator {
             )
         }
 
+        let protectedNavigationExists = specification.navigation.items.contains {
+            $0.screenID == screen.id && !$0.allowedRoleIDs.isEmpty
+        }
+        if !screen.allowedRoleIDs.isEmpty || protectedNavigationExists {
+            throw FlutterRendererError.formScreenRequiresRoleEvaluation(
+                screenID: screen.id
+            )
+        }
+
         let visibleFieldIDs = Set(screen.visibleFieldIDs)
         for field in entity.fields {
             let isMissingRequiredField = field.isRequired

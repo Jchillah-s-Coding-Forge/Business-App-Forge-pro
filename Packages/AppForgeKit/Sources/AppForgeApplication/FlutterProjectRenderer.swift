@@ -49,6 +49,7 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
     case formScreenMissingRequiredField(screenID: String, fieldID: String)
     case formScreenRequiresRelationPicker(screenID: String, relationID: String)
     case formScreenRequiresExternalValuePicker(screenID: String, fieldID: String)
+    case formScreenRequiresRoleEvaluation(screenID: String)
     case reservedGeneratedStorageIdentifier(definitionID: String, identifier: String)
     case duplicateGeneratedStorageIdentifier(entityID: String, identifier: String)
     case encodingFailed

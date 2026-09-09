@@ -13,15 +13,16 @@ struct FlutterProjectCoreSources {
             throw FlutterRendererError.encodingFailed
         }
 
-        return [
+        return try [
             GeneratedFile(relativePath: ".gitignore", contents: gitignore()),
             GeneratedFile(relativePath: "README.md", contents: readme()),
             GeneratedFile(relativePath: "forge.lock", contents: lockfileText),
-            GeneratedFile(relativePath: "lib/app.dart", contents: appDart()),
             GeneratedFile(relativePath: "lib/main.dart", contents: mainDart()),
-            GeneratedFile(relativePath: "pubspec.yaml", contents: pubspec()),
-            GeneratedFile(relativePath: "test/app_smoke_test.dart", contents: smokeTest())
-        ] + stateManagementFiles()
+            GeneratedFile(relativePath: "pubspec.yaml", contents: pubspec())
+        ] + stateManagementFiles() + (FlutterGeneratedAppSources(
+            specification: specification,
+            packageName: packageName
+        ).files())
     }
 
     private func stateManagementFiles() -> [GeneratedFile] {
@@ -131,64 +132,6 @@ struct FlutterProjectCoreSources {
                 ""
             ])
         }
-    }
-
-    private func appDart() -> String {
-        let displayName = specification.design.appDisplayName ?? specification.identity.name
-        let escapedName = FlutterDartEscaping.singleQuoted(displayName)
-
-        return FlutterGeneratedText.lines([
-            "import 'package:flutter/material.dart';",
-            "",
-            "class App extends StatelessWidget {",
-            "  const App({super.key});",
-            "",
-            "  @override",
-            "  Widget build(BuildContext context) {",
-            "    return MaterialApp(",
-            "      debugShowCheckedModeBanner: false,",
-            "      title: '\(escapedName)',",
-            "      home: const _AppHome(),",
-            "    );",
-            "  }",
-            "}",
-            "",
-            "class _AppHome extends StatelessWidget {",
-            "  const _AppHome();",
-            "",
-            "  @override",
-            "  Widget build(BuildContext context) {",
-            "    return Scaffold(",
-            "      appBar: AppBar(",
-            "        title: const Text('\(escapedName)'),",
-            "      ),",
-            "      body: const Center(",
-            "        child: Text('Generated with AppForge Pro'),",
-            "      ),",
-            "    );",
-            "  }",
-            "}",
-            ""
-        ])
-    }
-
-    private func smokeTest() -> String {
-        let displayName = specification.design.appDisplayName ?? specification.identity.name
-        let escapedName = FlutterDartEscaping.singleQuoted(displayName)
-
-        return FlutterGeneratedText.lines([
-            "import 'package:flutter_test/flutter_test.dart';",
-            "import 'package:\(packageName)/app.dart';",
-            "",
-            "void main() {",
-            "  testWidgets('renders the generated app shell', (tester) async {",
-            "    await tester.pumpWidget(const App());",
-            "",
-            "    expect(find.text('\(escapedName)'), findsOneWidget);",
-            "  });",
-            "}",
-            ""
-        ])
     }
 
     private func gitignore() -> String {
