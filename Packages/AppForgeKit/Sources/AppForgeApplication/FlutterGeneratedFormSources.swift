@@ -12,6 +12,7 @@ struct FlutterGeneratedFormSources {
         }
 
         var result = [
+            FlutterGeneratedRecordIDSource().file(),
             FlutterGeneratedFormContractSource().file(),
             FlutterGeneratedFormTextFieldsSource().file(),
             FlutterGeneratedFormChoiceFieldsSource().file(),
@@ -26,6 +27,13 @@ struct FlutterGeneratedFormSources {
             )
             try result.append(
                 FlutterGeneratedFormScreenSource(
+                    specification: specification,
+                    screen: screen,
+                    entity: entity
+                ).file()
+            )
+            try result.append(
+                FlutterGeneratedFormViewModelSource(
                     specification: specification,
                     screen: screen,
                     entity: entity

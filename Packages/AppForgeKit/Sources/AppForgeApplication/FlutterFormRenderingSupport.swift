@@ -36,6 +36,21 @@ enum FlutterFormRenderingSupport {
         return typeName
     }
 
+    static func viewModelTypeName(
+        for screen: ScreenDefinition
+    ) throws -> String {
+        let typeName = FlutterDartNaming.typeName(
+            screen.identity.code
+        ) + "FormViewModel"
+        guard FlutterDartNaming.isUsableIdentifier(typeName) else {
+            throw FlutterRendererError.invalidGeneratedIdentifier(
+                definitionID: screen.id,
+                code: screen.identity.code
+            )
+        }
+        return typeName
+    }
+
     static func outputPath(
         for screen: ScreenDefinition,
         entity: EntityDefinition
@@ -58,6 +73,41 @@ enum FlutterFormRenderingSupport {
         return "lib/features/\(featureName)"
             + "/presentation/screens/"
             + "\(screenName)_form_screen.dart"
+    }
+
+    static func viewModelOutputPath(
+        for screen: ScreenDefinition,
+        entity: EntityDefinition
+    ) throws -> String {
+        let featureName = FlutterDartNaming.snakeCase(
+            entity.identity.code
+        )
+        let screenName = FlutterDartNaming.snakeCase(
+            screen.identity.code
+        )
+        guard FlutterDartNaming.isUsableIdentifier(featureName),
+              FlutterDartNaming.isUsableIdentifier(screenName)
+        else {
+            throw FlutterRendererError.invalidGeneratedIdentifier(
+                definitionID: screen.id,
+                code: screen.identity.code
+            )
+        }
+
+        return "lib/features/\(featureName)"
+            + "/presentation/view_models/"
+            + "\(screenName)_form_view_model.dart"
+    }
+
+    static func usesExternalValuePicker(
+        _ field: FieldDefinition
+    ) -> Bool {
+        switch field.dataType {
+        case .file, .image, .color, .location:
+            true
+        default:
+            false
+        }
     }
 
     static func presentationsByField(

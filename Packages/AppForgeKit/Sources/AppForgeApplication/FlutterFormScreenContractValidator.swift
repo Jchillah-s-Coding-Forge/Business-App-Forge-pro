@@ -37,6 +37,11 @@ struct FlutterFormScreenContractValidator {
                 entity: entity,
                 presentations: presentations
             )
+            try validateCreateFlow(
+                screen: screen,
+                entity: entity,
+                specification: specification
+            )
         }
     }
 }
@@ -87,6 +92,50 @@ private extension FlutterFormScreenContractValidator {
                     )
                 }
             }
+        }
+    }
+
+    func validateCreateFlow(
+        screen: ScreenDefinition,
+        entity: EntityDefinition,
+        specification: ProjectSpecification
+    ) throws {
+        guard specification.offline.isEnabled else {
+            throw FlutterRendererError.formScreenRequiresOfflinePersistence(
+                screenID: screen.id
+            )
+        }
+
+        let visibleFieldIDs = Set(screen.visibleFieldIDs)
+        for field in entity.fields {
+            let isMissingRequiredField = field.isRequired
+                && field.defaultValue == nil
+                && !visibleFieldIDs.contains(field.id)
+            if isMissingRequiredField {
+                throw FlutterRendererError.formScreenMissingRequiredField(
+                    screenID: screen.id,
+                    fieldID: field.id
+                )
+            }
+            let needsExternalPicker = field.isRequired
+                && visibleFieldIDs.contains(field.id)
+                && FlutterFormRenderingSupport.usesExternalValuePicker(field)
+            if needsExternalPicker {
+                throw FlutterRendererError.formScreenRequiresExternalValuePicker(
+                    screenID: screen.id,
+                    fieldID: field.id
+                )
+            }
+        }
+
+        let requiredRelations = specification.relations.filter {
+            $0.sourceEntityID == entity.id && $0.isRequired
+        }
+        for relation in requiredRelations {
+            throw FlutterRendererError.formScreenRequiresRelationPicker(
+                screenID: screen.id,
+                relationID: relation.id
+            )
         }
     }
 }

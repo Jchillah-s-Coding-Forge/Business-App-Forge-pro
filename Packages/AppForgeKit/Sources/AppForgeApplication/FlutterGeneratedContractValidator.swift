@@ -51,6 +51,8 @@ private extension FlutterGeneratedContractValidator {
         "DomainLocationValue",
         "DomainReference",
         "GeneratedFieldPresentationSchema",
+        "GeneratedAppDestination",
+        "GeneratedAppHome",
         "GeneratedBooleanField",
         "GeneratedChoiceField",
         "GeneratedChoiceOption",
@@ -64,6 +66,8 @@ private extension FlutterGeneratedContractValidator {
         "GeneratedFormSubmit",
         "GeneratedFormValueKind",
         "GeneratedRelationSchema",
+        "RecordIdGenerator",
+        "SecureUuidV4Generator",
         "GeneratedSliderField",
         "GeneratedStepperField",
         "GeneratedTemporalField",
@@ -129,26 +133,41 @@ private extension FlutterGeneratedContractValidator {
         }
 
         for screen in formScreens {
-            let generatedType = try FlutterFormRenderingSupport.typeName(
-                for: screen
-            )
-            if Self.reservedTopLevelTypes.contains(generatedType) {
-                throw FlutterRendererError.reservedGeneratedTypeName(
+            let screenTypes = try [
+                FlutterFormRenderingSupport.typeName(for: screen),
+                FlutterFormRenderingSupport.viewModelTypeName(for: screen)
+            ]
+            for generatedType in screenTypes {
+                try registerGeneratedType(
+                    generatedType,
                     definitionID: screen.id,
+                    generatedTypes: &generatedTypes
+                )
+            }
+        }
+    }
+
+    func registerGeneratedType(
+        _ generatedType: String,
+        definitionID: String,
+        generatedTypes: inout [String: String]
+    ) throws {
+        if Self.reservedTopLevelTypes.contains(generatedType) {
+            throw FlutterRendererError.reservedGeneratedTypeName(
+                definitionID: definitionID,
+                typeName: generatedType
+            )
+        }
+        if let firstDefinitionID = generatedTypes[generatedType] {
+            if firstDefinitionID != definitionID {
+                throw FlutterRendererError.generatedTypeNameCollision(
+                    firstDefinitionID: firstDefinitionID,
+                    secondDefinitionID: definitionID,
                     typeName: generatedType
                 )
             }
-            if let firstDefinitionID = generatedTypes[generatedType] {
-                if firstDefinitionID != screen.id {
-                    throw FlutterRendererError.generatedTypeNameCollision(
-                        firstDefinitionID: firstDefinitionID,
-                        secondDefinitionID: screen.id,
-                        typeName: generatedType
-                    )
-                }
-            }
-            generatedTypes[generatedType] = screen.id
         }
+        generatedTypes[generatedType] = definitionID
     }
 
     func validateMembers(

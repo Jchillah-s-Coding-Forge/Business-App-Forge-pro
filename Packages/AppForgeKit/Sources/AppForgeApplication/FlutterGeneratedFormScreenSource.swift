@@ -22,7 +22,25 @@ private extension FlutterGeneratedFormScreenSource {
         let escapedScreenID = FlutterDartEscaping.singleQuoted(screen.id)
         let escapedTitle = FlutterDartEscaping.singleQuoted(screen.identity.label)
 
-        return FlutterGeneratedText.lines([
+        return FlutterGeneratedText.lines(
+            declarationLines(
+                typeName: typeName,
+                escapedScreenID: escapedScreenID,
+                escapedTitle: escapedTitle
+            )
+                + fieldSpecLines()
+                + defaultValueDeclarationLines()
+                + defaultValueLines()
+                + ["    };", "}"]
+        )
+    }
+
+    func declarationLines(
+        typeName: String,
+        escapedScreenID: String,
+        escapedTitle: String
+    ) -> [String] {
+        [
             "import 'package:flutter/material.dart';",
             "",
             "import '../../../../core/presentation/generated_entity_form_screen.dart';",
@@ -50,7 +68,10 @@ private extension FlutterGeneratedFormScreenSource {
             "      screenId: '\(escapedScreenID)',",
             "      title: '\(escapedTitle)',",
             "      fields: _fields,",
-            "      initialValues: initialValues,",
+            "      initialValues: <String, Object?>{",
+            "        ..._defaultValues,",
+            "        ...initialValues,",
+            "      },",
             "      submitLabel: submitLabel,",
             "      externalValuePicker: externalValuePicker,",
             "      errorMessageBuilder: errorMessageBuilder,",
@@ -60,10 +81,32 @@ private extension FlutterGeneratedFormScreenSource {
             "",
             "  static const List<GeneratedFormFieldSpec> _fields =",
             "      <GeneratedFormFieldSpec>["
-        ] + fieldSpecLines() + [
+        ]
+    }
+
+    func defaultValueDeclarationLines() -> [String] {
+        [
             "    ];",
-            "}"
-        ])
+            "",
+            "  static final Map<String, Object?> _defaultValues =",
+            "      <String, Object?>{"
+        ]
+    }
+
+    func defaultValueLines() -> [String] {
+        let fields = Dictionary(
+            uniqueKeysWithValues: entity.fields.map { ($0.id, $0) }
+        )
+        return screen.visibleFieldIDs.compactMap { fieldID in
+            guard let field = fields[fieldID],
+                  let expression = FlutterDartDefaultValue.expression(
+                      for: field
+                  )
+            else {
+                return nil
+            }
+            return "        '\(FlutterDartEscaping.singleQuoted(fieldID))': \(expression),"
+        }
     }
 
     func fieldSpecLines() -> [String] {
