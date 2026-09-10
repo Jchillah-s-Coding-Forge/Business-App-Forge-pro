@@ -146,42 +146,13 @@ private extension FlutterFormEditMapperRendererTests {
     }
 
     func makeFixture() -> Fixture {
-        let asset = EntityDefinition(
-            identity: DefinitionIdentity(
-                id: "entity.asset",
-                code: "asset",
-                label: "Asset"
-            ),
-            fields: assetFields()
+        let asset = makeAsset()
+        let category = makeCategory()
+        let relation = makeCategoryRelation(
+            assetID: asset.id,
+            categoryID: category.id
         )
-        let category = EntityDefinition(
-            identity: DefinitionIdentity(
-                id: "entity.category",
-                code: "category",
-                label: "Category"
-            )
-        )
-        let relation = RelationDefinition(
-            identity: DefinitionIdentity(
-                id: "relation.asset.category",
-                code: "category",
-                label: "Category"
-            ),
-            sourceEntityID: asset.id,
-            targetEntityID: category.id,
-            cardinality: .manyToOne,
-            isRequired: true
-        )
-        let screen = ScreenDefinition(
-            identity: DefinitionIdentity(
-                id: "screen.asset.editor",
-                code: "asset_editor",
-                label: "Edit asset"
-            ),
-            kind: .form,
-            entityID: asset.id,
-            visibleFieldIDs: visibleFieldIDs()
-        )
+        let screen = makeEditScreen(entityID: asset.id)
 
         return Fixture(
             specification: ProjectSpecification(
@@ -201,6 +172,59 @@ private extension FlutterFormEditMapperRendererTests {
         )
     }
 
+    func makeAsset() -> EntityDefinition {
+        EntityDefinition(
+            identity: DefinitionIdentity(
+                id: "entity.asset",
+                code: "asset",
+                label: "Asset"
+            ),
+            fields: visibleFields() + hiddenFields()
+        )
+    }
+
+    func makeCategory() -> EntityDefinition {
+        EntityDefinition(
+            identity: DefinitionIdentity(
+                id: "entity.category",
+                code: "category",
+                label: "Category"
+            )
+        )
+    }
+
+    func makeCategoryRelation(
+        assetID: String,
+        categoryID: String
+    ) -> RelationDefinition {
+        RelationDefinition(
+            identity: DefinitionIdentity(
+                id: "relation.asset.category",
+                code: "category",
+                label: "Category"
+            ),
+            sourceEntityID: assetID,
+            targetEntityID: categoryID,
+            cardinality: .manyToOne,
+            isRequired: true
+        )
+    }
+
+    func makeEditScreen(
+        entityID: String
+    ) -> ScreenDefinition {
+        ScreenDefinition(
+            identity: DefinitionIdentity(
+                id: "screen.asset.editor",
+                code: "asset_editor",
+                label: "Edit asset"
+            ),
+            kind: .form,
+            entityID: entityID,
+            visibleFieldIDs: visibleFieldIDs()
+        )
+    }
+
     func visibleFieldIDs() -> [String] {
         [
             "field.asset.name",
@@ -214,7 +238,7 @@ private extension FlutterFormEditMapperRendererTests {
         ]
     }
 
-    func assetFields() -> [FieldDefinition] {
+    func visibleFields() -> [FieldDefinition] {
         [
             field(
                 id: "field.asset.name",
@@ -257,7 +281,12 @@ private extension FlutterFormEditMapperRendererTests {
                 id: "field.asset.location",
                 code: "location",
                 type: .location
-            ),
+            )
+        ]
+    }
+
+    func hiddenFields() -> [FieldDefinition] {
+        [
             field(
                 id: "field.asset.internal_note",
                 code: "internal_note",
