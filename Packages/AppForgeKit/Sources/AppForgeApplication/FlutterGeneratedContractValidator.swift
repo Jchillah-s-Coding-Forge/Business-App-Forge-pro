@@ -84,6 +84,7 @@ private extension FlutterGeneratedContractValidator {
         "GeneratedFormErrorMessageBuilder",
         "GeneratedFormField",
         "GeneratedFormFieldSpec",
+        "GeneratedIdentifiedFormSubmit",
         "GeneratedFormSubmit",
         "GeneratedFormValueKind",
         "GeneratedRelationSchema",

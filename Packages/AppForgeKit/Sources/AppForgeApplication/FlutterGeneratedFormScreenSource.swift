@@ -19,51 +19,132 @@ struct FlutterGeneratedFormScreenSource {
 private extension FlutterGeneratedFormScreenSource {
     func content() throws -> String {
         let typeName = try FlutterFormRenderingSupport.typeName(for: screen)
+        let featureName = FlutterDartNaming.snakeCase(entity.identity.code)
+        let entityType = FlutterDartNaming.typeName(entity.identity.code)
         let escapedScreenID = FlutterDartEscaping.singleQuoted(screen.id)
         let escapedTitle = FlutterDartEscaping.singleQuoted(screen.identity.label)
 
-        return FlutterGeneratedText.lines([
+        return FlutterGeneratedText.lines(
+            wrapperDeclarationLines(
+                typeName: typeName,
+                featureName: featureName,
+                entityType: entityType
+            )
+                + buildMethodLines(
+                    screenID: escapedScreenID,
+                    title: escapedTitle
+                )
+                + initialValuesMethodLines(entityType: entityType)
+                + fieldSpecDeclarationLines()
+        )
+    }
+
+    func wrapperDeclarationLines(
+        typeName: String,
+        featureName: String,
+        entityType: String
+    ) -> [String] {
+        [
             "import 'package:flutter/material.dart';",
             "",
+            "import '../../../../core/domain/domain_values.dart';",
             "import '../../../../core/presentation/generated_entity_form_screen.dart';",
             "import '../../../../core/presentation/generated_form_contract.dart';",
+            "import '../../domain/entities/\(featureName).dart';",
             "",
             "class \(typeName) extends StatelessWidget {",
             "  const \(typeName)({",
             "    super.key,",
             "    required this.onSubmit,",
+            "    this.record,",
             "    this.initialValues = const <String, Object?>{},",
             "    this.submitLabel = 'Save',",
             "    this.externalValuePicker,",
             "    this.errorMessageBuilder,",
             "  });",
             "",
-            "  final GeneratedFormSubmit onSubmit;",
+            "  final GeneratedIdentifiedFormSubmit onSubmit;",
+            "  final DomainRecord<\(entityType)>? record;",
             "  final Map<String, Object?> initialValues;",
             "  final String submitLabel;",
             "  final GeneratedExternalValuePicker? externalValuePicker;",
             "  final GeneratedFormErrorMessageBuilder? errorMessageBuilder;",
-            "",
+            ""
+        ]
+    }
+
+    func buildMethodLines(
+        screenID: String,
+        title: String
+    ) -> [String] {
+        [
             "  @override",
             "  Widget build(BuildContext context) {",
+            "    final recordValues = record == null",
+            "        ? const <String, Object?>{}",
+            "        : _initialValuesFor(record!.value);",
+            "    final effectiveInitialValues = Map<String, Object?>.unmodifiable(",
+            "      <String, Object?>{",
+            "        ...recordValues,",
+            "        ...initialValues,",
+            "      },",
+            "    );",
+            "",
             "    return GeneratedEntityFormScreen(",
-            "      screenId: '\(escapedScreenID)',",
-            "      title: '\(escapedTitle)',",
+            "      screenId: '\(screenID)',",
+            "      title: '\(title)',",
             "      fields: _fields,",
-            "      initialValues: initialValues,",
+            "      initialValues: effectiveInitialValues,",
             "      submitLabel: submitLabel,",
             "      externalValuePicker: externalValuePicker,",
             "      errorMessageBuilder: errorMessageBuilder,",
-            "      onSubmit: onSubmit,",
+            "      onSubmit: (values) => onSubmit(",
+            "        recordId: record?.recordId,",
+            "        values: values,",
+            "      ),",
             "    );",
             "  }",
-            "",
+            ""
+        ]
+    }
+
+    func initialValuesMethodLines(
+        entityType: String
+    ) -> [String] {
+        [
+            "  static Map<String, Object?> _initialValuesFor(",
+            "    \(entityType) value,",
+            "  ) {",
+            "    return <String, Object?>{"
+        ] + initialValueLines() + [
+            "    };",
+            "  }",
+            ""
+        ]
+    }
+
+    func fieldSpecDeclarationLines() -> [String] {
+        [
             "  static const List<GeneratedFormFieldSpec> _fields =",
             "      <GeneratedFormFieldSpec>["
         ] + fieldSpecLines() + [
             "    ];",
             "}"
-        ])
+        ]
+    }
+
+    func initialValueLines() -> [String] {
+        let fields = Dictionary(
+            uniqueKeysWithValues: entity.fields.map { ($0.id, $0) }
+        )
+        return screen.visibleFieldIDs.compactMap { fieldID in
+            guard let field = fields[fieldID] else {
+                return nil
+            }
+            let escapedID = FlutterDartEscaping.singleQuoted(field.id)
+            let member = FlutterDartNaming.memberName(field.identity.code)
+            return "      '\(escapedID)': value.\(member),"
+        }
     }
 
     func fieldSpecLines() -> [String] {
