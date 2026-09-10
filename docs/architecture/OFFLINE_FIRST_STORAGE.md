@@ -99,6 +99,39 @@ For offline projects the data-layer implementation delegates exclusively to the 
 
 DTO/SQLite row mapping remains in the Data layer. This slice does not invent a create-ID policy; callers still provide `recordId` for saves.
 
+## Typed edit mapping before persistence
+
+M3.15 adds an explicit edit-only mapping boundary between normalized generated-form values and the domain Save Use Case.
+
+```text
+DomainRecord<Entity>
+        +
+normalized immutable form values
+        ↓
+<Screen>FormEditMapper.apply(...)
+        ↓
+new complete Entity
+        ↓
+future composition boundary
+        ↓
+Save<Entity>(recordId, value)
+```
+
+Every generated form screen receives a deterministic public `<Screen>FormEditMapper`. The mapper reads only `ScreenDefinition.visibleFieldIDs` from the normalized values map. Visible required fields must contain a non-null value of the expected Dart type. Visible optional fields must still have a normalized map key, may contain `null`, and otherwise must contain the expected type.
+
+The shared `GeneratedFormEditMapping` contract fails closed with separate `missingValue` and `invalidType` failures and retains the responsible field ID. It does not silently coerce arbitrary values, restore an old visible value, or invent a default.
+
+Fields that are not visible on the form are copied from `record.value`. All source-side relations are likewise preserved from the existing entity. The mapper therefore creates a new complete entity without mutating the original record and without losing hidden required fields or relations.
+
+Rich values remain typed across the boundary:
+
+- file → `DomainFileValue`
+- image → `DomainImageValue`
+- color → `DomainColorValue`
+- location → `DomainLocationValue`
+
+M3.15 deliberately stops before persistence. It does not instantiate repositories or Save Use Cases, execute SQLite writes, create Supabase/Firebase clients, generate record IDs, perform navigation, edit relations, or construct create-mode entities. Create remains separate because a form can omit required hidden fields or required relations and AppForge must not invent those values.
+
 ## Local mutation transaction
 
 Every local save executes inside `database.transaction`.
