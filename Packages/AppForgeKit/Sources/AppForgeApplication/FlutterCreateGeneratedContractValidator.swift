@@ -9,6 +9,37 @@ struct FlutterCreateGeneratedContractValidator {
         )
         var generatedTypes: [String: String] = [:]
 
+        try registerEntityTypes(
+            specification: specification,
+            generatedTypes: &generatedTypes
+        )
+        try registerScreenTypes(
+            specification: specification,
+            generatedTypes: &generatedTypes
+        )
+        try registerRouteTypes(
+            routes,
+            generatedTypes: &generatedTypes
+        )
+    }
+}
+
+private extension FlutterCreateGeneratedContractValidator {
+    static let reservedCoreTypes: Set<String> = [
+        "AppDependencies",
+        "GeneratedAppDestination",
+        "GeneratedAppHome",
+        "GeneratedFormCreateMapping",
+        "GeneratedFormCreateMappingException",
+        "GeneratedFormCreateMappingFailure",
+        "RecordIdGenerator",
+        "SecureUuidV4Generator"
+    ]
+
+    func registerEntityTypes(
+        specification: ProjectSpecification,
+        generatedTypes: inout [String: String]
+    ) throws {
         for entity in specification.entities.sorted(by: Self.entitySort) {
             let typeName = FlutterDartNaming.typeName(entity.identity.code)
             if Self.reservedCoreTypes.contains(typeName) {
@@ -28,7 +59,12 @@ struct FlutterCreateGeneratedContractValidator {
                 )
             }
         }
+    }
 
+    func registerScreenTypes(
+        specification: ProjectSpecification,
+        generatedTypes: inout [String: String]
+    ) throws {
         for screen in FlutterFormRenderingSupport.formScreens(in: specification) {
             try registerExisting(
                 FlutterFormRenderingSupport.typeName(for: screen),
@@ -55,7 +91,12 @@ struct FlutterCreateGeneratedContractValidator {
                 generatedTypes: &generatedTypes
             )
         }
+    }
 
+    func registerRouteTypes(
+        _ routes: [FlutterGeneratedCreateRoute],
+        generatedTypes: inout [String: String]
+    ) throws {
         for route in routes {
             try registerCreateType(
                 FlutterFormCreateMappingSupport.typeName(for: route.screen),
@@ -69,19 +110,6 @@ struct FlutterCreateGeneratedContractValidator {
             )
         }
     }
-}
-
-private extension FlutterCreateGeneratedContractValidator {
-    static let reservedCoreTypes: Set<String> = [
-        "AppDependencies",
-        "GeneratedAppDestination",
-        "GeneratedAppHome",
-        "GeneratedFormCreateMapping",
-        "GeneratedFormCreateMappingException",
-        "GeneratedFormCreateMappingFailure",
-        "RecordIdGenerator",
-        "SecureUuidV4Generator"
-    ]
 
     func registerExisting(
         _ typeName: String,
