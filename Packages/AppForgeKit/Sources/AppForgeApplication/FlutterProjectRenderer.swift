@@ -47,13 +47,18 @@ public enum FlutterRendererError: Error, Equatable, Sendable {
         fieldID: String,
         control: FieldControl
     )
+    case formCreateRequiresOfflinePersistence(screenID: String)
+    case formCreateMissingRequiredField(screenID: String, fieldID: String)
+    case formCreateRequiresRelationInput(screenID: String, relationID: String)
+    case formCreateRequiresExternalValuePicker(screenID: String, fieldID: String)
+    case formCreateRequiresRoleEvaluation(screenID: String)
     case reservedGeneratedStorageIdentifier(definitionID: String, identifier: String)
     case duplicateGeneratedStorageIdentifier(entityID: String, identifier: String)
     case encodingFailed
 }
 
 public struct DeterministicFlutterProjectRenderer: FlutterProjectRendering {
-    public static let rendererVersion = 8
+    public static let rendererVersion = 9
 
     private let specificationValidator: ProjectSpecificationValidator
     private let lockfileBuilder: ForgeLockfileBuilder
