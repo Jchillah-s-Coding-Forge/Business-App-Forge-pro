@@ -81,6 +81,9 @@ private extension FlutterGeneratedContractValidator {
         "GeneratedExternalPickerField",
         "GeneratedExternalValuePicker",
         "GeneratedFormControl",
+        "GeneratedFormEditMapping",
+        "GeneratedFormEditMappingException",
+        "GeneratedFormEditMappingFailure",
         "GeneratedFormErrorMessageBuilder",
         "GeneratedFormField",
         "GeneratedFormFieldSpec",
@@ -146,6 +149,11 @@ private extension FlutterGeneratedContractValidator {
         for screen in formScreens {
             try registerGeneratedType(
                 FlutterFormRenderingSupport.typeName(for: screen),
+                definitionID: screen.id,
+                generatedTypes: &generatedTypes
+            )
+            try registerGeneratedType(
+                FlutterFormEditMappingSupport.typeName(for: screen),
                 definitionID: screen.id,
                 generatedTypes: &generatedTypes
             )

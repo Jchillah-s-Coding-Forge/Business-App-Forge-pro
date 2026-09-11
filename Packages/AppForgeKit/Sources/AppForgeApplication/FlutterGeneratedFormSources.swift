@@ -13,6 +13,7 @@ struct FlutterGeneratedFormSources {
 
         var result = [
             FlutterGeneratedFormContractSource().file(),
+            FlutterGeneratedFormEditMappingSource().file(),
             FlutterGeneratedFormTextFieldsSource().file(),
             FlutterGeneratedFormChoiceFieldsSource().file(),
             FlutterGeneratedFormPickerFieldsSource().file(),
@@ -23,6 +24,13 @@ struct FlutterGeneratedFormSources {
             let entity = try FlutterFormRenderingSupport.entity(
                 for: screen,
                 in: specification
+            )
+            try result.append(
+                FlutterGeneratedFormEditMapperSource(
+                    specification: specification,
+                    screen: screen,
+                    entity: entity
+                ).file()
             )
             try result.append(
                 FlutterGeneratedFormScreenSource(

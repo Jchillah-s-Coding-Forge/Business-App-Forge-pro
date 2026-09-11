@@ -40,6 +40,7 @@ final class LiveFlutterMaterializationGateTests: XCTestCase {
             result.toolchainReceipt.validatedSteps.contains(.format)
         )
         try assertRecordAwareFormSource(projectURL: targetURL)
+        try assertTypedEditMapperSource(projectURL: targetURL)
         try assertFormattingIsStable(
             projectURL: targetURL,
             sdkPath: sdkPath
@@ -68,6 +69,25 @@ private extension LiveFlutterMaterializationGateTests {
         )
         XCTAssertTrue(
             source.contains("recordId: record?.recordId")
+        )
+    }
+
+    func assertTypedEditMapperSource(
+        projectURL: URL
+    ) throws {
+        let sourceURL = projectURL
+            .appendingPathComponent("lib/features/asset/presentation/mappers")
+            .appendingPathComponent("asset_form_form_edit_mapper.dart")
+        let source = try String(contentsOf: sourceURL)
+
+        XCTAssertTrue(
+            source.contains("abstract final class AssetFormFormEditMapper")
+        )
+        XCTAssertTrue(
+            source.contains("GeneratedFormEditMapping.requiredValue<String>")
+        )
+        XCTAssertTrue(
+            source.contains("GeneratedFormEditMapping.optionalValue<bool>")
         )
     }
 
