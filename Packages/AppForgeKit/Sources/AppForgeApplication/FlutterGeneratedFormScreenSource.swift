@@ -35,6 +35,7 @@ private extension FlutterGeneratedFormScreenSource {
                     title: escapedTitle
                 )
                 + initialValuesMethodLines(entityType: entityType)
+                + defaultValueDeclarationLines()
                 + fieldSpecDeclarationLines()
         )
     }
@@ -85,6 +86,7 @@ private extension FlutterGeneratedFormScreenSource {
             "        : _initialValuesFor(record!.value);",
             "    final effectiveInitialValues = Map<String, Object?>.unmodifiable(",
             "      <String, Object?>{",
+            "        ..._defaultValues,",
             "        ...recordValues,",
             "        ...initialValues,",
             "      },",
@@ -123,6 +125,16 @@ private extension FlutterGeneratedFormScreenSource {
         ]
     }
 
+    func defaultValueDeclarationLines() -> [String] {
+        [
+            "  static final Map<String, Object?> _defaultValues =",
+            "      <String, Object?>{"
+        ] + defaultValueLines() + [
+            "    };",
+            ""
+        ]
+    }
+
     func fieldSpecDeclarationLines() -> [String] {
         [
             "  static const List<GeneratedFormFieldSpec> _fields =",
@@ -144,6 +156,23 @@ private extension FlutterGeneratedFormScreenSource {
             let escapedID = FlutterDartEscaping.singleQuoted(field.id)
             let member = FlutterDartNaming.memberName(field.identity.code)
             return "      '\(escapedID)': value.\(member),"
+        }
+    }
+
+    func defaultValueLines() -> [String] {
+        let fields = Dictionary(
+            uniqueKeysWithValues: entity.fields.map { ($0.id, $0) }
+        )
+        return screen.visibleFieldIDs.compactMap { fieldID in
+            guard let field = fields[fieldID],
+                  let expression = FlutterDartDefaultValue.expression(
+                      for: field
+                  )
+            else {
+                return nil
+            }
+            let escapedID = FlutterDartEscaping.singleQuoted(field.id)
+            return "        '\(escapedID)': \(expression),"
         }
     }
 
