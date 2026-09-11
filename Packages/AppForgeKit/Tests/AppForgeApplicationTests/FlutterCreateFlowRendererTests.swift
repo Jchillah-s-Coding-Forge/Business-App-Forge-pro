@@ -30,7 +30,7 @@ final class FlutterCreateFlowRendererTests: XCTestCase {
         XCTAssertTrue(dependencies.contains("AssetRepositoryImpl("))
         XCTAssertTrue(dependencies.contains("AssetLocalDataSource(database)"))
         XCTAssertTrue(dependencies.contains("save: SaveAsset(assetRepository)"))
-        XCTAssertTrue(viewModel.contains("final AssetCreateFormCreateMapper" ) == false)
+        XCTAssertFalse(viewModel.contains("final AssetCreateFormCreateMapper"))
         XCTAssertTrue(
             viewModel.contains("AssetCreateFormCreateMapper.apply(values)")
         )
