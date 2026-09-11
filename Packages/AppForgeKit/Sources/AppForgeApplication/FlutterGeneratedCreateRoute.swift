@@ -20,9 +20,26 @@ enum FlutterGeneratedCreateRoutes {
         let screensByID = Dictionary(
             uniqueKeysWithValues: screens.map { ($0.id, $0) }
         )
-        var result: [FlutterGeneratedCreateRoute] = []
         var routedScreenIDs = Set<String>()
+        var result = try explicitRoutes(
+            specification: specification,
+            screensByID: screensByID,
+            routedScreenIDs: &routedScreenIDs
+        )
+        result += try automaticRoutes(
+            specification: specification,
+            screens: screens,
+            routedScreenIDs: &routedScreenIDs
+        )
+        return result
+    }
 
+    private static func explicitRoutes(
+        specification: ProjectSpecification,
+        screensByID: [String: ScreenDefinition],
+        routedScreenIDs: inout Set<String>
+    ) throws -> [FlutterGeneratedCreateRoute] {
+        var result: [FlutterGeneratedCreateRoute] = []
         for item in specification.navigation.items {
             guard let screen = screensByID[item.screenID],
                   routedScreenIDs.insert(screen.id).inserted
@@ -50,7 +67,15 @@ enum FlutterGeneratedCreateRoutes {
                 )
             )
         }
+        return result
+    }
 
+    private static func automaticRoutes(
+        specification: ProjectSpecification,
+        screens: [ScreenDefinition],
+        routedScreenIDs: inout Set<String>
+    ) throws -> [FlutterGeneratedCreateRoute] {
+        var result: [FlutterGeneratedCreateRoute] = []
         for screen in screens where routedScreenIDs.insert(screen.id).inserted {
             let entity = try FlutterFormRenderingSupport.entity(
                 for: screen,
@@ -103,36 +128,15 @@ enum FlutterCreateFlowPrerequisites {
             )
         }
 
-        let visibleFieldIDs = Set(screen.visibleFieldIDs)
-        for field in entity.fields {
-            if field.isRequired,
-               field.defaultValue == nil,
-               !visibleFieldIDs.contains(field.id)
-            {
-                throw FlutterRendererError.formCreateMissingRequiredField(
-                    screenID: screen.id,
-                    fieldID: field.id
-                )
-            }
-            if field.isRequired,
-               visibleFieldIDs.contains(field.id),
-               usesExternalValuePicker(field)
-            {
-                throw FlutterRendererError.formCreateRequiresExternalValuePicker(
-                    screenID: screen.id,
-                    fieldID: field.id
-                )
-            }
-        }
-
-        for relation in specification.relations where
-            relation.sourceEntityID == entity.id && relation.isRequired
-        {
-            throw FlutterRendererError.formCreateRequiresRelationInput(
-                screenID: screen.id,
-                relationID: relation.id
-            )
-        }
+        try validateFields(
+            screen: screen,
+            entity: entity
+        )
+        try validateRelations(
+            screen: screen,
+            entity: entity,
+            specification: specification
+        )
     }
 
     static func canAutoMaterialize(
@@ -149,6 +153,49 @@ enum FlutterCreateFlowPrerequisites {
             return true
         } catch {
             return false
+        }
+    }
+
+    private static func validateFields(
+        screen: ScreenDefinition,
+        entity: EntityDefinition
+    ) throws {
+        let visibleFieldIDs = Set(screen.visibleFieldIDs)
+        for field in entity.fields {
+            if field.isRequired {
+                if field.defaultValue == nil,
+                   !visibleFieldIDs.contains(field.id)
+                {
+                    throw FlutterRendererError.formCreateMissingRequiredField(
+                        screenID: screen.id,
+                        fieldID: field.id
+                    )
+                }
+                if visibleFieldIDs.contains(field.id),
+                   usesExternalValuePicker(field)
+                {
+                    throw FlutterRendererError.formCreateRequiresExternalValuePicker(
+                        screenID: screen.id,
+                        fieldID: field.id
+                    )
+                }
+            }
+        }
+    }
+
+    private static func validateRelations(
+        screen: ScreenDefinition,
+        entity: EntityDefinition,
+        specification: ProjectSpecification
+    ) throws {
+        let requiredRelations = specification.relations.filter {
+            $0.sourceEntityID == entity.id && $0.isRequired
+        }
+        if let relation = requiredRelations.first {
+            throw FlutterRendererError.formCreateRequiresRelationInput(
+                screenID: screen.id,
+                relationID: relation.id
+            )
         }
     }
 
