@@ -38,6 +38,10 @@ struct FlutterFormScreenContractValidator {
                 presentations: presentations
             )
         }
+
+        try FlutterCreateGeneratedContractValidator().validate(
+            specification
+        )
     }
 }
 
