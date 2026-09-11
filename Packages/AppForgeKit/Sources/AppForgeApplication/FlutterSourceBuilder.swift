@@ -9,6 +9,14 @@ struct FlutterSourceBuilder {
     let rendererVersion: Int
 
     func build() throws -> [GeneratedFile] {
+        var files = try baseFiles()
+        files.append(contentsOf: try featureFiles())
+        files.append(contentsOf: try presentationFiles())
+        try files.append(generationManifestFile(existingFiles: files))
+        return files
+    }
+
+    private func baseFiles() throws -> [GeneratedFile] {
         var files = try FlutterProjectCoreSources(
             specification: specification,
             graph: graph,
@@ -16,55 +24,64 @@ struct FlutterSourceBuilder {
             packageName: packageName
         ).files()
         try replaceAppShell(in: &files)
-        files.append(contentsOf: FlutterDomainContractSources(
-            specification: specification
-        ).files())
-        for entity in specification.entities.sorted(by: Self.entitySort) {
-            try files.append(contentsOf: FlutterFeatureSources(
-                specification: specification,
-                entity: entity
-            ).files())
-            try files.append(
-                contentsOf: FlutterOfflineFeatureSources(
-                    specification: specification,
-                    entity: entity
-                ).files()
-            )
-        }
-
+        files.append(
+            contentsOf: FlutterDomainContractSources(
+                specification: specification
+            ).files()
+        )
         try files.append(
             contentsOf: FlutterOfflineCoreSources(
                 specification: specification,
                 packageName: packageName
             ).files()
         )
-        try files.append(
-            contentsOf: FlutterGeneratedFormSources(
-                specification: specification
-            ).files()
-        )
-        try files.append(
+        return files
+    }
+
+    private func featureFiles() throws -> [GeneratedFile] {
+        var result: [GeneratedFile] = []
+        for entity in specification.entities.sorted(by: Self.entitySort) {
+            try result.append(
+                contentsOf: FlutterFeatureSources(
+                    specification: specification,
+                    entity: entity
+                ).files()
+            )
+            try result.append(
+                contentsOf: FlutterOfflineFeatureSources(
+                    specification: specification,
+                    entity: entity
+                ).files()
+            )
+        }
+        return result
+    }
+
+    private func presentationFiles() throws -> [GeneratedFile] {
+        var result = try FlutterGeneratedFormSources(
+            specification: specification
+        ).files()
+        try result.append(
             contentsOf: FlutterGeneratedCreateSources(
                 specification: specification
             ).files()
         )
-        files.append(
+        result.append(
             contentsOf: FlutterGeneratedRecordDisplaySources(
                 specification: specification
             ).files()
         )
-        try files.append(
+        try result.append(
             contentsOf: FlutterGeneratedListSources(
                 specification: specification
             ).files()
         )
-        try files.append(
+        try result.append(
             contentsOf: FlutterGeneratedDetailSources(
                 specification: specification
             ).files()
         )
-        try files.append(generationManifestFile(existingFiles: files))
-        return files
+        return result
     }
 
     private func replaceAppShell(
