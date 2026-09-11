@@ -23,7 +23,7 @@ struct FlutterGeneratedCreateSources {
                 ).file()
             )
             try result.append(
-                FlutterGeneratedFormCreateViewModelSource(
+                FlutterFormCreateViewModelSource(
                     screen: route.screen,
                     entity: route.entity
                 ).file()
