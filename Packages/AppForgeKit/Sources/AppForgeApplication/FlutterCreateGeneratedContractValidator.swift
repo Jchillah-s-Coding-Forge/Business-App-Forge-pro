@@ -21,7 +21,7 @@ struct FlutterCreateGeneratedContractValidator {
                 typeName: typeName,
                 offlineEnabled: specification.offline.isEnabled
             ) {
-                registerExisting(
+                try registerExisting(
                     generatedType,
                     definitionID: entity.id,
                     generatedTypes: &generatedTypes
@@ -88,14 +88,14 @@ private extension FlutterCreateGeneratedContractValidator {
         definitionID: String,
         generatedTypes: inout [String: String]
     ) throws {
-        if let firstDefinitionID = generatedTypes[typeName],
-           firstDefinitionID != definitionID
-        {
-            throw FlutterRendererError.generatedTypeNameCollision(
-                firstDefinitionID: firstDefinitionID,
-                secondDefinitionID: definitionID,
-                typeName: typeName
-            )
+        if let firstDefinitionID = generatedTypes[typeName] {
+            if firstDefinitionID != definitionID {
+                throw FlutterRendererError.generatedTypeNameCollision(
+                    firstDefinitionID: firstDefinitionID,
+                    secondDefinitionID: definitionID,
+                    typeName: typeName
+                )
+            }
         }
         generatedTypes[typeName] = definitionID
     }
