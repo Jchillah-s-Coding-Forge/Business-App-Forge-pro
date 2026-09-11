@@ -15,6 +15,7 @@ struct FlutterSourceBuilder {
             lockfile: lockfile,
             packageName: packageName
         ).files()
+        try replaceAppShell(in: &files)
         files.append(contentsOf: FlutterDomainContractSources(
             specification: specification
         ).files())
@@ -42,6 +43,11 @@ struct FlutterSourceBuilder {
                 specification: specification
             ).files()
         )
+        try files.append(
+            contentsOf: FlutterGeneratedCreateSources(
+                specification: specification
+            ).files()
+        )
         files.append(
             contentsOf: FlutterGeneratedRecordDisplaySources(
                 specification: specification
@@ -59,6 +65,18 @@ struct FlutterSourceBuilder {
         )
         try files.append(generationManifestFile(existingFiles: files))
         return files
+    }
+
+    private func replaceAppShell(
+        in files: inout [GeneratedFile]
+    ) throws {
+        let replacements = try FlutterGeneratedAppSources(
+            specification: specification,
+            packageName: packageName
+        ).files()
+        let replacementPaths = Set(replacements.map(\.relativePath))
+        files.removeAll { replacementPaths.contains($0.relativePath) }
+        files.append(contentsOf: replacements)
     }
 
     private func generationManifestFile(
