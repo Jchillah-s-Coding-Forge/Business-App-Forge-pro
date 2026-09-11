@@ -1,6 +1,6 @@
 import AppForgeDomain
 
-struct FlutterGeneratedFormCreateViewModelSource {
+struct FlutterFormCreateViewModelSource {
     let screen: ScreenDefinition
     let entity: EntityDefinition
 
@@ -15,7 +15,7 @@ struct FlutterGeneratedFormCreateViewModelSource {
     }
 }
 
-private extension FlutterGeneratedFormCreateViewModelSource {
+private extension FlutterFormCreateViewModelSource {
     func content() throws -> String {
         let featureName = FlutterDartNaming.snakeCase(
             entity.identity.code
