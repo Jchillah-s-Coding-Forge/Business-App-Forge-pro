@@ -1,6 +1,6 @@
 import AppForgeDomain
 
-// Emits already-validated FieldDefaultValue values as typed Dart expressions.
+/// Emits already-validated FieldDefaultValue values as typed Dart expressions.
 enum FlutterDartDefaultValue {
     static func expression(
         for field: FieldDefinition
