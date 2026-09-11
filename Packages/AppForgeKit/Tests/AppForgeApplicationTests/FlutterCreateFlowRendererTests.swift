@@ -139,7 +139,28 @@ private extension FlutterCreateFlowRendererTests {
     }
 
     func makeFixture() -> Fixture {
-        let asset = EntityDefinition(
+        let asset = makeAsset()
+        let screen = makeScreen(entityID: asset.id)
+        return Fixture(
+            specification: ProjectSpecification(
+                identity: ProjectIdentity(
+                    name: "Inventory App",
+                    organizationIdentifier: "de.example"
+                ),
+                framework: .flutter,
+                targetPlatforms: [.iOS, .android],
+                backend: .localOnly,
+                flutterStateManagement: .riverpod,
+                entities: [asset],
+                screens: [screen],
+                navigation: makeNavigation(screenID: screen.id),
+                offline: .businessDefault
+            )
+        )
+    }
+
+    func makeAsset() -> EntityDefinition {
+        EntityDefinition(
             identity: DefinitionIdentity(
                 id: "entity.asset",
                 code: "asset",
@@ -172,44 +193,37 @@ private extension FlutterCreateFlowRendererTests {
                 )
             ]
         )
-        let screen = ScreenDefinition(
+    }
+
+    func makeScreen(
+        entityID: String
+    ) -> ScreenDefinition {
+        ScreenDefinition(
             identity: DefinitionIdentity(
                 id: "screen.asset.create",
                 code: "asset_create",
                 label: "Asset create"
             ),
             kind: .form,
-            entityID: asset.id,
+            entityID: entityID,
             visibleFieldIDs: [
                 "field.asset.name",
                 "field.asset.active"
             ]
         )
-        let navigation = NavigationDefinition(
+    }
+
+    func makeNavigation(
+        screenID: String
+    ) -> NavigationDefinition {
+        NavigationDefinition(
             items: [
                 NavigationItemDefinition(
                     id: "nav.asset.create",
                     label: "Create asset",
-                    screenID: screen.id
+                    screenID: screenID
                 )
             ]
-        )
-
-        return Fixture(
-            specification: ProjectSpecification(
-                identity: ProjectIdentity(
-                    name: "Inventory App",
-                    organizationIdentifier: "de.example"
-                ),
-                framework: .flutter,
-                targetPlatforms: [.iOS, .android],
-                backend: .localOnly,
-                flutterStateManagement: .riverpod,
-                entities: [asset],
-                screens: [screen],
-                navigation: navigation,
-                offline: .businessDefault
-            )
         )
     }
 
